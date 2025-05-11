@@ -12,6 +12,7 @@ import Germ from './Germ';
 import GermManager from './GermManager';
 import { useLoading } from './LoadingManager';
 import DustManager from './DustManager';
+import LivesIndicator from './LivesIndicator';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -74,9 +75,11 @@ export default function Scene3D() {
   }
 
   return (
-    <div className="w-full h-full bg-black">
+    <div className="w-full h-full bg-black relative">
+      {/* Lives indicator placed outside Canvas */}
+      <LivesIndicator />
+      
       <KeyboardControls map={keyboardMap}>
-        {/* Adjust camera for longer tunnel: further back, looking down Z. Y at 0 for straight view. */}
         <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
           <color attach="background" args={['#000000']} />
           <ambientLight intensity={0.3} />
@@ -99,6 +102,7 @@ export default function Scene3D() {
           <CameraController oxyRef={oxyMeshRef} offset={new THREE.Vector3(0, 0.5, 3.5)} />
         </Canvas>
       </KeyboardControls>
+      
       {lastCollision && (
         <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded">
           Collision: {lastCollision}
