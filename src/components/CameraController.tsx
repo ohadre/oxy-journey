@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 interface CameraControllerProps {
-  oxyRef: React.RefObject<THREE.Mesh>;
+  oxyRef: React.RefObject<THREE.Mesh | null>;
   offset?: THREE.Vector3;
   smoothness?: number;
 }
