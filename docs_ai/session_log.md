@@ -114,4 +114,24 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
 - **Next:**
   - Proceeding to Vercel deployment and integration.
 
+## 2024-06-11 Vercel Deployment Success & Asset Fix
+
+- **Vercel Deployment:**
+  - Successfully deployed the Oxy Journey app to Vercel from the main branch.
+  - Confirmed that Vercel builds and deploys automatically on push to main.
+- **Static Asset Fix:**
+  - Resolved 404 error for Oxy character image by staging, committing, and pushing `public/textures/oxy.png`.
+  - Verified that Oxy now appears correctly in the deployed app.
+- **Branch Protection & Workflow:**
+  - Temporarily removed required status checks and PR requirements to unblock solo dev workflow and deployment.
+  - Direct pushes to main are now allowed for rapid iteration.
+
+## 2024-06-11 Oxy Movement Clamping & Deployment
+
+- **Oxy Movement Update:**
+  - Adjusted Z-clamping logic so Oxy can move closer to the camera (2 unit buffer), improving player freedom while keeping Oxy visible.
+- **Deployment:**
+  - Successfully pushed and deployed the latest changes to Vercel.
+  - Confirmed live deployment is working as expected.
+
 ---

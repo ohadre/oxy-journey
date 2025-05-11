@@ -1,14 +1,29 @@
 'use client';
 
+import React, { useMemo, useEffect } from 'react';
 import * as THREE from 'three';
-import { useLoader, useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
+import { useLoading } from './LoadingManager';
 
 export default function Tunnel() {
-  // Load the texture
-  const texture = useLoader(THREE.TextureLoader, '/textures/tunnel_tile.png');
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(4, 2); // More natural tiling
+  const { loadedTextures } = useLoading();
+  
+  // Create and configure the texture
+  const texture = useMemo(() => {
+    console.log('[Tunnel] Creating and configuring texture');
+    const textureLoader = new THREE.TextureLoader();
+    const tex = textureLoader.load('/textures/tunnel_tile.png');
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(4, 2); // More natural tiling
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, []);
+  
+  useEffect(() => {
+    console.log('[Tunnel] Component mounted');
+    return () => console.log('[Tunnel] Component unmounted');
+  }, []);
 
   // Animate the texture offset to simulate forward movement
   useFrame((_, delta) => {
@@ -32,6 +47,7 @@ export default function Tunnel() {
       <meshStandardMaterial
         map={texture}
         side={THREE.BackSide}
+        toneMapped={false}
       />
     </mesh>
   );
