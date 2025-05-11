@@ -27,7 +27,7 @@ export default function Scene3D() {
   const [isMounted, setIsMounted] = useState(false);
   const worldSize = 10; // Less relevant for tunnel, kept for Oxy prop for now
 
-  const oxyMeshRef = useRef<THREE.Mesh>(null);
+  const oxyMeshRef = useRef<THREE.Mesh | null>(null);
 
   // Ensure component is mounted before rendering
   useEffect(() => {
