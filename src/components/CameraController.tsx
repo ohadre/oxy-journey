@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { RefObject } from 'react';
 
 interface CameraControllerProps {
-  oxyRef: RefObject<THREE.Mesh>; // Ref to Oxy's mesh
+  oxyRef: RefObject<THREE.Mesh | null>; // Ref to Oxy's mesh, can be null
   offset?: THREE.Vector3;       // Camera offset from Oxy
   lookAtOffset?: THREE.Vector3; // Offset for the lookAt point from Oxy's position
 }
