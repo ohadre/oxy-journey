@@ -126,4 +126,12 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
   - Temporarily removed required status checks and PR requirements to unblock solo dev workflow and deployment.
   - Direct pushes to main are now allowed for rapid iteration.
 
+## 2024-06-11 Oxy Movement Clamping & Deployment
+
+- **Oxy Movement Update:**
+  - Adjusted Z-clamping logic so Oxy can move closer to the camera (2 unit buffer), improving player freedom while keeping Oxy visible.
+- **Deployment:**
+  - Successfully pushed and deployed the latest changes to Vercel.
+  - Confirmed live deployment is working as expected.
+
 ---

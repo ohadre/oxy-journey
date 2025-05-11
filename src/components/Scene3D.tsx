@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import CameraController from './CameraController';
 import * as THREE from 'three';
 import Germ from './Germ';
+import GermManager from './GermManager';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -29,6 +30,8 @@ export default function Scene3D() {
   const worldSize = 10; // Less relevant for tunnel, kept for Oxy prop for now
 
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
+  const oxyPositionRef = useRef<[number, number, number]>([0, 0, 70]);
+  const [_, setDummy] = useState(0); // For forced re-render if needed
 
   // Ensure component is mounted before rendering
   useEffect(() => {
@@ -45,6 +48,12 @@ export default function Scene3D() {
   // Place Oxy just inside one end.
   const oxyInitialPosition = new THREE.Vector3(0, 0, 70); 
 
+  // Callback to update Oxy's position in the ref
+  const handleOxyPositionChange = (pos: [number, number, number]) => {
+    oxyPositionRef.current = pos;
+    // setDummy(d => d + 1); // Uncomment if you need to force a re-render for UI
+  };
+
   if (!isMounted) {
     return null;
   }
@@ -60,12 +69,13 @@ export default function Scene3D() {
           <directionalLight position={[0, -10, -40]} intensity={1.2} color="#a0c8ff" /> {/* Cool rim light from behind */}
           <Tunnel />
           {/* <OrbitControls /> */}
-          <Germ position={[2, 0, 60]} size={1.2} speed={0.1} />
+          <GermManager oxyPosition={oxyPositionRef.current} />
           <Oxy 
             ref={oxyMeshRef} 
             worldSize={worldSize} // Will need to be adapted for tunnel collision
             onCollision={handleCollision} // Same as above
             initialPosition={oxyInitialPosition}
+            onPositionChange={handleOxyPositionChange}
           />
           {/* CameraController will adjust to follow Oxy */}
           <CameraController oxyRef={oxyMeshRef} offset={new THREE.Vector3(0, 0.5, 3.5)} />

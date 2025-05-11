@@ -13,6 +13,7 @@ interface OxyProps {
   worldSize: number; // This will be the tunnel radius
   onCollision?: (direction: 'left' | 'right' | 'top' | 'bottom') => void;
   initialPosition?: THREE.Vector3;
+  onPositionChange?: (pos: [number, number, number]) => void;
 }
 
 // Define the type for the imperative handle
@@ -20,7 +21,7 @@ export interface OxyRefType {
   getPosition: () => THREE.Vector3 | undefined;
 }
 
-const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialPosition }, ref) => {
+const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialPosition, onPositionChange }, ref) => {
   const texture = useTexture('/textures/oxy.png');
   const meshRef = useRef<THREE.Mesh>(null!);
   const velocityRef = useRef(new THREE.Vector3());
@@ -149,7 +150,10 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
 
     // Update mesh position
     mesh.position.copy(position);
-
+    // Report position to parent if callback provided
+    if (typeof onPositionChange === 'function') {
+      onPositionChange([position.x, position.y, position.z]);
+    }
     // Make Oxy always face the camera (billboard effect)
     if (meshRef.current) {
       meshRef.current.lookAt(camera.position);
