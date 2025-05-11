@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import Dust from './Dust';
 import { useLoading } from './LoadingManager';
+import * as THREE from 'three';
 
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
@@ -17,7 +18,11 @@ function randomXY(radius: number): [number, number] {
 }
 
 function randomSpeed() {
-  return 0.05 + Math.random() * 0.05; // 0.05 to 0.1
+  return 0.08 + Math.random() * 0.07; // 0.08 to 0.15 units per frame
+}
+
+function randomLifetime() {
+  return 15 + Math.random() * 10; // 15 to 25 seconds lifetime
 }
 
 function randomTargetAcrossTunnel(spawnXY: [number, number]): [number, number, number] {
@@ -30,6 +35,8 @@ export interface DustInstance {
   speed: number;
   size: number;
   target: [number, number, number];
+  timeAlive: number;
+  maxLifetime: number;
 }
 
 interface DustManagerProps {
@@ -56,9 +63,35 @@ const DustManager: React.FC<DustManagerProps> = ({ oxyPosition }) => {
   useFrame((_, delta) => {
     if (!isReady) return;
     setDusts(prev => {
-      let filtered = prev.filter(dust => dust.position[2] < OUT_OF_BOUNDS_Z);
+      // Move dusts with slower speed and update lifetime
+      const moved = prev.map(dust => {
+        const currentPos = new THREE.Vector3(...dust.position);
+        const targetPos = new THREE.Vector3(...dust.target);
+        const direction = new THREE.Vector3().subVectors(targetPos, currentPos).normalize();
+        const moveDistance = dust.speed * delta * 10; // Reduced scale factor for slower movement
+        currentPos.addScaledVector(direction, moveDistance);
+        
+        return {
+          ...dust,
+          position: [currentPos.x, currentPos.y, currentPos.z],
+          timeAlive: dust.timeAlive + delta
+        };
+      });
+      
+      // Remove dusts that are out of bounds OR have exceeded their lifetime
+      let filtered = moved.filter(dust => {
+        const isOutOfBounds = dust.position[2] >= OUT_OF_BOUNDS_Z;
+        const isExpired = dust.timeAlive >= dust.maxLifetime;
+        return !isOutOfBounds && !isExpired;
+      });
+      
+      if (filtered.length !== moved.length) {
+        console.log(`[DustManager] Removed ${moved.length - filtered.length} dusts (out of bounds or expired)`);
+      }
+      
       spawnTimer.current += delta;
-      if (filtered.length < MAX_DUSTS && spawnTimer.current >= SPAWN_INTERVAL) {
+      let spawnCount = 0;
+      while (filtered.length < MAX_DUSTS && spawnTimer.current >= SPAWN_INTERVAL) {
         const [x, y] = randomXY(TUNNEL_RADIUS);
         filtered.push({
           id: `dust-${nextId.current++}`,
@@ -66,8 +99,16 @@ const DustManager: React.FC<DustManagerProps> = ({ oxyPosition }) => {
           speed: randomSpeed(),
           size: 0.7 + Math.random() * 0.4,
           target: randomTargetAcrossTunnel([x, y]),
+          timeAlive: 0,
+          maxLifetime: randomLifetime()
         });
-        spawnTimer.current = 0;
+        spawnCount++;
+        spawnTimer.current -= SPAWN_INTERVAL;
+      }
+      if (spawnCount > 0) {
+        console.log(`[DustManager] Spawned ${spawnCount} dusts this frame. Timer: ${spawnTimer.current.toFixed(2)}. Dusts now: ${filtered.length}`);
+      } else {
+        console.log(`[DustManager] No spawn. Timer: ${spawnTimer.current.toFixed(2)}. Dusts: ${filtered.length}`);
       }
       return filtered;
     });

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import Germ from './Germ';
 import { useLoading } from './LoadingManager';
+import * as THREE from 'three';
 
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140; // Far end of the tunnel
@@ -18,7 +19,11 @@ function randomXY(radius: number): [number, number] {
 }
 
 function randomSpeed() {
-  return 0.08 + Math.random() * 0.07; // 0.08 to 0.15
+  return 0.1 + Math.random() * 0.08; // 0.1 to 0.18 units per frame
+}
+
+function randomLifetime() {
+  return 12 + Math.random() * 8; // 12 to 20 seconds lifetime
 }
 
 function randomTargetNearOxy(oxyPosition: [number, number, number], radius = 2): [number, number, number] {
@@ -37,6 +42,8 @@ export interface GermInstance {
   speed: number;
   size: number;
   target: [number, number, number];
+  timeAlive: number;
+  maxLifetime: number;
 }
 
 interface GermManagerProps {
@@ -70,14 +77,36 @@ const GermManager: React.FC<GermManagerProps> = ({ oxyPosition }) => {
     if (!isReady) return;
 
     setGerms(prev => {
-      // Remove germs out of bounds
-      let filtered = prev.filter(germ => germ.position[2] < OUT_OF_BOUNDS_Z);
+      // Move germs with slower speed and update lifetime
+      const moved = prev.map(germ => {
+        const currentPos = new THREE.Vector3(...germ.position);
+        const targetPos = new THREE.Vector3(...germ.target);
+        const direction = new THREE.Vector3().subVectors(targetPos, currentPos).normalize();
+        const moveDistance = germ.speed * delta * 10; // Reduced scale factor for slower movement
+        currentPos.addScaledVector(direction, moveDistance);
+        
+        return {
+          ...germ,
+          position: [currentPos.x, currentPos.y, currentPos.z],
+          timeAlive: germ.timeAlive + delta
+        };
+      });
+      
+      // Remove germs that are out of bounds OR have exceeded their lifetime
+      let filtered = moved.filter(germ => {
+        const isOutOfBounds = germ.position[2] >= OUT_OF_BOUNDS_Z;
+        const isExpired = germ.timeAlive >= germ.maxLifetime;
+        return !isOutOfBounds && !isExpired;
+      });
+      
+      if (filtered.length !== moved.length) {
+        console.log(`[GermManager] Removed ${moved.length - filtered.length} germs (out of bounds or expired)`);
+      }
       
       // Timer-based spawning
       spawnTimer.current += delta;
-      
-      if (filtered.length < MAX_GERMS && spawnTimer.current >= SPAWN_INTERVAL) {
-        console.log('[GermManager] Spawning new germ');
+      let spawnCount = 0;
+      while (filtered.length < MAX_GERMS && spawnTimer.current >= SPAWN_INTERVAL) {
         const [x, y] = randomXY(TUNNEL_RADIUS);
         filtered.push({
           id: `germ-${nextId.current++}`,
@@ -85,15 +114,20 @@ const GermManager: React.FC<GermManagerProps> = ({ oxyPosition }) => {
           speed: randomSpeed(),
           size: 1 + Math.random() * 0.5,
           target: randomTargetAcrossTunnel([x, y]),
+          timeAlive: 0,
+          maxLifetime: randomLifetime()
         });
-        
-        // Log first spawn
+        spawnCount++;
         if (isFirstSpawn.current) {
           console.log('[GermManager] First germ spawned');
           isFirstSpawn.current = false;
         }
-        
-        spawnTimer.current = 0;
+        spawnTimer.current -= SPAWN_INTERVAL;
+      }
+      if (spawnCount > 0) {
+        console.log(`[GermManager] Spawned ${spawnCount} germs this frame. Timer: ${spawnTimer.current.toFixed(2)}. Germs now: ${filtered.length}`);
+      } else {
+        console.log(`[GermManager] No spawn. Timer: ${spawnTimer.current.toFixed(2)}. Germs: ${filtered.length}`);
       }
       return filtered;
     });
