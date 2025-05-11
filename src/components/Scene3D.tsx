@@ -32,6 +32,7 @@ const keyboardMap = [
 export default function Scene3D() {
   const [lastCollision, setLastCollision] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const worldSize = 10; // Less relevant for tunnel, kept for Oxy prop for now
   const { isLoading } = useLoading();
 
@@ -72,6 +73,17 @@ export default function Scene3D() {
   if (!isMounted) {
     console.log('[Scene3D] Not mounted yet, returning null');
     return null;
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-xl font-bold mb-2">Error</h2>
+          <p>{error.message}</p>
+        </div>
+      </div>
+    );
   }
 
   return (

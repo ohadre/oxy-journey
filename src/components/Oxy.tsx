@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
+import React, { forwardRef, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useKeyboardControls, useTexture } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
+import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Define the key mapping type to match Scene3D
@@ -13,7 +14,7 @@ interface OxyProps {
   worldSize: number; // This will be the tunnel radius
   onCollision?: (direction: 'left' | 'right' | 'top' | 'bottom') => void;
   initialPosition?: THREE.Vector3;
-  onPositionChange?: (pos: [number, number, number]) => void;
+  onPositionChange?: (position: [number, number, number]) => void;
 }
 
 // Define the type for the imperative handle
@@ -46,15 +47,10 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
     }
   }, [initialPosition]);
 
-  useFrame(({ camera }, delta) => {
+  useFrame((_, delta) => {
     const mesh = meshRef.current;
     if (!mesh) return;
 
-    // Use the selector pattern variables
-    // const forward = getKeys('forward');
-    // const backward = getKeys('backward');
-    // const left = getKeys('left');
-    // const right = getKeys('right');
     const velocity = velocityRef.current;
     const position = mesh.position;
 
@@ -76,11 +72,6 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
     const xyDistance = Math.sqrt(position.x * position.x + position.y * position.y);
     const distanceToBoundary = tunnelRadius - radius - xyDistance;
     
-    // Debug: Log position and distance to boundary
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Oxy position: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}) | Distance to boundary: ${distanceToBoundary.toFixed(2)}`);
-    }
-
     // Check if near boundary
     isNearBoundaryRef.current = distanceToBoundary < boundaryThreshold;
 
@@ -132,42 +123,31 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
       onCollision?.('left');
     }
 
-    // Clamp Z position to tunnel length (z = -150 to z = +150)
+    // Clamp Z position to tunnel length
     const tunnelZMin = -150;
     const tunnelZMax = 150;
-    if (position.z < tunnelZMin + radius) {
-      position.z = tunnelZMin + radius;
-      velocity.z = 0;
-      onCollision?.('left');
-    }
-    if (position.z > tunnelZMax - radius) {
-      position.z = tunnelZMax - radius;
-      velocity.z = 0;
-      onCollision?.('left');
-    }
-    // Clamp Oxy so it can't get closer to the camera than 2 units
-    const minZ = camera.position.z - 2;
-    if (position.z > minZ) {
-      position.z = minZ;
-      velocity.z = 0;
+    if (position.z < tunnelZMin) {
+      position.z = tunnelZMin;
+      velocity.z *= -0.5;
+      onCollision?.('bottom');
+    } else if (position.z > tunnelZMax) {
+      position.z = tunnelZMax;
+      velocity.z *= -0.5;
+      onCollision?.('top');
     }
 
-    // Update mesh position
-    mesh.position.copy(position);
-    // Report position to parent if callback provided
-    if (typeof onPositionChange === 'function') {
-      onPositionChange([position.x, position.y, position.z]);
-    }
-    // Make Oxy always face the camera (billboard effect)
-    if (meshRef.current) {
-      meshRef.current.lookAt(camera.position);
-    }
+    // Update position callback
+    onPositionChange?.([position.x, position.y, position.z]);
   });
 
   return (
-    <mesh ref={meshRef} position={initialPosition}>
+    <mesh ref={meshRef}>
       <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={texture} transparent />
+      <meshBasicMaterial 
+        map={texture} 
+        transparent 
+        toneMapped={false}
+      />
     </mesh>
   );
 });

@@ -1,39 +1,54 @@
+import React, { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { RefObject } from 'react';
 
 interface CameraControllerProps {
-  oxyRef: RefObject<THREE.Mesh | null>; // Ref to Oxy's mesh, can be null
-  offset?: THREE.Vector3;       // Camera offset from Oxy
-  lookAtOffset?: THREE.Vector3; // Offset for the lookAt point from Oxy's position
+  oxyRef: React.RefObject<THREE.Mesh>;
+  offset?: THREE.Vector3;
+  smoothness?: number;
 }
 
-const CAMERA_OFFSET_DEFAULT = new THREE.Vector3(0, 2, 5); // Behind, slightly above
-const LOOK_AT_OFFSET_DEFAULT = new THREE.Vector3(0, 0, 0); // Look directly at Oxy's center
-
-export default function CameraController({
-  oxyRef,
-  offset = CAMERA_OFFSET_DEFAULT,
-  lookAtOffset = LOOK_AT_OFFSET_DEFAULT,
-}: CameraControllerProps) {
+const CameraController: React.FC<CameraControllerProps> = ({ 
+  oxyRef, 
+  offset = new THREE.Vector3(0, 0.5, 3.5),
+  smoothness = 0.1
+}) => {
   const { camera } = useThree();
+  const targetPosition = useRef(new THREE.Vector3());
+  const currentPosition = useRef(new THREE.Vector3());
+  const isInitialized = useRef(false);
 
-  useFrame(() => {
-    if (oxyRef.current) {
-      const oxyPosition = oxyRef.current.position;
-
-      // Calculate target camera position relative to Oxy
-      // Clone offset to avoid modifying the default or prop
-      const targetPosition = oxyPosition.clone().add(offset.clone());
-
-      // Smoothly move the camera towards the target position
-      camera.position.lerp(targetPosition, 0.1); // Adjust lerp factor for smoothness
-
-      // Calculate lookAt point
-      const lookAtPoint = oxyPosition.clone().add(lookAtOffset.clone());
-      camera.lookAt(lookAtPoint);
+  // Initialize camera position
+  useEffect(() => {
+    if (oxyRef.current && !isInitialized.current) {
+      const oxyPosition = oxyRef.current.position.clone();
+      const initialPosition = oxyPosition.clone().add(offset);
+      camera.position.copy(initialPosition);
+      currentPosition.current.copy(initialPosition);
+      targetPosition.current.copy(initialPosition);
+      isInitialized.current = true;
     }
+  }, [camera, offset, oxyRef]);
+
+  useFrame((_, delta) => {
+    if (!oxyRef.current || !isInitialized.current) return;
+
+    const oxyPosition = oxyRef.current.position;
+    
+    // Calculate target position
+    targetPosition.current.copy(oxyPosition).add(offset);
+
+    // Smoothly interpolate current position to target
+    currentPosition.current.lerp(targetPosition.current, smoothness);
+
+    // Update camera position
+    camera.position.copy(currentPosition.current);
+
+    // Make camera look at Oxy
+    camera.lookAt(oxyPosition);
   });
 
-  return null; // This component does not render anything itself
-} 
+  return null;
+};
+
+export default CameraController; 
