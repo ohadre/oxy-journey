@@ -20,10 +20,12 @@ const Tunnel = dynamic(() => import('./Tunnel'), {
 });
 
 const keyboardMap = [
-  { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
-  { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
+  { name: 'forward', keys: ['KeyE'] }, // Optional: keep for Z movement if needed
+  { name: 'backward', keys: ['KeyQ'] }, // Optional: keep for Z movement if needed
   { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
   { name: 'right', keys: ['ArrowRight', 'KeyD'] },
+  { name: 'up', keys: ['ArrowUp', 'KeyW'] },
+  { name: 'down', keys: ['ArrowDown', 'KeyS'] },
 ];
 
 export default function Scene3D() {

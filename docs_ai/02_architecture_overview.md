@@ -70,6 +70,13 @@ The game will be developed as a web application using the following stack:
 * **UI System (`HUD`, `UImanager`):**
     * Renders the Heads-Up Display (lives).
     * Manages the presentation and state of the Q&A modal.
+* **Loading System (`LoadingManager`, `LoadingScreen`):**
+    * Centralizes and manages asset loading for the entire application.
+    * Preloads all textures and other assets before game initialization.
+    * Provides visual feedback with a progress bar during loading.
+    * Uses a global React Context to share loading state with all components.
+    * Features a smooth fade-out transition from loading screen to game.
+    * Ensures consistent black backgrounds at all times to prevent white flashes.
 * **Scene Manager (`SceneSetup`):**
     * Initializes the 3D scene, lighting, camera, and basic environment.
     * Manages the overall level layout.

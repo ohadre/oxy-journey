@@ -70,4 +70,50 @@
 - Updated Oxy's logic to strictly clamp to tunnel's cross-section and Z range
 - Added a green debug wireframe to visualize the tunnel boundary, then removed it after confirming correct behavior
 - Verified Oxy cannot escape the tunnel in any direction
-- Kept Oxy as a 2D circle for now, with option to revisit visuals later 
+- Kept Oxy as a 2D circle for now, with option to revisit visuals later
+
+## White Flash Fix During Loading and Game Transitions (2025-05-11)
+
+### Problem Identification
+- Discovered white screen flash during game transitions, particularly when spawning the first enemy
+- Issue occurred after the tunnel and Oxy were shown but before the first germ spawned
+- Created jarring visual experience that affected the overall game polish
+
+### Root Cause Analysis
+- Identified multiple contributing factors:
+  - Textures being loaded on-demand rather than preloaded
+  - Lack of a consistent black background during transitions
+  - Germ component loading textures independently of main loading system
+  - Immediate enemy spawning without giving the scene time to stabilize
+
+### Comprehensive Solution
+- **Loading System Implementation**:
+  - Created a global `LoadingManager` component to centralize asset loading
+  - Implemented `LoadingScreen` with progress tracking and visual feedback
+  - Preloaded all textures before showing the game content
+  - Added fade-out transitions for smoother visual experience
+
+- **Multiple Layers of Black Background**:
+  - Added black backgrounds at document level in `_app.tsx` and `_document.tsx`
+  - Added component-level black backgrounds in `Scene3D` and other components
+  - Added explicit black background to Three.js Canvas using `<color attach="background" args={['#000000']} />`
+
+- **Texture Handling Improvements**:
+  - Created a global TextureLoader instance for consistency
+  - Updated textures to use proper `colorSpace = THREE.SRGBColorSpace` instead of deprecated `sRGBEncoding`
+  - Added `toneMapped={false}` to materials for consistent rendering
+  - Used `texture.needsUpdate = true` to ensure textures are fully processed
+
+- **Enhanced Game Component Loading**:
+  - Updated `Germ.tsx` to use preloaded textures
+  - Added delayed spawning in `GermManager.tsx` to ensure scene stability
+  - Improved error handling for texture loading failures
+
+### Deployment and Testing
+- Successfully implemented the solution and tested on local development environment
+- Consolidated multiple Vercel projects to a single deployment
+- Confirmed the fix is working in the production environment
+- Eliminated white flashes for a smoother, more professional user experience
+
+### Development Guidelines
+- **Test Locally Before Commit:** Every new feature, bugfix, or refactor must be tested in the local development environment before committing and pushing to the repository. This ensures that changes work as intended and reduces the risk of introducing bugs to the main codebase or production deployment. 

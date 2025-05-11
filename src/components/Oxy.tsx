@@ -37,6 +37,8 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
   const backward = useKeyboardControls(state => state.backward);
   const left = useKeyboardControls(state => state.left);
   const right = useKeyboardControls(state => state.right);
+  const up = useKeyboardControls(state => state.up);
+  const down = useKeyboardControls(state => state.down);
 
   useEffect(() => {
     if (meshRef.current && initialPosition) {
@@ -58,10 +60,12 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
 
     // Calculate desired movement direction
     const moveDirection = new THREE.Vector3();
-    if (forward) moveDirection.z -= 1;
-    if (backward) moveDirection.z += 1;
+    if (up) moveDirection.y += 1;
+    if (down) moveDirection.y -= 1;
     if (left) moveDirection.x -= 1;
     if (right) moveDirection.x += 1;
+    if (forward) moveDirection.z -= 1;
+    if (backward) moveDirection.z += 1;
 
     // Normalize movement direction if moving diagonally
     if (moveDirection.length() > 0) {

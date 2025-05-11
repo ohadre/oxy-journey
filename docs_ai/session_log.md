@@ -134,4 +134,87 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
   - Successfully pushed and deployed the latest changes to Vercel.
   - Confirmed live deployment is working as expected.
 
+## 2025-05-10 Tunnel Visual & Technical Enhancements
+
+- **Tunnel texture:** Applied seamless custom texture (`tunnel_tile.png`) to the tunnel interior using Three.js CylinderGeometry and meshStandardMaterial.
+- **Texture tiling:** Set repeat to (4, 2) for a natural, non-stretched look.
+- **Texture animation:** Animated the texture's offset (offset.y) each frame to simulate forward movement through the tunnel (`useFrame` with `texture.offset.y += delta * 0.2`).
+- **Lighting:** Added a warm directional light at the tunnel entrance (`#ffd9a0`), a cool rim light at the exit (`#a0c8ff`), and ambient light for depth and realism.
+- **Parameters:** All key parameters (radius, height, tiling, animation speed, light colors/intensities) are now easily adjustable for further tuning.
+- **Result:** Tunnel is now immersive, dynamic, and visually clear, ready for further gameplay and visual enhancements.
+
+## 2025-05-10 GitHub & Branch Protection Setup
+
+- **Repository Setup:**
+  - Initialized GitHub repository and pushed all project files.
+  - Created `.gitignore` and committed initial codebase.
+  - Switched default branch from `master` to `main` for modern best practices.
+- **GitHub Actions:**
+  - Added a workflow for automated testing on push and PR to `main`.
+  - Triggered workflow with a dummy commit to register status checks.
+- **Branch Protection:**
+  - Configured branch protection rule for `main`.
+  - Required status checks to pass before merging.
+  - Required branches to be up to date before merging.
+  - Confirmed rule is active and targets the correct branch.
+
+## 2025-05-10 Oxy Character Visual & Movement Update
+
+- **Oxy Visual Update:**
+  - Replaced placeholder circle with a sprite using `oxy.png` image (located in `public/textures/`).
+  - Ensured Oxy always faces the camera for clarity.
+- **Movement Fix:**
+  - Updated movement logic to use the correct mesh reference (`meshRef.current`), restoring keyboard controls.
+  - Confirmed Oxy moves as expected in the tunnel.
+- **Next:**
+  - Proceeding to Vercel deployment and integration.
+
+## 2025-05-11 Vercel Deployment Success & Asset Fix
+
+- **Vercel Deployment:**
+  - Successfully deployed the Oxy Journey app to Vercel from the main branch.
+  - Confirmed that Vercel builds and deploys automatically on push to main.
+- **Static Asset Fix:**
+  - Resolved 404 error for Oxy character image by staging, committing, and pushing `public/textures/oxy.png`.
+  - Verified that Oxy now appears correctly in the deployed app.
+- **Branch Protection & Workflow:**
+  - Temporarily removed required status checks and PR requirements to unblock solo dev workflow and deployment.
+  - Direct pushes to main are now allowed for rapid iteration.
+
+## 2025-05-11 Oxy Movement Clamping & Deployment
+
+- **Oxy Movement Update:**
+  - Adjusted Z-clamping logic so Oxy can move closer to the camera (2 unit buffer), improving player freedom while keeping Oxy visible.
+- **Deployment:**
+  - Successfully pushed and deployed the latest changes to Vercel.
+  - Confirmed live deployment is working as expected.
+
+## 2025-05-11 White Flash Fix and Loading System Implementation
+
+- **Problem Identification:**
+  - Discovered white flashes during game transitions, particularly when spawning the first enemy.
+  - Issue occurred after the tunnel and Oxy were shown but before the first germ spawned.
+  - Created jarring visual experience that affected the overall game polish.
+
+- **Loading System Implementation:**
+  - Created a global `LoadingManager` component to centralize asset loading.
+  - Implemented `LoadingScreen` with progress tracking and visual feedback.
+  - Added fade-out transitions for smoother visual experience.
+  - Preloaded all textures before showing the game content.
+
+- **Multiple Layers of Black Background:**
+  - Added black backgrounds at document level in `_app.tsx` and `_document.tsx`.
+  - Added component-level black backgrounds in `Scene3D` and other components.
+  - Added explicit black background to Three.js Canvas.
+
+- **Germ and Enemy Improvements:**
+  - Updated `Germ.tsx` to use preloaded textures instead of on-demand loading.
+  - Added delayed spawning in `GermManager.tsx` to ensure scene stability.
+  - Improved error handling for texture loading failures.
+
+- **Deployment Consolidation:**
+  - Consolidated multiple Vercel projects to a single deployment.
+  - Cleaned up deployment pipeline for better maintainability.
+  - Successfully deployed and verified the fix in production.
+
 ---
