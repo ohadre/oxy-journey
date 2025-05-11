@@ -81,4 +81,37 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
 - Verified Oxy cannot escape the tunnel in any direction
 - Kept Oxy as a 2D circle for now
 
---- 
+## 2024-06-10 GitHub & Branch Protection Setup
+
+- **Repository Setup:**
+  - Initialized GitHub repository and pushed all project files.
+  - Created `.gitignore` and committed initial codebase.
+  - Switched default branch from `master` to `main` for modern best practices.
+- **GitHub Actions:**
+  - Added a workflow for automated testing on push and PR to `main`.
+  - Triggered workflow with a dummy commit to register status checks.
+- **Branch Protection:**
+  - Configured branch protection rule for `main`.
+  - Required status checks to pass before merging.
+  - Required branches to be up to date before merging.
+  - Confirmed rule is active and targets the correct branch.
+
+---
+
+## 2024-03-19 GitHub Actions Workflow Trigger
+
+- **Triggered GitHub Actions Workflow:**
+  - Executed `git push` command to trigger the GitHub Actions workflow for status check registration.
+
+## 2024-06-10 Oxy Character Visual & Movement Update
+
+- **Oxy Visual Update:**
+  - Replaced placeholder circle with a sprite using `oxy.png` image (located in `public/textures/`).
+  - Ensured Oxy always faces the camera for clarity.
+- **Movement Fix:**
+  - Updated movement logic to use the correct mesh reference (`meshRef.current`), restoring keyboard controls.
+  - Confirmed Oxy moves as expected in the tunnel.
+- **Next:**
+  - Proceeding to Vercel deployment and integration.
+
+---
