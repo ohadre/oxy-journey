@@ -8,6 +8,7 @@ import { Oxy } from './Oxy';
 import dynamic from 'next/dynamic';
 import CameraController from './CameraController';
 import * as THREE from 'three';
+import Germ from './Germ';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -59,6 +60,7 @@ export default function Scene3D() {
           <directionalLight position={[0, -10, -40]} intensity={1.2} color="#a0c8ff" /> {/* Cool rim light from behind */}
           <Tunnel />
           {/* <OrbitControls /> */}
+          <Germ position={[2, 0, 60]} size={1.2} speed={0.1} />
           <Oxy 
             ref={oxyMeshRef} 
             worldSize={worldSize} // Will need to be adapted for tunnel collision
