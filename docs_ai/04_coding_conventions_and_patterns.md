@@ -153,4 +153,7 @@ This document defines the coding conventions, standards, and design patterns to 
     * If the AI proposes extensive changes for a minor bug, instruct it to attempt a more constrained solution first, or ask for a clear justification if it believes a larger change is truly necessary.
     * The AI should be guided to prefer the smallest effective change when addressing specific issues, unless a broader refactor is explicitly requested and justified.
 
+## 15. Windows/PowerShell Command Chaining
+- When running terminal commands on Windows/PowerShell, do **not** use `&&` to chain commands. Run each command separately, one at a time, to avoid errors.
+
 This document is a living document and may be updated as the project evolves and new patterns or decisions emerge.
