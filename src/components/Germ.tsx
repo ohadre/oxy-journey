@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { useLoading } from './LoadingManager';
 
 interface GermProps {
   position?: [number, number, number];
@@ -11,7 +11,17 @@ interface GermProps {
 }
 
 const Germ: React.FC<GermProps> = ({ position = [0, 0, 0], size = 1, speed = 0.1, target }) => {
-  const texture = useTexture('/textures/germ.png');
+  const { loadedTextures } = useLoading();
+  
+  // Create texture manually instead of using useTexture
+  const texture = useMemo(() => {
+    console.log('[Germ] Creating texture');
+    const textureLoader = new THREE.TextureLoader();
+    const tex = textureLoader.load('/textures/germ.png');
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, []);
+  
   const meshRef = useRef<THREE.Mesh>(null!);
   const positionRef = useRef<THREE.Vector3>(new THREE.Vector3(...position));
 
@@ -39,7 +49,11 @@ const Germ: React.FC<GermProps> = ({ position = [0, 0, 0], size = 1, speed = 0.1
   return (
     <mesh ref={meshRef} position={position}>
       <planeGeometry args={[size, size]} />
-      <meshBasicMaterial map={texture} transparent />
+      <meshBasicMaterial 
+        map={texture} 
+        transparent 
+        toneMapped={false}
+      />
     </mesh>
   );
 };

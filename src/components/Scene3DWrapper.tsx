@@ -1,18 +1,25 @@
 'use client';
 
+import React from 'react';
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
+import { LoadingManager } from './LoadingManager';
 
 // Dynamically import Scene3D with no SSR
 const Scene3D = dynamic(() => import('./Scene3D'), {
   ssr: false,
-  loading: () => <div>Loading 3D Scene...</div>
+  loading: () => (
+    <div className="w-full h-screen bg-black flex items-center justify-center">
+      <p className="text-white">Preparing 3D environment...</p>
+    </div>
+  )
 });
 
 export default function Scene3DWrapper() {
   return (
-    <Suspense fallback={<div>Loading 3D Scene...</div>}>
-      <Scene3D />
-    </Suspense>
+    <div className="w-full h-screen bg-black">
+      <LoadingManager>
+        <Scene3D />
+      </LoadingManager>
+    </div>
   );
 } 
