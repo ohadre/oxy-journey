@@ -26,6 +26,7 @@ export interface EntityManagerProps {
   spawnInterval: number;
   initialSpawnDelay: number;
   entityType: 'germ' | 'dust';
+  onEntitiesUpdate?: (entities: EntityInstance[]) => void;
 }
 
 // Helper functions
@@ -55,7 +56,8 @@ export function EntityManager<T extends EntityInstance>({
   spawnInterval,
   initialSpawnDelay,
   entityType,
-  renderEntity
+  renderEntity,
+  onEntitiesUpdate
 }: EntityManagerProps & {
   renderEntity: (entity: T) => React.ReactNode;
 }) {
@@ -123,6 +125,10 @@ export function EntityManager<T extends EntityInstance>({
         spawnTimer.current -= spawnInterval;
       }
       
+      // After updating entities, call onEntitiesUpdate if provided
+      if (onEntitiesUpdate) {
+        onEntitiesUpdate(filtered);
+      }
       return filtered;
     });
   });
