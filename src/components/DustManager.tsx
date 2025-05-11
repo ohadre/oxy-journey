@@ -73,7 +73,7 @@ const DustManager: React.FC<DustManagerProps> = ({ oxyPosition }) => {
         
         return {
           ...dust,
-          position: [currentPos.x, currentPos.y, currentPos.z],
+          position: [currentPos.x, currentPos.y, currentPos.z] as [number, number, number],
           timeAlive: dust.timeAlive + delta
         };
       });

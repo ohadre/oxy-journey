@@ -87,7 +87,7 @@ const GermManager: React.FC<GermManagerProps> = ({ oxyPosition }) => {
         
         return {
           ...germ,
-          position: [currentPos.x, currentPos.y, currentPos.z],
+          position: [currentPos.x, currentPos.y, currentPos.z] as [number, number, number],
           timeAlive: germ.timeAlive + delta
         };
       });
