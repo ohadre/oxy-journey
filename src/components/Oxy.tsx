@@ -2,16 +2,12 @@
 
 import React, { useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useKeyboardControls } from '@react-three/drei';
+import { useKeyboardControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Define the key mapping type to match Scene3D
-interface Controls {
-  forward: boolean;
-  backward: boolean;
-  left: boolean;
-  right: boolean;
-}
+// type Controls = 'forward' | 'backward' | 'left' | 'right';
+type Controls = 'forward' | 'backward' | 'left' | 'right';
 
 interface OxyProps {
   worldSize: number; // This will be the tunnel radius
@@ -25,7 +21,8 @@ export interface OxyRefType {
 }
 
 const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialPosition }, ref) => {
-  const internalMeshRef = useRef<THREE.Mesh>(null!);
+  const texture = useTexture('/textures/oxy.png');
+  const meshRef = useRef<THREE.Mesh>(null!);
   const velocityRef = useRef(new THREE.Vector3());
   const isNearBoundaryRef = useRef(false);
   
@@ -35,20 +32,26 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
   const tunnelRadius = 6; // Match Tunnel.tsx
   const boundaryThreshold = 1.0;
 
-  const [subscribeKeys, getKeys] = useKeyboardControls<Controls>();
+  const forward = useKeyboardControls(state => state.forward);
+  const backward = useKeyboardControls(state => state.backward);
+  const left = useKeyboardControls(state => state.left);
+  const right = useKeyboardControls(state => state.right);
 
   useEffect(() => {
-    const mesh = (ref as React.RefObject<THREE.Mesh>)?.current;
-    if (mesh && initialPosition) {
-      mesh.position.copy(initialPosition);
+    if (meshRef.current && initialPosition) {
+      meshRef.current.position.copy(initialPosition);
     }
-  }, [initialPosition, ref]);
+  }, [initialPosition]);
 
-  useFrame((_, delta) => {
-    const mesh = (ref as React.RefObject<THREE.Mesh>)?.current;
+  useFrame(({ camera }, delta) => {
+    const mesh = meshRef.current;
     if (!mesh) return;
 
-    const { forward, backward, left, right } = getKeys();
+    // Use the selector pattern variables
+    // const forward = getKeys('forward');
+    // const backward = getKeys('backward');
+    // const left = getKeys('left');
+    // const right = getKeys('right');
     const velocity = velocityRef.current;
     const position = mesh.position;
 
@@ -140,16 +143,17 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
 
     // Update mesh position
     mesh.position.copy(position);
+
+    // Make Oxy always face the camera (billboard effect)
+    if (meshRef.current) {
+      meshRef.current.lookAt(camera.position);
+    }
   });
 
   return (
-    <mesh ref={ref as React.RefObject<THREE.Mesh>}>
-      <circleGeometry args={[radius, 32]} />
-      <meshStandardMaterial 
-        color={isNearBoundaryRef.current ? "#ff4444" : "#4444ff"} 
-        emissive={isNearBoundaryRef.current ? "#ff0000" : "#0000ff"}
-        emissiveIntensity={0.2}
-      />
+    <mesh ref={meshRef} position={initialPosition}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={texture} transparent />
     </mesh>
   );
 });
