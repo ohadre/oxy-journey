@@ -140,6 +140,12 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, onCollision, initialP
       velocity.z = 0;
       onCollision?.('left');
     }
+    // Clamp Oxy so it can't get closer to the camera than 2 units
+    const minZ = camera.position.z - 2;
+    if (position.z > minZ) {
+      position.z = minZ;
+      velocity.z = 0;
+    }
 
     // Update mesh position
     mesh.position.copy(position);
