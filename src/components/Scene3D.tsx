@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import Germ from './Germ';
 import GermManager from './GermManager';
 import { useLoading } from './LoadingManager';
+import DustManager from './DustManager';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -83,7 +84,7 @@ export default function Scene3D() {
           <Suspense fallback={null}>
             <Tunnel />
           </Suspense>
-          {/* <OrbitControls /> */}
+          <DustManager oxyPosition={oxyPositionRef.current} />
           <GermManager oxyPosition={oxyPositionRef.current} />
           <Oxy 
             ref={oxyMeshRef} 
