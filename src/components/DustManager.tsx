@@ -39,11 +39,7 @@ export interface DustInstance {
   maxLifetime: number;
 }
 
-interface DustManagerProps {
-  oxyPosition: [number, number, number];
-}
-
-const DustManager: React.FC<DustManagerProps> = ({ oxyPosition }) => {
+const DustManager: React.FC = () => {
   const [dusts, setDusts] = useState<DustInstance[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { isLoading } = useLoading();

@@ -26,11 +26,6 @@ function randomLifetime() {
   return 12 + Math.random() * 8; // 12 to 20 seconds lifetime
 }
 
-function randomTargetNearOxy(oxyPosition: [number, number, number], radius = 2): [number, number, number] {
-  const [dx, dy] = randomXY(radius);
-  return [oxyPosition[0] + dx, oxyPosition[1] + dy, oxyPosition[2]];
-}
-
 function randomTargetAcrossTunnel(spawnXY: [number, number]): [number, number, number] {
   // Target is same X/Y, but at the far end (z = +140)
   return [spawnXY[0], spawnXY[1], 140];
@@ -46,11 +41,7 @@ export interface GermInstance {
   maxLifetime: number;
 }
 
-interface GermManagerProps {
-  oxyPosition: [number, number, number];
-}
-
-const GermManager: React.FC<GermManagerProps> = ({ oxyPosition }) => {
+const GermManager: React.FC = () => {
   const [germs, setGerms] = useState<GermInstance[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { isLoading, loadedTextures } = useLoading();

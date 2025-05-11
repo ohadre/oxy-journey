@@ -89,8 +89,8 @@ export default function Scene3D() {
           <Suspense fallback={null}>
             <Tunnel />
           </Suspense>
-          <DustManager oxyPosition={oxyPositionRef.current} />
-          <GermManager oxyPosition={oxyPositionRef.current} />
+          <DustManager />
+          <GermManager />
           <Oxy 
             ref={oxyMeshRef} 
             worldSize={worldSize} // Will need to be adapted for tunnel collision
