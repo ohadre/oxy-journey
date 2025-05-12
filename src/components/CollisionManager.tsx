@@ -2,18 +2,21 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GermInstance } from './GermManager'; // Import GermInstance type
+import { DustInstance } from './DustManager'; // Import DustInstance type
 
 // Removed import { TUNNEL_RADIUS } from './EntityManager';
 
 interface CollisionManagerProps {
   oxyPosition: [number, number, number];
   germs: GermInstance[]; // Add germs array prop
-  onCollision: (germId: string) => void; // Modify onCollision to accept germId
+  dustParticles: DustInstance[]; // Add dust array prop
+  onCollision: (type: 'germ' | 'dust', id: string) => void; // Modify onCollision signature
 }
 
 export const CollisionManager: React.FC<CollisionManagerProps> = ({
   oxyPosition,
   germs, // Destructure germs prop
+  dustParticles, // Destructure dust prop
   onCollision
 }) => {
   const lastCollisionTime = useRef(0);
@@ -21,10 +24,8 @@ export const CollisionManager: React.FC<CollisionManagerProps> = ({
   const oxyRadius = 0.5; // Oxy's radius
 
   useFrame(() => {
-    // Add check to ensure germs is an array
-    if (!Array.isArray(germs)) {
-       // It might be undefined briefly on init, don't log error unless debugging
-       // console.error('[CollisionManager] Error: germs prop is not an array!', germs);
+    // Add check to ensure germs is an array (optional: add for dustParticles too)
+    if (!Array.isArray(germs) || !Array.isArray(dustParticles)) {
        return; 
     }
 
@@ -53,10 +54,25 @@ export const CollisionManager: React.FC<CollisionManagerProps> = ({
 
       // Check for overlap
       if (distance < combinedRadius) {
-        console.log(`[CollisionManager] Collision detected! Oxy at ${oxyPos.toArray().map(n => n.toFixed(2))}, Germ ${germ.id} at ${germPos.toArray().map(n => n.toFixed(2))}. Dist: ${distance.toFixed(2)}, Combined Radius: ${combinedRadius.toFixed(2)}`);
-        onCollision(germ.id); // Call the callback with the collided germ's ID
+        console.log(`[CollisionManager] Collision detected! Type: germ, ID: ${germ.id}`);
+        onCollision('germ', germ.id); // Call with type 'germ'
         lastCollisionTime.current = currentTime; // Update last collision time
         return; // Exit the loop and frame check after the first collision
+      }
+    }
+    
+    // Iterate through each dust particle to check for collision
+    for (const dust of dustParticles) {
+      const dustPos = new THREE.Vector3(...dust.position);
+      const distance = oxyPos.distanceTo(dustPos);
+      const dustRadius = dust.size * 0.5; // Assuming dust size represents diameter
+      const combinedRadius = oxyRadius + dustRadius;
+
+      if (distance < combinedRadius) {
+        console.log(`[CollisionManager] Collision detected! Type: dust, ID: ${dust.id}`);
+        onCollision('dust', dust.id); // Call with type 'dust'
+        lastCollisionTime.current = currentTime;
+        return; // Exit after the first collision
       }
     }
 

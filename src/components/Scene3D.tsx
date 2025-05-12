@@ -9,9 +9,10 @@ import dynamic from 'next/dynamic';
 import CameraController from './CameraController';
 import * as THREE from 'three';
 import Germ from './Germ';
+import DustParticle from './DustParticle';
 import GermManager, { GermInstance } from './GermManager';
+import DustManager, { DustInstance } from './DustManager';
 import { useLoading } from './LoadingManager';
-import DustManager from './DustManager';
 import LivesIndicator from './LivesIndicator';
 import { CollisionManager } from './CollisionManager';
 
@@ -41,6 +42,7 @@ export default function Scene3D() {
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
   const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 70]);
   const [germs, setGerms] = useState<GermInstance[]>([]);
+  const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
@@ -65,12 +67,20 @@ export default function Scene3D() {
     setGerms(updatedGerms);
   };
 
-  const handleCollision = (germId: string) => {
-    // Log just BEFORE removing the germ due to collision
-    console.warn(`[Scene3D] !!! Preparing to remove germ ${germId} due to collision !!!`);
-    console.log(`[Scene3D] Collision detected with germ: ${germId}`);
-    setGerms(prevGerms => prevGerms.filter(germ => germ.id !== germId));
-    // TODO: Add other collision effects (e.g., decrease lives)
+  const handleDustChange = (updatedDust: DustInstance[]) => {
+    setDustParticles(updatedDust);
+  };
+
+  const handleCollision = (type: 'germ' | 'dust', id: string) => {
+    console.warn(`[Scene3D] !!! Preparing to remove ${type} ${id} due to collision !!!`);
+    console.log(`[Scene3D] Collision detected with ${type}: ${id}`);
+    
+    if (type === 'germ') {
+      setGerms(prevGerms => prevGerms.filter(germ => germ.id !== id));
+    } else if (type === 'dust') {
+      setDustParticles(prevDust => prevDust.filter(dust => dust.id !== id));
+    }
+    // TODO: Add other collision effects (e.g., decrease lives, trigger Q&A)
   };
 
   if (!isMounted) {
@@ -98,13 +108,21 @@ export default function Scene3D() {
             onGermsChange={handleGermsChange}
             germs={germs}
           />
+          <DustManager
+            onDustChange={handleDustChange}
+            dustParticles={dustParticles}
+          />
           <CollisionManager
             oxyPosition={oxyPosition}
             germs={germs}
+            dustParticles={dustParticles}
             onCollision={handleCollision}
           />
           {(Array.isArray(germs) ? germs : []).map(germ => (
             <Germ key={germ.id} position={germ.position} size={germ.size} />
+          ))}
+          {(Array.isArray(dustParticles) ? dustParticles : []).map(dust => (
+            <DustParticle key={dust.id} position={dust.position} size={dust.size} />
           ))}
           <Oxy 
             ref={oxyMeshRef} 

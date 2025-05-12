@@ -125,8 +125,27 @@ The game will be developed as a web application using the following stack:
 * **Camera Controller (`CameraController`):** (Implemented)
     * Manages the camera's position and follows Oxy.
 
-* **Dust Particles (`DustManager`):** (Implemented)
-    * Manages the visual dust particles in the environment.
+*   **Dust Logic (`DustManager.tsx`):**
+    *   **Function:** Manages the lifecycle and movement of all active dust particles, similar to `GermManager`. Does *not* render visually (`return null`).
+    *   **Inputs:** Takes the current `dustParticles` array and the `onDustChange` callback from `Scene3D`.
+    *   **Frame Update (`useFrame`):
+        *   Calculates the next `position` for each dust particle based on its `speed` and `delta` time, moving along the Z-axis.
+        *   Increments `timeAlive` for each dust particle.
+        *   Filters the `dustParticles` array, removing any dust where `position.z >= OUT_OF_BOUNDS_Z` (160) or `timeAlive >= maxLifetime` (200-300s).
+        *   Checks if new dust can be spawned (`currentDust.length < MAX_DUST` and `spawnTimer >= SPAWN_INTERVAL`).
+        *   Spawns new dust particles at `SPAWN_Z` (-140) with random properties (speed, size, lifetime) when conditions are met.
+        *   Calls `onDustChange` with the final, updated list of dust particles.
+    *   **Tuned Parameters:**
+        *   `MAX_DUST`: 15
+        *   `SPAWN_INTERVAL`: 1.0 second
+        *   `randomDustSpeed`: 30-45 units/sec
+        *   `randomDustLifetime`: 200-300 seconds
+
+*   **Dust Visuals (`DustParticle.tsx`):**
+    *   **Function:** Purely visual component responsible for rendering a single dust particle.
+    *   **Inputs:** Takes `position` and `size` props from `Scene3D`'s mapping of the `dustParticles` state.
+    *   **Rendering:** Renders a textured (`/textures/dust.png`) `planeGeometry` mesh at the specified `position`.
+    *   **Orientation:** Uses `useFrame` to make the mesh `lookAt(camera.position)`, ensuring it always faces the player.
 
 ## 3. "Vibe Coding Infrastructure" Architecture & Application
 

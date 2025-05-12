@@ -1,51 +1,60 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import Dust from './Dust';
 import { useLoading } from './LoadingManager';
 import * as THREE from 'three';
 
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
 const OUT_OF_BOUNDS_Z = 160;
-const MAX_DUSTS = 6;
-const SPAWN_INTERVAL = 3; // seconds
-const INITIAL_SPAWN_DELAY = 1.5; // seconds delay after loading before first spawn
+const MAX_DUST = 15; // Define max dust particles
+const SPAWN_INTERVAL = 1.0; // Define spawn interval (seconds)
+const INITIAL_SPAWN_DELAY = 2.0; // seconds delay after loading before first spawn
 
 function randomXY(radius: number): [number, number] {
   const angle = Math.random() * Math.PI * 2;
-  const r = Math.random() * (radius - 1.5); // -1.5 for margin
+  const r = Math.random() * (radius - 1.0); // Adjusted margin slightly
   return [Math.cos(angle) * r, Math.sin(angle) * r];
 }
 
-function randomSpeed() {
-  return 0.08 + Math.random() * 0.07; // 0.08 to 0.15 units per frame
+function randomDustSpeed() {
+  // Adjusted speed range (units per second, similar to germs but maybe slightly slower)
+  return 30 + Math.random() * 15; // 30-45 units per second 
 }
 
-function randomLifetime() {
-  return 15 + Math.random() * 10; // 15 to 25 seconds lifetime
+function randomDustLifetime() {
+  // Using a longer lifetime, similar to germs
+  return 200 + Math.random() * 100; // 200 to 300 seconds lifetime
 }
 
-function randomTargetAcrossTunnel(spawnXY: [number, number]): [number, number, number] {
-  return [spawnXY[0], spawnXY[1], 140];
-}
+// Target doesn't seem strictly necessary if just moving down Z axis
+// function randomTargetAcrossTunnel(spawnXY: [number, number]): [number, number, number] {
+//   return [spawnXY[0], spawnXY[1], 140];
+// }
 
+// Ensure this interface is exported
 export interface DustInstance {
   id: string;
   position: [number, number, number];
   speed: number;
   size: number;
-  target: [number, number, number];
+  // target: [number, number, number]; // Removed target if not needed
   timeAlive: number;
   maxLifetime: number;
 }
 
-const DustManager: React.FC = () => {
-  const [dusts, setDusts] = useState<DustInstance[]>([]);
+// Define props interface
+interface DustManagerProps {
+  dustParticles: DustInstance[];
+  onDustChange: (updatedDust: DustInstance[]) => void;
+}
+
+const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange }) => {
+  // Removed internal state: const [dusts, setDusts] = useState<DustInstance[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { isLoading } = useLoading();
   const nextId = useRef(Date.now());
   const spawnTimer = useRef(0);
-  const isFirstSpawn = useRef(true);
+  // Removed isFirstSpawn ref as it wasn't used in the cleaned version
 
   useEffect(() => {
     if (!isLoading) {
@@ -53,70 +62,83 @@ const DustManager: React.FC = () => {
         setIsReady(true);
       }, INITIAL_SPAWN_DELAY * 1000);
       return () => clearTimeout(timer);
+    } else {
+      // Reset state if loading restarts
+      setIsReady(false);
+      spawnTimer.current = 0;
     }
   }, [isLoading]);
 
   useFrame((_, delta) => {
     if (!isReady) return;
-    setDusts(prev => {
-      // Move dusts with slower speed and update lifetime
-      const moved = prev.map(dust => {
-        const currentPos = new THREE.Vector3(...dust.position);
-        const targetPos = new THREE.Vector3(...dust.target);
-        const direction = new THREE.Vector3().subVectors(targetPos, currentPos).normalize();
-        const moveDistance = dust.speed * delta * 10; // Reduced scale factor for slower movement
-        currentPos.addScaledVector(direction, moveDistance);
-        
-        return {
-          ...dust,
-          position: [currentPos.x, currentPos.y, currentPos.z] as [number, number, number],
-          timeAlive: dust.timeAlive + delta
-        };
-      });
-      
-      // Remove dusts that are out of bounds OR have exceeded their lifetime
-      let filtered = moved.filter(dust => {
-        const isOutOfBounds = dust.position[2] >= OUT_OF_BOUNDS_Z;
-        const isExpired = dust.timeAlive >= dust.maxLifetime;
-        return !isOutOfBounds && !isExpired;
-      });
-      
-      if (filtered.length !== moved.length) {
-        console.log(`[DustManager] Removed ${moved.length - filtered.length} dusts (out of bounds or expired)`);
+
+    // Ensure dustParticles is always an array before proceeding
+    if (!Array.isArray(dustParticles)) {
+      console.error('[DustManager] Error: dustParticles prop is not an array!', dustParticles);
+      return; 
+    }
+
+    let currentDust = [...dustParticles];
+
+    // 1. Move existing dust particles
+    let movedDust = currentDust.map((dust) => {
+      // --- Defensive Checks Start ---
+      if (!dust || !dust.position || !Array.isArray(dust.position) || dust.position.length !== 3) {
+        console.error('[DustManager] Invalid dust position:', dust);
+        return dust; 
       }
-      
-      spawnTimer.current += delta;
-      let spawnCount = 0;
-      while (filtered.length < MAX_DUSTS && spawnTimer.current >= SPAWN_INTERVAL) {
-        const [x, y] = randomXY(TUNNEL_RADIUS);
-        filtered.push({
-          id: `dust-${nextId.current++}`,
-          position: [x, y, SPAWN_Z],
-          speed: randomSpeed(),
-          size: 0.7 + Math.random() * 0.4,
-          target: randomTargetAcrossTunnel([x, y]),
-          timeAlive: 0,
-          maxLifetime: randomLifetime()
-        });
-        spawnCount++;
-        spawnTimer.current -= SPAWN_INTERVAL;
+      if (typeof dust.speed !== 'number' || typeof dust.timeAlive !== 'number') {
+        console.error('[DustManager] Invalid dust speed or timeAlive:', dust);
+        return dust;
       }
-      if (spawnCount > 0) {
-        console.log(`[DustManager] Spawned ${spawnCount} dusts this frame. Timer: ${spawnTimer.current.toFixed(2)}. Dusts now: ${filtered.length}`);
-      } else {
-        console.log(`[DustManager] No spawn. Timer: ${spawnTimer.current.toFixed(2)}. Dusts: ${filtered.length}`);
-      }
-      return filtered;
+      // --- Defensive Checks End ---
+
+      // Simplified Z-axis movement (assuming dust drifts down the tunnel)
+      const newZ = dust.position[2] + dust.speed * delta;
+      const finalPos: [number, number, number] = [dust.position[0], dust.position[1], newZ];
+      const finalTimeAlive = dust.timeAlive + delta;
+
+      return {
+        ...dust,
+        position: finalPos,
+        timeAlive: finalTimeAlive
+      };
     });
+    
+    // 2. Filter out of bounds / expired dust
+    let filteredDust = movedDust.filter(dust => {
+      if (!dust || typeof dust.timeAlive !== 'number' || typeof dust.maxLifetime !== 'number' || !Array.isArray(dust.position)) {
+         console.error('[DustManager] Invalid dust data before filtering:', dust);
+         return false;
+      }
+      const isOutOfBounds = dust.position[2] >= OUT_OF_BOUNDS_Z;
+      const isExpired = dust.timeAlive >= dust.maxLifetime;
+      return !isOutOfBounds && !isExpired;
+    });
+    
+    // 3. Spawn new dust if needed
+    spawnTimer.current += delta;
+    let newDustParticles = [...filteredDust];
+    while (newDustParticles.length < MAX_DUST && spawnTimer.current >= SPAWN_INTERVAL) {
+      const [x, y] = randomXY(TUNNEL_RADIUS);
+      const newDust: DustInstance = {
+        id: `dust-${nextId.current++}`,
+        position: [x, y, SPAWN_Z],
+        speed: randomDustSpeed(),
+        size: 0.5 + Math.random() * 0.5, // Adjusted size range
+        // target: randomTargetAcrossTunnel([x, y]), // Removed target
+        timeAlive: 0,
+        maxLifetime: randomDustLifetime()
+      };
+      newDustParticles.push(newDust);
+      spawnTimer.current -= SPAWN_INTERVAL;
+    }
+
+    // 4. Call the callback with the final list
+    onDustChange(newDustParticles);
   });
 
-  return (
-    <>
-      {dusts.map(dust => (
-        <Dust key={dust.id} position={dust.position} speed={dust.speed} size={dust.size} target={dust.target} />
-      ))}
-    </>
-  );
+  return null; // Does not render anything directly
 };
 
 export default DustManager; 
