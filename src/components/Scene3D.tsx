@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useRef, useState, useEffect, Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { /* OrbitControls, */ KeyboardControls } from '@react-three/drei';
 import { Oxy } from './Oxy';
@@ -9,16 +9,20 @@ import dynamic from 'next/dynamic';
 import CameraController from './CameraController';
 import * as THREE from 'three';
 import Germ from './Germ';
-import GermManager from './GermManager';
+import GermManager, { GermInstance } from './GermManager';
 import { useLoading } from './LoadingManager';
 import DustManager from './DustManager';
 import LivesIndicator from './LivesIndicator';
+import { CollisionManager } from './CollisionManager';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
   ssr: false,
   loading: () => null
 });
+
+// Helper Component to log camera info
+// const CameraLogger = () => { ... };
 
 const keyboardMap = [
   { name: 'forward', keys: ['KeyE'] },
@@ -35,8 +39,8 @@ export default function Scene3D() {
   const { isLoading } = useLoading();
 
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
-  const oxyPositionRef = useRef<[number, number, number]>([0, 0, 70]);
-  const [_, setDummy] = useState(0);
+  const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 70]);
+  const [germs, setGerms] = useState<GermInstance[]>([]);
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
@@ -48,13 +52,25 @@ export default function Scene3D() {
   }, []);
   
   useEffect(() => {
-    console.log('[Scene3D] Loading state changed:', isLoading);
+    console.warn(`[Scene3D] --- isLoading state changed: ${isLoading} ---`);
   }, [isLoading]);
 
-  const oxyInitialPosition = new THREE.Vector3(0, 0, 70); 
+  const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), []);
 
   const handleOxyPositionChange = (pos: [number, number, number]) => {
-    oxyPositionRef.current = pos;
+    setOxyPosition(pos);
+  };
+
+  const handleGermsChange = (updatedGerms: GermInstance[]) => {
+    setGerms(updatedGerms);
+  };
+
+  const handleCollision = (germId: string) => {
+    // Log just BEFORE removing the germ due to collision
+    console.warn(`[Scene3D] !!! Preparing to remove germ ${germId} due to collision !!!`);
+    console.log(`[Scene3D] Collision detected with germ: ${germId}`);
+    setGerms(prevGerms => prevGerms.filter(germ => germ.id !== germId));
+    // TODO: Add other collision effects (e.g., decrease lives)
   };
 
   if (!isMounted) {
@@ -77,7 +93,19 @@ export default function Scene3D() {
             <Tunnel />
           </Suspense>
           <DustManager />
-          <GermManager />
+          <GermManager
+            oxyPosition={oxyPosition}
+            onGermsChange={handleGermsChange}
+            germs={germs}
+          />
+          <CollisionManager
+            oxyPosition={oxyPosition}
+            germs={germs}
+            onCollision={handleCollision}
+          />
+          {(Array.isArray(germs) ? germs : []).map(germ => (
+            <Germ key={germ.id} position={germ.position} size={germ.size} />
+          ))}
           <Oxy 
             ref={oxyMeshRef} 
             worldSize={worldSize}

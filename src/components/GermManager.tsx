@@ -1,136 +1,182 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import Germ from './Germ';
 import { useLoading } from './LoadingManager';
 import * as THREE from 'three';
 
 const TUNNEL_RADIUS = 6;
-const SPAWN_Z = -140; // Far end of the tunnel
-const OUT_OF_BOUNDS_Z = 160; // Remove germs past this Z
-const MAX_GERMS = 8;
-const SPAWN_INTERVAL = 2; // seconds
-const INITIAL_SPAWN_DELAY = 1.5; // seconds delay after loading before first spawn
+const SPAWN_Z = -140;
+const OUT_OF_BOUNDS_Z = 160;
+const MAX_GERMS = 20;
+const SPAWN_INTERVAL = 1.5; // seconds
+const INITIAL_SPAWN_DELAY = 1.5; // seconds
 
 function randomXY(radius: number): [number, number] {
-  // Random point in a circle
   const angle = Math.random() * Math.PI * 2;
-  const r = Math.random() * (radius - 1); // -1 for margin
+  const r = Math.random() * (radius - 1);
   return [Math.cos(angle) * r, Math.sin(angle) * r];
 }
 
 function randomSpeed() {
-  return 0.1 + Math.random() * 0.08; // 0.1 to 0.18 units per frame
+  // Adjusted speed range (units per second)
+  // return 17 + Math.random() * 12; // Old range: 17-29 units per second
+  return 40 + Math.random() * 20; // Faster range: 40-60 units per second
 }
 
 function randomLifetime() {
-  return 12 + Math.random() * 8; // 12 to 20 seconds lifetime
+  // Increased lifetime significantly
+  return 240 + Math.random() * 60; // 240 to 300 seconds lifetime
 }
 
 function randomTargetAcrossTunnel(spawnXY: [number, number]): [number, number, number] {
-  // Target is same X/Y, but at the far end (z = +140)
   return [spawnXY[0], spawnXY[1], 140];
 }
 
+// Ensure this interface is exported
 export interface GermInstance {
   id: string;
   position: [number, number, number];
-  speed: number;
+  speed: number; // Units per second
   size: number;
   target: [number, number, number];
   timeAlive: number;
-  maxLifetime: number;
+  maxLifetime: number; // seconds
 }
 
-const GermManager: React.FC = () => {
-  const [germs, setGerms] = useState<GermInstance[]>([]);
-  const [isReady, setIsReady] = useState(false);
-  const { isLoading, loadedTextures } = useLoading();
+interface GermManagerProps {
+  oxyPosition: [number, number, number]; // Accept Oxy's position
+  germs: GermInstance[]; // Accept the current list of germs
+  onGermsChange: (updatedGerms: GermInstance[]) => void; // Callback to update state in parent
+}
+
+const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange }) => {
+  const [isReady, setIsReady] = useState(false); // Keep state for spawn readiness
+  const { isLoading } = useLoading();
   const nextId = useRef(Date.now());
   const spawnTimer = useRef(0);
   const isFirstSpawn = useRef(true);
 
-  // Set ready state after loading completes
+  // Effect to manage spawn readiness based on loading state
   useEffect(() => {
     if (!isLoading) {
-      // Add a delay before allowing spawns
-      console.log('[GermManager] Loading complete, setting up spawn timer');
       const timer = setTimeout(() => {
         console.log('[GermManager] Now ready to spawn germs');
         setIsReady(true);
       }, INITIAL_SPAWN_DELAY * 1000);
-      
       return () => clearTimeout(timer);
+    } else {
+      setIsReady(false);
+      spawnTimer.current = 0;
+      isFirstSpawn.current = true;
     }
   }, [isLoading]);
 
   useFrame((_, delta) => {
-    // Only process spawns if loading is complete and ready state is true
     if (!isReady) return;
 
-    setGerms(prev => {
-      // Move germs with slower speed and update lifetime
-      const moved = prev.map(germ => {
-        const currentPos = new THREE.Vector3(...germ.position);
-        const targetPos = new THREE.Vector3(...germ.target);
-        const direction = new THREE.Vector3().subVectors(targetPos, currentPos).normalize();
-        const moveDistance = germ.speed * delta * 10; // Reduced scale factor for slower movement
-        currentPos.addScaledVector(direction, moveDistance);
-        
-        return {
-          ...germ,
-          position: [currentPos.x, currentPos.y, currentPos.z] as [number, number, number],
-          timeAlive: germ.timeAlive + delta
-        };
-      });
-      
-      // Remove germs that are out of bounds OR have exceeded their lifetime
-      let filtered = moved.filter(germ => {
-        const isOutOfBounds = germ.position[2] >= OUT_OF_BOUNDS_Z;
-        const isExpired = germ.timeAlive >= germ.maxLifetime;
-        return !isOutOfBounds && !isExpired;
-      });
-      
-      if (filtered.length !== moved.length) {
-        console.log(`[GermManager] Removed ${moved.length - filtered.length} germs (out of bounds or expired)`);
+    // Ensure germs is always an array before proceeding
+    if (!Array.isArray(germs)) {
+      console.error('[GermManager] Error: germs prop is not an array!', germs);
+      return; 
+    }
+
+    let currentGerms = [...germs];
+
+    // 1. Move existing germs
+    let movedGerms = currentGerms.map((germ, index) => {
+      // --- Defensive Checks Start ---
+      if (!germ || !germ.position || !Array.isArray(germ.position) || germ.position.length !== 3) {
+        console.error('[GermManager] Invalid germ position:', germ);
+        return germ; // Return original germ data if invalid to prevent crash
       }
+      if (!germ.target || !Array.isArray(germ.target) || germ.target.length !== 3) {
+        console.error('[GermManager] Invalid germ target:', germ);
+        return germ;
+      }
+      if (typeof germ.speed !== 'number' || typeof germ.timeAlive !== 'number') {
+        console.error('[GermManager] Invalid germ speed or timeAlive:', germ);
+        return germ;
+      }
+      // --- Defensive Checks End ---
+
+      const currentPos = new THREE.Vector3(...germ.position);
+      const targetPos = new THREE.Vector3(...germ.target);
+      const direction = new THREE.Vector3().subVectors(targetPos, currentPos);
+
+      // Removed the snappedToTarget flag and the early return based on distance check.
+      // Calculate movement regardless, ensure it doesn't overshoot.
       
-      // Timer-based spawning
-      spawnTimer.current += delta;
-      let spawnCount = 0;
-      while (filtered.length < MAX_GERMS && spawnTimer.current >= SPAWN_INTERVAL) {
-        const [x, y] = randomXY(TUNNEL_RADIUS);
-        filtered.push({
-          id: `germ-${nextId.current++}`,
-          position: [x, y, SPAWN_Z],
-          speed: randomSpeed(),
-          size: 1 + Math.random() * 0.5,
-          target: randomTargetAcrossTunnel([x, y]),
-          timeAlive: 0,
-          maxLifetime: randomLifetime()
-        });
-        spawnCount++;
-        if (isFirstSpawn.current) {
-          console.log('[GermManager] First germ spawned');
-          isFirstSpawn.current = false;
-        }
-        spawnTimer.current -= SPAWN_INTERVAL;
+      const remainingDistanceSq = direction.lengthSq();
+      let finalPos = currentPos.clone(); // Start with the current position for the update
+
+      // Only calculate movement if not already at the target (use epsilon for float comparison)
+      if (remainingDistanceSq > 1e-6) { 
+          direction.normalize();
+          const moveDistance = germ.speed * delta;
+
+          // Check if the intended move distance is greater than or equal to the remaining distance
+          if (moveDistance * moveDistance >= remainingDistanceSq) {
+              // If so, place the germ exactly at the target position for this frame
+              finalPos.copy(targetPos);
+          } else {
+              // Otherwise, move the calculated distance along the direction vector
+              finalPos.addScaledVector(direction, moveDistance);
+          }
       }
-      if (spawnCount > 0) {
-        console.log(`[GermManager] Spawned ${spawnCount} germs this frame. Timer: ${spawnTimer.current.toFixed(2)}. Germs now: ${filtered.length}`);
-      } else {
-        console.log(`[GermManager] No spawn. Timer: ${spawnTimer.current.toFixed(2)}. Germs: ${filtered.length}`);
-      }
-      return filtered;
+
+      const finalTimeAlive = (typeof germ.timeAlive === 'number' ? germ.timeAlive : 0) + delta;
+
+      return {
+        ...germ,
+        position: [finalPos.x, finalPos.y, finalPos.z] as [number, number, number], // Use finalPos
+        timeAlive: finalTimeAlive
+      };
     });
+
+    // 2. Filter out of bounds / expired germs
+    let filteredGerms = movedGerms.filter(germ => {
+      if (!germ || typeof germ.timeAlive !== 'number' || typeof germ.maxLifetime !== 'number' || !Array.isArray(germ.position)) {
+         console.error('[GermManager] Invalid germ data before filtering:', germ);
+         return false;
+      }
+      const isOutOfBounds = germ.position[2] >= OUT_OF_BOUNDS_Z;
+      const isExpired = germ.timeAlive >= germ.maxLifetime;
+      
+      if (isOutOfBounds) {
+      }
+      if (isExpired) {
+      }
+
+      return !isOutOfBounds && !isExpired;
+    });
+
+    // 3. Spawn new germs if needed
+    spawnTimer.current += delta;
+    let newGerms = [...filteredGerms];
+    
+    while (newGerms.length < MAX_GERMS && spawnTimer.current >= SPAWN_INTERVAL) {
+      const [x, y] = randomXY(TUNNEL_RADIUS);
+      // --- Create the new germ data --- 
+      const newGerm: GermInstance = {
+        id: `germ-${nextId.current++}`,
+        position: [x, y, SPAWN_Z],
+        speed: randomSpeed(),
+        size: 1 + Math.random() * 0.5,
+        target: randomTargetAcrossTunnel([x, y]),
+        timeAlive: 0,
+        maxLifetime: randomLifetime()
+      };
+      newGerms.push(newGerm);
+      if (isFirstSpawn.current) {
+        isFirstSpawn.current = false;
+      }
+      spawnTimer.current -= SPAWN_INTERVAL;
+    }
+
+    // 4. Call the callback with the final list
+    onGermsChange(newGerms);
   });
 
-  return (
-    <>
-      {germs.map(germ => (
-        <Germ key={germ.id} position={germ.position} speed={germ.speed} size={germ.size} target={germ.target} />
-      ))}
-    </>
-  );
+  return null;
 };
 
 export default GermManager; 

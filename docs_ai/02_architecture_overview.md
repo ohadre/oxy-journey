@@ -53,43 +53,80 @@ The game will be developed as a web application using the following stack:
 * **Styling:** Tailwind CSS
     * For utility-first styling of all 2D UI components.
 
-### 2.3. Key Game Modules & Components (Conceptual)
+### 2.3. Key Game Modules & Components (Final Implementation)
 
-* **Player Controller (`OxyController`):**
-    * Manages Oxy's 3D model and movement (keyboard input).
-    * Handles collision detection logic (specifically for Oxy).
-    * Manages player state (lives).
-* **Obstacle System (`ObstacleManager`, `Germ`, `Dust`):**
-    * Spawns and manages behavior of germs and dust particles.
-    * Each obstacle type might have simple movement patterns or static placement.
-* **Q&A System (`QASystem`, `QuestionModal`):**
-    * Stores and retrieves questions (with types: Yes/No, MCQs).
-    * Displays the Q&A modal upon collision.
-    * Processes player answers and determines correctness.
-    * Communicates outcomes to the Player Controller / Game State.
-* **UI System (`HUD`, `UImanager`):**
-    * Renders the Heads-Up Display (lives).
-    * Manages the presentation and state of the Q&A modal.
-* **Loading System (`LoadingManager`, `LoadingScreen`):**
-    * Centralizes and manages asset loading for the entire application.
-    * Preloads all textures and other assets before game initialization.
-    * Provides visual feedback with a progress bar during loading.
-    * Uses a global React Context to share loading state with all components.
-    * Features a smooth fade-out transition from loading screen to game.
-    * Ensures consistent black backgrounds at all times to prevent white flashes.
-* **Scene Manager (`SceneSetup`):**
-    * Initializes the 3D scene, lighting, camera, and basic environment.
-    * Manages the overall level layout.
-* **Game State Manager (Potentially using React Context or Zustand):**
-    * A lightweight state management solution to handle global game states like score (if added later), current lives, game over conditions, and Q&A flow.
-* **Tunnel System (`Tunnel`):**
-    * Represents the main navigable environment, simulating a section of the human respiratory system (e.g., trachea or bronchus) as a cylindrical tunnel.
-    * Implemented using Three.js's `CylinderGeometry` with the interior rendered (`THREE.BackSide`).
-    * Uses a custom seamless texture (`tunnel_tile.png`) mapped to the interior, with repeat tiling for a natural look (`texture.repeat.set(4, 2)`).
-    * The tunnel texture is animated by incrementing its offset each frame, simulating forward movement (`useFrame` with `texture.offset.y += delta * 0.2`).
-    * Lighting is enhanced with a warm directional light at the entrance (`#ffd9a0`), a cool rim light at the exit (`#a0c8ff`), and ambient light for depth and realism.
-    * All parameters (radius, height, tiling, animation speed, light colors/intensities) are easily adjustable for further tuning.
-    * The player (Oxy) is positioned inside the tunnel, and future improvements will adapt movement and collision logic to the tunnel's cylindrical boundaries.
+*   **State Management (`Scene3D.tsx`):**
+    *   Central hub for core gameplay state using `useState`.
+    *   Manages `oxyPosition`: Player's current `[x, y, z]` coordinates.
+    *   Manages `germs`: An array of `GermInstance` objects, each containing `id`, `position`, `size`, `speed`, `target`, `timeAlive`, and `maxLifetime`.
+    *   Provides callbacks (`handleOxyPositionChange`, `handleGermsChange`, `handleCollision`) passed down to child components for state updates.
+
+*   **Player (`Oxy.tsx`):**
+    *   Renders Oxy's 3D model.
+    *   Handles player movement based on keyboard input (`useKeyboardControls`).
+    *   Clamps Oxy's position within tunnel boundaries.
+    *   Calls `handleOxyPositionChange` when position updates.
+
+*   **Germ Logic (`GermManager.tsx`):**
+    *   **Function:** Manages the lifecycle and movement of all active germs. Does *not* render visually (`return null`).
+    *   **Inputs:** Takes the current `germs` array and the `onGermsChange` callback from `Scene3D`.
+    *   **Frame Update (`useFrame`):**
+        *   Calculates the next `position` for each germ based on its `speed` and `delta` time, moving towards its `target` Z coordinate. Movement logic ensures germs move smoothly to the target without overshooting, even with variable frame times.
+        *   Increments `timeAlive` for each germ.
+        *   Filters the `germs` array, removing any germ where `position.z >= OUT_OF_BOUNDS_Z` (160) or `timeAlive >= maxLifetime` (240-300s).
+        *   Checks if new germs can be spawned (`currentGerms.length < MAX_GERMS` and `spawnTimer >= SPAWN_INTERVAL`).
+        *   Spawns new germs at `SPAWN_Z` (-140) with random properties (speed, size, lifetime, target) when conditions are met.
+        *   Calls `onGermsChange` with the final, updated list of germs (moved, filtered, newly spawned).
+    *   **Tuned Parameters:**
+        *   `MAX_GERMS`: 20
+        *   `SPAWN_INTERVAL`: 1.5 seconds
+        *   `randomSpeed`: 40-60 units/sec
+        *   `randomLifetime`: 240-300 seconds
+
+*   **Germ Visuals (`Germ.tsx`):**
+    *   **Function:** Purely visual component responsible for rendering a single germ.
+    *   **Inputs:** Takes `position` and `size` props from `Scene3D`'s mapping of the `germs` state.
+    *   **Rendering:** Renders a textured `planeGeometry` mesh at the specified `position`.
+    *   **Orientation:** Uses `useFrame` to make the mesh `lookAt(camera.position)`, ensuring it always faces the player.
+
+*   **Collision Logic (`CollisionManager.tsx`):**
+    *   **Function:** Checks for collisions between Oxy and Germs each frame. Does *not* render visually (`return null`).
+    *   **Inputs:** Takes `oxyPosition`, `germs` array, and `onCollision` callback from `Scene3D`.
+    *   **Frame Update (`useFrame`):**
+        *   Iterates through the `germs` array.
+        *   Calculates the Euclidean distance between `oxyPosition` and each `germ.position`.
+        *   Calculates the combined radii (`oxyRadius` (0.5) + `germRadius` (`germ.size * 0.5`)).
+        *   **Collision Condition:** If `distance < combinedRadius`, a collision is detected.
+        *   Calls `onCollision(collidedGerm.id)` upon detection.
+        *   Implements a `collisionCooldown` (500ms) using `useRef` to prevent multiple triggers from a single impact.
+
+*   **Scene Rendering & Flow (`Scene3D.tsx` continued):**
+    *   Renders the main `Canvas`, `Oxy`, `Tunnel`, `DustManager`, `GermManager`, and `CollisionManager`.
+    *   Maps the `germs` state array to render active `<Germ>` components, passing the necessary props (`key`, `position`, `size`).
+    *   The `handleCollision` callback filters the germ with the matching `germId` from the `germs` state array, causing it to be removed visually on the next render.
+
+* **Q&A System (`QASystem`, `QuestionModal`):** (Conceptual - Implementation Pending)
+    * Stores and retrieves questions.
+    * Displays the Q&A modal upon collision (triggered via `handleCollision`).
+    * Processes answers and communicates outcomes.
+
+* **UI System (`HUD`, `UImanager`, `LivesIndicator`):** (Partially Implemented)
+    * Renders the Heads-Up Display (`LivesIndicator` exists).
+    * Manages the presentation of the Q&A modal (Implementation Pending).
+
+* **Loading System (`LoadingManager`, `LoadingScreen`):** (Implemented)
+    * Centralizes asset preloading (textures).
+    * Provides visual progress feedback and smooth transition.
+    * Uses React Context (`useLoading`) to gate rendering of components like `GermManager` until loading is complete.
+
+* **Tunnel System (`Tunnel`):** (Implemented)
+    * Renders the animated tunnel environment.
+
+* **Camera Controller (`CameraController`):** (Implemented)
+    * Manages the camera's position and follows Oxy.
+
+* **Dust Particles (`DustManager`):** (Implemented)
+    * Manages the visual dust particles in the environment.
 
 ## 3. "Vibe Coding Infrastructure" Architecture & Application
 
