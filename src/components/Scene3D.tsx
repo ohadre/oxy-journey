@@ -97,7 +97,7 @@ export default function Scene3D() {
 
   return (
     <div className="w-full h-full bg-black relative">
-      <LivesIndicator lives={lives} />
+      <LivesIndicator currentLives={lives} />
       
       <KeyboardControls map={keyboardMap}>
         <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
