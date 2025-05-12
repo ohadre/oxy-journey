@@ -21,8 +21,8 @@ const Tunnel = dynamic(() => import('./Tunnel'), {
 });
 
 const keyboardMap = [
-  { name: 'forward', keys: ['KeyE'] }, // Optional: keep for Z movement if needed
-  { name: 'backward', keys: ['KeyQ'] }, // Optional: keep for Z movement if needed
+  { name: 'forward', keys: ['KeyE'] },
+  { name: 'backward', keys: ['KeyQ'] },
   { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
   { name: 'right', keys: ['ArrowRight', 'KeyD'] },
   { name: 'up', keys: ['ArrowUp', 'KeyW'] },
@@ -30,16 +30,14 @@ const keyboardMap = [
 ];
 
 export default function Scene3D() {
-  const [lastCollision, setLastCollision] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const worldSize = 10; // Less relevant for tunnel, kept for Oxy prop for now
+  const worldSize = 10;
   const { isLoading } = useLoading();
 
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
   const oxyPositionRef = useRef<[number, number, number]>([0, 0, 70]);
-  const [_, setDummy] = useState(0); // For forced re-render if needed
+  const [_, setDummy] = useState(0);
 
-  // Ensure component is mounted before rendering
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
     setIsMounted(true);
@@ -49,24 +47,14 @@ export default function Scene3D() {
     };
   }, []);
   
-  // Log loading state changes
   useEffect(() => {
     console.log('[Scene3D] Loading state changed:', isLoading);
   }, [isLoading]);
 
-  const handleCollision = (direction: 'left' | 'right' | 'top' | 'bottom') => {
-    setLastCollision(direction);
-    setTimeout(() => setLastCollision(null), 500);
-  };
-
-  // Tunnel height is 300, so ends are at z = ±150 relative to its center.
-  // Place Oxy just inside one end.
   const oxyInitialPosition = new THREE.Vector3(0, 0, 70); 
 
-  // Callback to update Oxy's position in the ref
   const handleOxyPositionChange = (pos: [number, number, number]) => {
     oxyPositionRef.current = pos;
-    // setDummy(d => d + 1); // Uncomment if you need to force a re-render for UI
   };
 
   if (!isMounted) {
@@ -76,15 +64,14 @@ export default function Scene3D() {
 
   return (
     <div className="w-full h-full bg-black relative">
-      {/* Lives indicator placed outside Canvas */}
       <LivesIndicator />
       
       <KeyboardControls map={keyboardMap}>
         <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
           <color attach="background" args={['#000000']} />
           <ambientLight intensity={0.3} />
-          <directionalLight position={[0, 10, 40]} intensity={2.0} color="#ffd9a0" /> {/* Warm light from entrance */}
-          <directionalLight position={[0, -10, -40]} intensity={1.2} color="#a0c8ff" /> {/* Cool rim light from behind */}
+          <directionalLight position={[0, 10, 40]} intensity={2.0} color="#ffd9a0" />
+          <directionalLight position={[0, -10, -40]} intensity={1.2} color="#a0c8ff" />
           
           <Suspense fallback={null}>
             <Tunnel />
@@ -93,21 +80,13 @@ export default function Scene3D() {
           <GermManager />
           <Oxy 
             ref={oxyMeshRef} 
-            worldSize={worldSize} // Will need to be adapted for tunnel collision
-            onCollision={handleCollision} // Same as above
+            worldSize={worldSize}
             initialPosition={oxyInitialPosition}
             onPositionChange={handleOxyPositionChange}
           />
-          {/* CameraController will adjust to follow Oxy */}
           <CameraController oxyRef={oxyMeshRef} offset={new THREE.Vector3(0, 0.5, 3.5)} />
         </Canvas>
       </KeyboardControls>
-      
-      {lastCollision && (
-        <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded">
-          Collision: {lastCollision}
-        </div>
-      )}
     </div>
   );
 } 
