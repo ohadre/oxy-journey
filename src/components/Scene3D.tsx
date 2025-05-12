@@ -43,6 +43,7 @@ export default function Scene3D() {
   const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 70]);
   const [germs, setGerms] = useState<GermInstance[]>([]);
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
+  const [lives, setLives] = useState(3);
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
@@ -75,12 +76,18 @@ export default function Scene3D() {
     console.warn(`[Scene3D] !!! Preparing to remove ${type} ${id} due to collision !!!`);
     console.log(`[Scene3D] Collision detected with ${type}: ${id}`);
     
+    setLives(prevLives => {
+      const newLives = prevLives - 1;
+      console.log(`[Scene3D] Lives decreased to: ${newLives}`);
+      return newLives;
+    });
+
     if (type === 'germ') {
       setGerms(prevGerms => prevGerms.filter(germ => germ.id !== id));
     } else if (type === 'dust') {
       setDustParticles(prevDust => prevDust.filter(dust => dust.id !== id));
     }
-    // TODO: Add other collision effects (e.g., decrease lives, trigger Q&A)
+    // TODO: Add other collision effects (e.g., trigger Q&A which might prevent life loss)
   };
 
   if (!isMounted) {
@@ -90,7 +97,7 @@ export default function Scene3D() {
 
   return (
     <div className="w-full h-full bg-black relative">
-      <LivesIndicator />
+      <LivesIndicator lives={lives} />
       
       <KeyboardControls map={keyboardMap}>
         <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
@@ -102,7 +109,6 @@ export default function Scene3D() {
           <Suspense fallback={null}>
             <Tunnel />
           </Suspense>
-          <DustManager />
           <GermManager
             oxyPosition={oxyPosition}
             onGermsChange={handleGermsChange}
