@@ -51,30 +51,35 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
   - Added WASD and arrow key controls
   - Implemented basic movement in all directions
   - Added unit tests for the Oxy component
-- [x] Add collision detection with environment boundaries (initial flat plane)
-  - Defined world boundaries
-  - Implemented collision response
-  - Added visual feedback for collisions
+- [x] Add collision detection with environment boundaries (initial flat plane) - *Note: Replaced by specific tunnel collision logic.*
 
 ### Environment Setup
-- [x] Create basic 3D environment (initial tunnel structure - no texture)
+- [x] Create basic 3D environment (initial tunnel structure - textured & animated)
   - [x] Design and implement tunnel structure (CylinderGeometry, solid color)
   - [-] Add tunnel boundaries / collision (deferred - player not yet moving *in* tunnel)
   - [-] Implement tunnel collision detection (deferred)
-  - [ ] Add basic lighting (restored)
+  - [x] Add basic lighting
   - [ ] Implement skybox (deferred)
 - [ ] Implement scrolling texture for tunnel (deferred due to WebGL context issues)
 
+### Obstacle & Collision System
+- [x] Implement Germ spawning, movement, and visual rendering.
+- [x] Implement Dust spawning, movement, and visual rendering.
+- [x] Refactor Germ & Dust systems for centralized state management (`Scene3D`) and separation of logic (`GermManager`, `DustManager`) vs. visuals (`Germ`, `DustParticle`).
+- [x] Implement collision detection between Oxy and both Germs & Dust (`CollisionManager`).
+- [x] Connect collisions to player state (decrement `lives`).
+- [x] Tune spawning parameters for continuous flow.
+
 ### Game Mechanics
-- [ ] Implement basic oxygen mechanics
-- [ ] Position player (Oxy) inside the tunnel
-- [ ] Implement camera follow for tunnel gameplay
+- [ ] Implement basic oxygen mechanics (If applicable beyond lives)
+- [x] Position player (Oxy) inside the tunnel
+- [x] Implement camera follow for tunnel gameplay (`CameraController`)
+- [ ] Implement Q&A mechanic triggered on collision.
+- [ ] Implement Game Over logic (when lives reach 0).
 
 ### UI/UX
-- [ ] Design and implement basic HUD
-  - Show oxygen levels
-  - Display current position
-  - Add basic instructions
+- [x] Design and implement basic HUD (`LivesIndicator`)
+- [ ] Design and implement Q&A modal.
 
 ### Testing
 - [x] Set up testing environment for React Three Fiber components
@@ -85,11 +90,11 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
 - [ ] Implement end-to-end testing for basic gameplay loop
 
 ### Deployment & CI/CD
-- [ ] Set up GitHub repository
+- [x] Set up GitHub repository
   - [ ] Initialize repository with proper .gitignore
   - [ ] Set up branch protection rules
   - [ ] Configure GitHub Actions for automated testing
-- [ ] Configure Vercel deployment
+- [x] Configure Vercel deployment
   - [ ] Connect GitHub repository to Vercel
   - [ ] Set up environment variables
   - [ ] Configure build settings for Next.js
@@ -100,9 +105,10 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
   - [ ] Configure production deployment process
 
 ## Next Steps
-1. Position player (Oxy) inside the tunnel entrance.
-2. Implement a camera system that follows Oxy smoothly within the tunnel.
-3. Adapt Oxy's movement and collision to work within the cylindrical tunnel walls.
+1. Implement Q&A mechanic triggered on collision.
+2. Add Game Over logic when lives reach zero.
+3. Add sound effects for collisions, etc.
+4. Refine visual appearance of entities if needed.
 
 ---
 This task list will be reviewed and updated at the beginning and end of each "Vibe Session."

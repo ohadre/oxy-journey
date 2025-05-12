@@ -217,4 +217,38 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
   - Cleaned up deployment pipeline for better maintainability.
   - Successfully deployed and verified the fix in production.
 
+## 2024-06-11 Entity System & Collision Refactor
+
+- **Goal:** Implement robust collision detection and refactor entity (Germs, Dust) management for better state control, separation of concerns, and continuous gameplay flow.
+
+- **Key Changes & Implementations:**
+    - **State Centralization (`Scene3D.tsx`):**
+        - Managed `germs`, `dustParticles`, and `lives` state.
+        - Implemented `handleGermsChange`, `handleDustChange`, `handleCollision` callbacks.
+    - **Logic-Only Managers (`GermManager.tsx`, `DustManager.tsx`):
+        - Refactored to handle all entity logic (movement, spawning, filtering based on lifetime/bounds) without direct rendering.
+        - Adjusted movement algorithms to prevent visual snapping and ensure smooth progression.
+        - Tuned spawning parameters (`MAX_GERMS`, `MAX_DUST`, `SPAWN_INTERVAL`, speeds, lifetimes) after multiple iterations to achieve a continuous flow of entities.
+    - **Visual Components (`Germ.tsx`, `DustParticle.tsx`):
+        - `Germ.tsx` updated to be purely visual.
+        - New `DustParticle.tsx` created for rendering dust as textured, camera-facing planes.
+    - **Collision System (`CollisionManager.tsx`):
+        - Now checks for collisions between Oxy and both Germ and Dust entities.
+        - Uses simple radius-based overlap detection.
+        - Reports collision type (`'germ'` or `'dust'`) and entity `id` to `Scene3D`.
+        - `handleCollision` in `Scene3D` updated to decrement `lives` and remove the correct entity from state.
+    - **UI (`LivesIndicator.tsx`):
+        - Connected to `lives` state in `Scene3D` to accurately reflect player health.
+
+- **Debugging & Iteration:**
+    - Addressed initial visual bugs where entities would snap to their target Z position.
+    - Iteratively tuned entity spawning limits and rates to ensure a consistent presence of obstacles.
+    - Resolved build errors related to prop mismatches and duplicate component instantiations.
+
+- **Outcome:**
+    - Core entity management and collision detection systems are now robust and data-driven.
+    - Player lives are correctly impacted by collisions.
+    - The game provides a more continuous and predictable challenge regarding obstacles.
+    - Architecture documentation (`02_architecture_overview.md`) updated to reflect these changes.
+
 ---
