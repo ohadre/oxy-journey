@@ -153,6 +153,30 @@ This document defines the coding conventions, standards, and design patterns to 
     * If the AI proposes extensive changes for a minor bug, instruct it to attempt a more constrained solution first, or ask for a clear justification if it believes a larger change is truly necessary.
     * The AI should be guided to prefer the smallest effective change when addressing specific issues, unless a broader refactor is explicitly requested and justified.
 
+* **Task Definition & Breakdown (NEW):**
+    * Before starting implementation, the AI must confirm its understanding of the current, overarching objective for the task or feature.
+    * The AI should assist in or propose breaking down tasks into granular steps. Each step should aim to be independently verifiable, preferably through changes observable in the UI by the human product manager.
+    * For any proposed task or sub-task, the AI should briefly state how its completion can be tested or verified through the UI.
+
+* **High-Level Planning for Major Components (NEW):**
+    * Unless explicitly working on a small bug fix, if tasked with adding a new major component or significant feature, the AI should first propose a brief, high-level plan. This plan should outline the main parts to be built and the general approach, ensuring alignment before detailed coding begins.
+
+* **Post-Change Self-Review (NEW):**
+    * After any code modifications are applied (e.g., after an `edit_file` operation), the AI should mentally (or by re-reading the diff/file if necessary) review the changes to ensure they align with the request, adhere to conventions, and don't have obvious errors.
+
+* **Preventing Regressions (NEW):**
+    * A primary goal during any change (bug fixes or feature additions) is to avoid negatively impacting existing functionality. The AI should actively consider potential side effects of its changes on other parts of the application. If a proposed change carries a risk of regression, this risk should be noted.
+
+* **Debugging Conditionally Rendered/Dynamic Component Styling (NEW):**
+    * When styles (especially utility-class based, like Tailwind CSS) do not appear to apply correctly to conditionally rendered or dynamically added UI components, the AI should guide the user through or perform the following checks:
+        1.  **Confirm State/Condition:** Verify via console logs or debugging that the state variable controlling the component's rendering is changing as expected.
+        2.  **Unconditional Render Test:** Temporarily render the component unconditionally to see if it appears at all.
+        3.  **Style Simplification Test:** If it renders unconditionally but without correct styling, simplify the component's styling to basic, non-conflicting properties (e.g., a solid background color, fixed dimensions, high z-index using inline styles or minimal utility classes) to confirm if *any* styling is possible.
+        4.  **Tailwind Configuration (`tailwind.config.js`):** Ensure the `content` array in `tailwind.config.js` correctly includes the path to the component file, enabling Tailwind's JIT compiler to scan it.
+        5.  **Global CSS Import:** Verify that the main CSS file containing `@tailwind base; @tailwind components; @tailwind utilities;` is correctly imported in the project's entry point (e.g., `_app.tsx` or `layout.tsx`).
+        6.  **Browser Inspector:** Guide the user to use the browser's element inspector to check if the component's HTML element is present in the DOM, what CSS classes are attached, and which specific styles are being applied or overridden (look for struck-through styles).
+        7.  **CSS Specificity/Cascade:** Consider potential conflicts with more specific global CSS rules that might be overriding the utility classes.
+
 ## 15. Windows/PowerShell Command Chaining
 - When running terminal commands on Windows/PowerShell, do **not** use `&&` to chain commands. Run each command separately, one at a time, to avoid errors.
 

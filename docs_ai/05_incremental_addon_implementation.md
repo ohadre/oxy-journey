@@ -20,6 +20,11 @@ This document outlines guidelines for implementing incremental addons to the Oxy
 - **Set Success Criteria**: Define what "done" looks like for each step
 - **Assess Dependencies**: Identify any dependencies on other components
 
+#### New Guideline Emphasis for Planning:
+- **Understand Current Objective**: Before initiating any task, thoroughly review and confirm understanding of the overarching current objective for the development session or sprint. This ensures alignment with broader project goals.
+- **Granular, UI-Testable Tasks**: Decompose larger tasks into the smallest possible granular steps. Each step should ideally result in a change that is testable by the human product manager through the user interface (UI). This facilitates rapid feedback and validation.
+- **High-Level Plan for Major Components**: For significant new features or major components (excluding minor bug fixes), outline a brief, high-level plan of what will be built *before* diving into detailed implementation steps. This plan should be concise and confirm the overall approach.
+
 ### 2. Implementation Phase
 Follow this sequence for each feature:
 
