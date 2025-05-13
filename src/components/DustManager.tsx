@@ -46,9 +46,10 @@ export interface DustInstance {
 interface DustManagerProps {
   dustParticles: DustInstance[];
   onDustChange: (updatedDust: DustInstance[]) => void;
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over'; // Add gameState prop
 }
 
-const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange }) => {
+const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, gameState }) => {
   // Removed internal state: const [dusts, setDusts] = useState<DustInstance[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { isLoading } = useLoading();
@@ -70,6 +71,7 @@ const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange }
   }, [isLoading]);
 
   useFrame((_, delta) => {
+    if (gameState !== 'playing') return; // Pause if not playing
     if (!isReady) return;
 
     // Ensure dustParticles is always an array before proceeding

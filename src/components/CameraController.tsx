@@ -6,12 +6,14 @@ interface CameraControllerProps {
   oxyRef: React.RefObject<THREE.Mesh | null>;
   offset?: THREE.Vector3;
   smoothness?: number;
+  gameState?: 'loading' | 'playing' | 'question_paused' | 'game_over';
 }
 
 const CameraController: React.FC<CameraControllerProps> = ({ 
   oxyRef, 
   offset = new THREE.Vector3(0, 0.5, 3.5),
-  smoothness = 0.1
+  smoothness = 0.1,
+  gameState
 }) => {
   const { camera } = useThree();
   const targetPosition = useRef(new THREE.Vector3());
@@ -31,6 +33,7 @@ const CameraController: React.FC<CameraControllerProps> = ({
   }, [camera, offset, oxyRef]);
 
   useFrame((_, delta) => {
+    if (gameState && gameState !== 'playing') return;
     if (!oxyRef.current || !isInitialized.current) return;
 
     const oxyPosition = oxyRef.current.position;

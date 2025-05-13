@@ -13,6 +13,8 @@ interface OxyProps {
   worldSize: number; // This will be the tunnel radius
   initialPosition?: THREE.Vector3;
   onPositionChange?: (pos: [number, number, number]) => void;
+  gameState?: 'loading' | 'playing' | 'question_paused' | 'game_over';
+  isInvincible?: boolean; // Add isInvincible prop
 }
 
 // Define the type for the imperative handle
@@ -20,9 +22,8 @@ export interface OxyRefType {
   getPosition: () => THREE.Vector3 | undefined;
 }
 
-const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, initialPosition, onPositionChange }, ref) => {
+const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, initialPosition, onPositionChange, gameState, isInvincible }, ref) => {
   const texture = useTexture('/textures/oxy.png');
-  const meshRef = useRef<THREE.Mesh>(null!);
   const velocityRef = useRef(new THREE.Vector3());
   
   const moveSpeed = 0.15;
@@ -38,14 +39,34 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, initialPosition, onPo
   const down = useKeyboardControls(state => state.down);
 
   useEffect(() => {
-    if (meshRef.current && initialPosition) {
-      meshRef.current.position.copy(initialPosition);
+    if (ref && typeof ref !== 'function' && ref.current && initialPosition) {
+      ref.current.position.copy(initialPosition);
     }
-  }, [initialPosition]);
+  }, [initialPosition, ref]);
+
+  // Effect to update opacity based on invincibility
+  useEffect(() => {
+    if (ref && typeof ref !== 'function' && ref.current && ref.current.material) {
+      // Ensure material is of a type that supports opacity and we can modify it
+      const material = ref.current.material as THREE.MeshBasicMaterial; 
+      if (material) {
+        material.opacity = isInvincible ? 0.5 : 1.0;
+        material.needsUpdate = true; // Important for some material changes
+      }
+    }
+  }, [isInvincible, ref]);
 
   useFrame(({ camera }, delta) => {
-    const mesh = meshRef.current;
-    if (!mesh) return;
+    if (!ref || typeof ref === 'function' || !ref.current) return;
+    const mesh = ref.current;
+
+    // Allow lookAt to work even if paused, but skip movement logic
+    if (gameState && gameState !== 'playing') {
+      if (mesh) {
+        mesh.lookAt(camera.position);
+      }
+      return; 
+    }
 
     // Use the selector pattern variables
     // const forward = getKeys('forward');
@@ -126,13 +147,13 @@ const Oxy = forwardRef<THREE.Mesh, OxyProps>(({ worldSize, initialPosition, onPo
     }
     
     // Make Oxy always face the camera
-    if (meshRef.current) {
-      meshRef.current.lookAt(camera.position);
+    if (mesh) {
+      mesh.lookAt(camera.position);
     }
   });
 
   return (
-    <mesh ref={meshRef} position={initialPosition}>
+    <mesh ref={ref} position={initialPosition}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial map={texture} transparent />
     </mesh>

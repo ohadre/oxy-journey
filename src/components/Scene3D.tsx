@@ -21,6 +21,7 @@ import { DisplayQuestion, LanguageCode } from '../types/question.types';
 import { createPortal } from 'react-dom';
 import QuestionModal from './ui/QuestionModal';
 import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
+import * as Tone from 'tone'; // Import Tone.js
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -50,7 +51,7 @@ export default function Scene3D() {
   const { isLoading: isAssetsLoading } = useLoading(); // Renamed for clarity
 
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
-  const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 140]);
+  const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 146]);
   const [germs, setGerms] = useState<GermInstance[]>([]);
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
   const [lives, setLives] = useState(3);
@@ -66,11 +67,46 @@ export default function Scene3D() {
   const [questionError, setQuestionError] = useState<string | null>(null);
   // --------------------------------------
   const [gameState, setGameState] = useState<GameState>('loading'); // Keep general gameState
+  const [isOxyInvincible, setIsOxyInvincible] = useState(false);
+  const invincibilityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Add portal container ref (if used by a future modal, keep; otherwise, can be removed if QuestionOverlay is gone)
   // const portalContainerRef = useRef<HTMLDivElement>(null);
 
+  // --- Sound Effect Setup ---
+  const collisionSynth = useMemo(() => {
+    if (typeof window !== 'undefined') { // Ensure Tone.js runs only on client
+      return new Tone.Synth().toDestination();
+    }
+    return null;
+  }, []);
+  // -------------------------
+
   const INITIAL_LIVES = 3;
+
+  // --- Oxy Invincibility Logic (MOVED EARLIER) ---
+  const activateOxyInvincibility = useCallback((duration: number) => {
+    if (invincibilityTimerRef.current) {
+      clearTimeout(invincibilityTimerRef.current);
+    }
+    console.log(`[Scene3D] Activating Oxy invincibility for ${duration / 1000} seconds.`);
+    setIsOxyInvincible(true);
+    invincibilityTimerRef.current = setTimeout(() => {
+      setIsOxyInvincible(false);
+      invincibilityTimerRef.current = null;
+      console.log('[Scene3D] Oxy invincibility ended.');
+    }, duration);
+  }, []);
+
+  // Cleanup invincibility timer on unmount
+  useEffect(() => {
+    return () => {
+      if (invincibilityTimerRef.current) {
+        clearTimeout(invincibilityTimerRef.current);
+      }
+    };
+  }, []);
+  // ---------------------------------------------
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
@@ -195,13 +231,19 @@ export default function Scene3D() {
     if (isCorrect) {
       setAnsweredCorrectlyIds(prev => [...new Set([...prev, currentDisplayQuestion.id])]);
       console.log('[Scene3D] Answer CORRECT. answeredCorrectlyIds updated.');
+      if (lives > 0) { // Check current lives before any updates for this turn
+        activateOxyInvincibility(5000);
+      }
     } else {
+      // Incorrect answer
       setLives(prevLives => {
         const newLives = Math.max(0, prevLives - 1);
         console.log(`[Scene3D] Answer INCORRECT. Lives decreased to: ${newLives}`);
         if (newLives <= 0) {
-          console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
           setGameState('game_over');
+          console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
+        } else {
+          activateOxyInvincibility(5000); // Grant invincibility if not game over
         }
         return newLives;
       });
@@ -209,11 +251,14 @@ export default function Scene3D() {
 
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
-    // Only set to playing if not game over
-    if (gameState !== 'game_over') {
-      setGameState('playing'); 
-    }
-  }, [currentDisplayQuestion, gameState, lives]); // Added gameState and lives to dependencies
+    // If, after all updates, gameState is not 'game_over', set to playing.
+    // This needs to account for the async nature of setGameState within setLives.
+    // A more robust way would be to use an effect that reacts to lives changes.
+    // For now, we rely on the sequence and check the current gameState value in closure.
+    if (gameState !== 'game_over') { 
+      setGameState('playing');
+    } 
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility]);
 
   const handleCloseModal = useCallback(() => {
     console.log('[Scene3D] Modal closed by user (penalty applied).');
@@ -221,19 +266,20 @@ export default function Scene3D() {
       const newLives = Math.max(0, prevLives - 1);
       console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
       if (newLives <= 0) {
-        console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
         setGameState('game_over');
+        console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
+      } else {
+        activateOxyInvincibility(5000); // Grant invincibility if not game over
       }
       return newLives;
     });
 
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
-    // Only set to playing if not game over
     if (gameState !== 'game_over') {
       setGameState('playing');
-    }
-  }, [gameState, lives]); // Added gameState and lives to dependencies
+    } 
+  }, [gameState, lives, activateOxyInvincibility]);
   // ------------------------------------
 
   // --- Game Restart Logic ---
@@ -243,7 +289,7 @@ export default function Scene3D() {
     setAnsweredCorrectlyIds([]);
     setCurrentDisplayQuestion(null); // Ensure no question is showing
     setIsModalVisible(false);      // Ensure question modal is hidden
-    setOxyPosition([0, 0, 140]); // Reset Oxy position
+    setOxyPosition([0, 0, 146]); // Reset Oxy position - Updated Z from 140 to 146
     // TODO: Reset germs and dust particles to initial state or clear them
     setGerms([]);
     setDustParticles([]);
@@ -267,7 +313,18 @@ export default function Scene3D() {
   }, []);
 
   const handleCollision = useCallback((type: 'germ' | 'dust', id: string) => {
-    console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}`);
+    console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}, Invincible: ${isOxyInvincible}`);
+
+    if (isOxyInvincible) {
+      console.log('[Scene3D] Collision occurred while Oxy is invincible. Ignoring penalty and question.');
+      // Still remove the entity to prevent immediate re-collision when invincibility ends
+      if (type === 'germ') {
+        setGerms(prevGerms => prevGerms.filter(g => g.id !== id));
+      } else {
+        setDustParticles(prevDust => prevDust.filter(d => d.id !== id));
+      }
+      return;
+    }
 
     // Guard: Only trigger Q&A if game is currently 'playing'
     if (gameState !== 'playing') {
@@ -280,6 +337,19 @@ export default function Scene3D() {
       }
       return;
     }
+
+    // --- Play Collision Sound ---
+    if (collisionSynth && Tone.context.state !== 'running') {
+      Tone.start(); // Ensure AudioContext is running
+      console.log('[Scene3D] AudioContext started by collision sound.');
+    }
+    if (collisionSynth) {
+      // Explicitly stop any ongoing note and schedule the new one with a slight delay
+      collisionSynth.triggerRelease(Tone.now()); 
+      collisionSynth.triggerAttackRelease("C4", "8n", Tone.now() + 0.01); 
+      console.log('[Scene3D] Collision sound played.');
+    }
+    // ---------------------------
 
     // Remove the collided entity immediately
     if (type === 'germ') {
@@ -321,7 +391,7 @@ export default function Scene3D() {
 
     // Lives decrement will be handled based on question outcome later.
 
-  }, [gameState, allQuestions, answeredCorrectlyIds, lives]); // Added gameState, allQuestions, answeredCorrectlyIds to dependencies
+  }, [gameState, allQuestions, answeredCorrectlyIds, lives, isOxyInvincible, activateOxyInvincibility]); // Added isOxyInvincible and activateOxyInvincibility
 
   // --- REMOVE Temporary Key Listener for K/L keys as it used old testQuestion logic ---
   /*
@@ -392,7 +462,7 @@ export default function Scene3D() {
       {/* End Temporary Test Button */}
 
       <KeyboardControls map={keyboardMap}>
-        <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
+        <Canvas camera={{ position: [0, 0, 80], fov: 60, near: 0.1, far: 2000 }}> 
           <color attach="background" args={['#000000']} />
           <ambientLight intensity={0.3} />
           <directionalLight position={[0, 10, 40]} intensity={2.0} color="#ffd9a0" />
@@ -405,10 +475,12 @@ export default function Scene3D() {
             oxyPosition={oxyPosition}
             onGermsChange={handleGermsChange}
             germs={germs}
+            gameState={gameState}
           />
           <DustManager
             onDustChange={handleDustChange}
             dustParticles={dustParticles}
+            gameState={gameState}
           />
           <CollisionManager
             oxyPosition={oxyPosition}
@@ -423,12 +495,18 @@ export default function Scene3D() {
             <DustParticle key={dust.id} position={dust.position} size={dust.size} />
           ))}
           <Oxy 
-            // ref={oxyMeshRef} // ref is not a prop of Oxy. Oxy component needs to use forwardRef if direct ref access is needed by parent.
+            ref={oxyMeshRef}
             worldSize={10} // Pass worldSize if Oxy uses it
             initialPosition={oxyInitialPosition}
             onPositionChange={handleOxyPositionChange}
+            gameState={gameState} 
+            isInvincible={isOxyInvincible} // Pass invincibility state
           />
-          <CameraController oxyRef={oxyMeshRef} offset={new THREE.Vector3(0, 0.5, 3.5)} />
+          <CameraController 
+            oxyRef={oxyMeshRef} 
+            offset={new THREE.Vector3(0, 0.5, 3.5)} // Reverted Z offset to 3.5
+            gameState={gameState} // Pass gameState
+          />
         </Canvas>
       </KeyboardControls>
 

@@ -46,9 +46,10 @@ interface GermManagerProps {
   oxyPosition: [number, number, number]; // Accept Oxy's position
   germs: GermInstance[]; // Accept the current list of germs
   onGermsChange: (updatedGerms: GermInstance[]) => void; // Callback to update state in parent
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over'; // Add gameState prop
 }
 
-const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange }) => {
+const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameState }) => {
   const [isReady, setIsReady] = useState(false); // Keep state for spawn readiness
   const { isLoading } = useLoading();
   const nextId = useRef(Date.now());
@@ -71,6 +72,7 @@ const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange }) => {
   }, [isLoading]);
 
   useFrame((_, delta) => {
+    if (gameState !== 'playing') return; // Pause if not playing
     if (!isReady) return;
 
     // Ensure germs is always an array before proceeding
@@ -88,46 +90,46 @@ const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange }) => {
         console.error('[GermManager] Invalid germ position:', germ);
         return germ; // Return original germ data if invalid to prevent crash
       }
-      if (!germ.target || !Array.isArray(germ.target) || germ.target.length !== 3) {
-        console.error('[GermManager] Invalid germ target:', germ);
-        return germ;
-      }
+      // if (!germ.target || !Array.isArray(germ.target) || germ.target.length !== 3) { // Target not used for this test
+      //   console.error('[GermManager] Invalid germ target:', germ);
+      //   return germ;
+      // }
       if (typeof germ.speed !== 'number' || typeof germ.timeAlive !== 'number') {
         console.error('[GermManager] Invalid germ speed or timeAlive:', germ);
         return germ;
       }
       // --- Defensive Checks End ---
 
+      // --- Simplified Z-axis movement (like DustManager) ---
+      const newZ = germ.position[2] + germ.speed * delta;
+      const finalPos: [number, number, number] = [germ.position[0], germ.position[1], newZ];
+      // --- End Simplified Z-axis movement ---
+      
+      /* Target-based movement (commented out for testing)
       const currentPos = new THREE.Vector3(...germ.position);
       const targetPos = new THREE.Vector3(...germ.target);
       const direction = new THREE.Vector3().subVectors(targetPos, currentPos);
 
-      // Removed the snappedToTarget flag and the early return based on distance check.
-      // Calculate movement regardless, ensure it doesn't overshoot.
-      
       const remainingDistanceSq = direction.lengthSq();
-      let finalPos = currentPos.clone(); // Start with the current position for the update
+      let finalPosVec = currentPos.clone(); 
 
-      // Only calculate movement if not already at the target (use epsilon for float comparison)
       if (remainingDistanceSq > 1e-6) { 
           direction.normalize();
           const moveDistance = germ.speed * delta;
-
-          // Check if the intended move distance is greater than or equal to the remaining distance
           if (moveDistance * moveDistance >= remainingDistanceSq) {
-              // If so, place the germ exactly at the target position for this frame
-              finalPos.copy(targetPos);
+              finalPosVec.copy(targetPos);
           } else {
-              // Otherwise, move the calculated distance along the direction vector
-              finalPos.addScaledVector(direction, moveDistance);
+              finalPosVec.addScaledVector(direction, moveDistance);
           }
       }
+      const finalPos: [number, number, number] = [finalPosVec.x, finalPosVec.y, finalPosVec.z];
+      */
 
       const finalTimeAlive = (typeof germ.timeAlive === 'number' ? germ.timeAlive : 0) + delta;
 
       return {
         ...germ,
-        position: [finalPos.x, finalPos.y, finalPos.z] as [number, number, number], // Use finalPos
+        position: finalPos, 
         timeAlive: finalTimeAlive
       };
     });
