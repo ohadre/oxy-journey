@@ -10,6 +10,7 @@
     "test": "jest --env=jsdom"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.2",
     "@react-three/drei": "^10.0.7",
     "@react-three/fiber": "^9.1.2",
     "framer-motion": "^12.10.5",
