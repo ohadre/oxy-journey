@@ -20,6 +20,7 @@ import { DisplayQuestion, LanguageCode } from '../types/question.types';
 // import QuestionOverlay, { Question } from './QuestionOverlay'; // Assuming this Question is the old type and not needed now
 import { createPortal } from 'react-dom';
 import QuestionModal from './ui/QuestionModal';
+import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -68,6 +69,8 @@ export default function Scene3D() {
 
   // Add portal container ref (if used by a future modal, keep; otherwise, can be removed if QuestionOverlay is gone)
   // const portalContainerRef = useRef<HTMLDivElement>(null);
+
+  const INITIAL_LIVES = 3;
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
@@ -232,6 +235,22 @@ export default function Scene3D() {
     }
   }, [gameState, lives]); // Added gameState and lives to dependencies
   // ------------------------------------
+
+  // --- Game Restart Logic ---
+  const handleRestartGame = useCallback(() => {
+    console.log('[Scene3D] Restarting game...');
+    setLives(INITIAL_LIVES);
+    setAnsweredCorrectlyIds([]);
+    setCurrentDisplayQuestion(null); // Ensure no question is showing
+    setIsModalVisible(false);      // Ensure question modal is hidden
+    setOxyPosition([0, 0, 140]); // Reset Oxy position
+    // TODO: Reset germs and dust particles to initial state or clear them
+    setGerms([]);
+    setDustParticles([]);
+    setGameState('playing'); // Or 'loading' if questions/assets need reload
+    console.log('[Scene3D] Game restarted. State set to playing.');
+  }, []);
+  // -------------------------
 
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
 
@@ -450,6 +469,15 @@ export default function Scene3D() {
           isVisible={isModalVisible}
           onAnswer={handleAnswer}
           onClose={handleCloseModal}
+          currentLang={currentLanguage}
+        />
+      )}
+
+      {/* Render the GameOverModal */}
+      {isMounted && (
+        <GameOverModal 
+          isVisible={gameState === 'game_over'}
+          onRestart={handleRestartGame}
           currentLang={currentLanguage}
         />
       )}
