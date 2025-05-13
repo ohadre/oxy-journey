@@ -183,28 +183,54 @@ export default function Scene3D() {
       case 'open-question':
         // For PoC, any non-empty answer is considered correct
         isCorrect = !!(answerDetails.openAnswerText && answerDetails.openAnswerText.trim());
-        console.log(`[Scene3D] Open Question Answer: User input: "${answerDetails.openAnswerText}". Considered Correct (PoC): ${isCorrect}`);
+        console.log(`[Scene3D] Open Question Answer: User input: \"${answerDetails.openAnswerText}\". Considered Correct (PoC): ${isCorrect}`);
         break;
       default:
         console.warn('[Scene3D] Unknown question type in handleAnswer:', currentDisplayQuestion.type);
     }
 
-    // TODO: Sub-task 5.2: Update answeredCorrectlyIds if isCorrect is true.
-    // TODO: Sub-task 5.3: Manage lives based on isCorrect.
+    if (isCorrect) {
+      setAnsweredCorrectlyIds(prev => [...new Set([...prev, currentDisplayQuestion.id])]);
+      console.log('[Scene3D] Answer CORRECT. answeredCorrectlyIds updated.');
+    } else {
+      setLives(prevLives => {
+        const newLives = Math.max(0, prevLives - 1);
+        console.log(`[Scene3D] Answer INCORRECT. Lives decreased to: ${newLives}`);
+        if (newLives <= 0) {
+          console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
+          setGameState('game_over');
+        }
+        return newLives;
+      });
+    }
 
-    // For now, just hide the modal and resume game (if it was paused)
-    // This will be modified later based on answer correctness and game state.
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
-    setGameState('playing'); // Assuming game was 'question_paused'
-  }, [currentDisplayQuestion]); // Added currentDisplayQuestion to dependencies
+    // Only set to playing if not game over
+    if (gameState !== 'game_over') {
+      setGameState('playing'); 
+    }
+  }, [currentDisplayQuestion, gameState, lives]); // Added gameState and lives to dependencies
 
   const handleCloseModal = useCallback(() => {
-    console.log('[Scene3D] Modal closed by user.');
+    console.log('[Scene3D] Modal closed by user (penalty applied).');
+    setLives(prevLives => {
+      const newLives = Math.max(0, prevLives - 1);
+      console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
+      if (newLives <= 0) {
+        console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
+        setGameState('game_over');
+      }
+      return newLives;
+    });
+
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
-    setGameState('playing'); // Assuming game was 'question_paused'
-  }, []);
+    // Only set to playing if not game over
+    if (gameState !== 'game_over') {
+      setGameState('playing');
+    }
+  }, [gameState, lives]); // Added gameState and lives to dependencies
   // ------------------------------------
 
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
@@ -424,6 +450,7 @@ export default function Scene3D() {
           isVisible={isModalVisible}
           onAnswer={handleAnswer}
           onClose={handleCloseModal}
+          currentLang={currentLanguage}
         />
       )}
     </div>
