@@ -29,5 +29,6 @@ export interface DisplayQuestion {
   type: QuestionType;
   text: string; // Resolved to current language
   options?: { text: string; isCorrect: boolean }[]; // Options text resolved
+  correctOptionIndex?: number; // Added for multiple-choice and yes-no
   explanation?: string; // Resolved
 } 

@@ -74,12 +74,23 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
 - [ ] Implement basic oxygen mechanics (If applicable beyond lives)
 - [x] Position player (Oxy) inside the tunnel
 - [x] Implement camera follow for tunnel gameplay (`CameraController`)
-- [ ] Implement Q&A mechanic triggered on collision.
+- [-] Implement Q&A mechanic triggered on collision.
+    - [x] Define Question data structure and localization support (`src/types/question.types.ts`, `public/data/questions.json`)
+    - [x] Implement question loading and resolving service (`src/lib/questionService.ts`)
+    - [x] Implement Q&A state management in `Scene3D.tsx` (loading, current question, answered questions)
+    - [ ] Implement logic in `Scene3D.tsx` to select and display a question upon collision event
+    - [ ] Implement logic in `Scene3D.tsx` to handle answer from modal and update game state (e.g., hide modal, proceed game)
 - [ ] Implement Game Over logic (when lives reach 0).
 
 ### UI/UX
 - [x] Design and implement basic HUD (`LivesIndicator`)
-- [ ] Design and implement Q&A modal.
+- [-] Design and implement Q&A modal.
+    - [x] Create basic `QuestionModal.tsx` structure and props
+    - [x] Implement rendering for multiple-choice, yes/no, and open-question types (basic layout)
+    - [x] Integrate `QuestionModal.tsx` into `Scene3D.tsx` (visibility toggle, passing question data)
+    - [ ] Style `QuestionModal.tsx` for all question types (including input fields, buttons)
+    - [ ] Implement answer submission logic within `QuestionModal.tsx` (calling `onAnswer` prop)
+    - [ ] Add animations (e.g., using Framer Motion) for modal appearance/disappearance
 
 ### Testing
 - [x] Set up testing environment for React Three Fiber components
@@ -105,10 +116,11 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
   - [ ] Configure production deployment process
 
 ## Next Steps
-1. Implement Q&A mechanic triggered on collision.
-2. Add Game Over logic when lives reach zero.
-3. Add sound effects for collisions, etc.
-4. Refine visual appearance of entities if needed.
+1. Complete `QuestionModal.tsx` UI and answer submission logic.
+2. Implement Q&A trigger on collision and answer handling in `Scene3D.tsx`.
+3. Add Game Over logic when lives reach zero.
+4. Add sound effects for collisions, Q&A events, etc.
+5. Refine visual appearance of entities if needed.
 
 ---
 This task list will be reviewed and updated at the beginning and end of each "Vibe Session."

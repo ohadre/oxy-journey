@@ -177,6 +177,9 @@ This document defines the coding conventions, standards, and design patterns to 
         6.  **Browser Inspector:** Guide the user to use the browser's element inspector to check if the component's HTML element is present in the DOM, what CSS classes are attached, and which specific styles are being applied or overridden (look for struck-through styles).
         7.  **CSS Specificity/Cascade:** Consider potential conflicts with more specific global CSS rules that might be overriding the utility classes.
 
+* **Commit After UI Test (NEW):**
+    * After a UI change is implemented and successfully tested visually by the human product manager, the AI should ensure that this change is included in the next commit. This helps maintain a clean commit history where each UI-affecting change is captured promptly. The AI should also update the developer journal (e.g. `docs_ai/session_log.md`) to reflect this.
+
 ## 15. Windows/PowerShell Command Chaining
 - When running terminal commands on Windows/PowerShell, do **not** use `&&` to chain commands. Run each command separately, one at a time, to avoid errors.
 

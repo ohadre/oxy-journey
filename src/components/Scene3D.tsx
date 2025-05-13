@@ -153,12 +153,51 @@ export default function Scene3D() {
     questionId: string
   ) => {
     console.log('[Scene3D] Answer submitted for question ID:', questionId, 'Details:', answerDetails);
+
+    if (!currentDisplayQuestion) {
+      console.error('[Scene3D] handleAnswer called but currentDisplayQuestion is null. This should not happen.');
+      setIsModalVisible(false); // Hide modal as a fallback
+      setGameState('playing');
+      return;
+    }
+
+    // Ensure the answer is for the current question
+    if (currentDisplayQuestion.id !== questionId) {
+      console.warn('[Scene3D] Answer received for a different question ID than current. Ignoring.', 
+                   { currentId: currentDisplayQuestion.id, receivedId: questionId });
+      // Do not close the modal or change state if it's for a mismatched question
+      return;
+    }
+
+    let isCorrect = false;
+    switch (currentDisplayQuestion.type) {
+      case 'multiple-choice':
+      case 'yes-no':
+        if (typeof answerDetails.selectedOptionIndex === 'number') {
+          isCorrect = answerDetails.selectedOptionIndex === currentDisplayQuestion.correctOptionIndex;
+          console.log(`[Scene3D] Multiple-choice/Yes-No Answer: User selected index ${answerDetails.selectedOptionIndex}, Correct index: ${currentDisplayQuestion.correctOptionIndex}. Correct: ${isCorrect}`);
+        } else {
+          console.warn('[Scene3D] No selectedOptionIndex provided for multiple-choice/yes-no question.');
+        }
+        break;
+      case 'open-question':
+        // For PoC, any non-empty answer is considered correct
+        isCorrect = !!(answerDetails.openAnswerText && answerDetails.openAnswerText.trim());
+        console.log(`[Scene3D] Open Question Answer: User input: "${answerDetails.openAnswerText}". Considered Correct (PoC): ${isCorrect}`);
+        break;
+      default:
+        console.warn('[Scene3D] Unknown question type in handleAnswer:', currentDisplayQuestion.type);
+    }
+
+    // TODO: Sub-task 5.2: Update answeredCorrectlyIds if isCorrect is true.
+    // TODO: Sub-task 5.3: Manage lives based on isCorrect.
+
     // For now, just hide the modal and resume game (if it was paused)
-    // Actual answer processing and state update (e.g., answeredCorrectlyIds) will come later.
+    // This will be modified later based on answer correctness and game state.
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
     setGameState('playing'); // Assuming game was 'question_paused'
-  }, []);
+  }, [currentDisplayQuestion]); // Added currentDisplayQuestion to dependencies
 
   const handleCloseModal = useCallback(() => {
     console.log('[Scene3D] Modal closed by user.');
