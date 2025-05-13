@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false, // Temporarily disable for diagnostics
   images: {
     domains: ['localhost', 'placehold.co'],
     remotePatterns: [

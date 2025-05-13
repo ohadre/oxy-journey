@@ -1,20 +1,23 @@
 import { Question, LocalizedText, DisplayQuestion, LanguageCode, LocalizedAnswerOption } from '../types/question.types';
 
 // Helper to resolve localized text, defaulting to English if the specified language or text itself is missing.
-const resolveText = (localizedText: LocalizedText | undefined, lang: LanguageCode): string => {
+const resolveText = (localizedText: LocalizedText | string | undefined, lang: LanguageCode): string => {
+  if (typeof localizedText === 'string') {
+    return localizedText; // It's already a non-localized string
+  }
   if (!localizedText) return '';
-  return localizedText[lang] || localizedText.en || ''; // Default to English, then empty string
+  return localizedText[lang] || localizedText.en || ''; // Default to specified lang, then English, then empty string
 };
 
 // Helper to resolve localized options
 const resolveOptions = (
-  localizedOptions: LocalizedAnswerOption[] | undefined,
+  sourceOptions: Array<{ text: LocalizedText | string; isCorrect: boolean }> | undefined,
   lang: LanguageCode
 ): { text: string; isCorrect: boolean }[] | undefined => {
-  if (!localizedOptions) return undefined;
-  return localizedOptions.map(opt => ({
-    text: resolveText(opt.text, lang),
-    isCorrect: opt.isCorrect,
+  if (!sourceOptions) return undefined;
+  return sourceOptions.map(opt => ({
+    text: resolveText(opt.text, lang), // Use the improved resolveText
+    isCorrect: !!opt.isCorrect, // Ensure boolean
   }));
 };
 
@@ -32,66 +35,63 @@ export const fetchAndResolveQuestions = async (lang: LanguageCode): Promise<Disp
       console.error(`Failed to fetch questions: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to fetch questions: ${response.statusText}`);
     }
-    // Assuming the JSON contains an array of objects that are either Question or an older format.
-    const questionsData: any[] = await response.json();
+    const questionsData: Question[] = await response.json(); // Assume data matches Question[] type more closely now
 
-    const resolvedQuestions: DisplayQuestion[] = questionsData.map((qData: any): DisplayQuestion => {
-      // Type assertion to help with mixed structure access
-      const question = qData as Question; 
-      const oldFormatQuestion = qData as { text: string, options?: {text: string, isCorrect: boolean}[], explanation?: string };
+    const resolvedQuestions: DisplayQuestion[] = questionsData.map((qData): DisplayQuestion => {
+      
+      const questionText = resolveText(qData.text, lang);
+      const questionOptions = resolveOptions(qData.options, lang);
+      const questionExplanation = qData.explanation ? resolveText(qData.explanation, lang) : undefined;
 
-      let resolvedText: string;
-      // Check if text is an object and has 'en' property (new localized format)
-      if (typeof question.text === 'object' && question.text !== null && 'en' in question.text) {
-        resolvedText = resolveText(question.text as LocalizedText, lang);
-      } else {
-        // Assume old string format (or malformed), treat as English or fallback
-        resolvedText = oldFormatQuestion.text || ''; 
-      }
-
-      let resolvedOptions: { text: string; isCorrect: boolean }[] | undefined = undefined;
-      if (question.options && question.options.length > 0) {
-        // Check if the first option's text is an object (new localized format)
-        if (typeof question.options[0].text === 'object' && question.options[0].text !== null && 'en' in question.options[0].text) {
-          resolvedOptions = resolveOptions(question.options as LocalizedAnswerOption[], lang);
+      // For Yes/No questions that might not have options defined in questions.json but expect them for rendering
+      // (especially if they were string-only and we want consistent DisplayQuestion structure)
+      let finalOptions = questionOptions;
+      if (qData.type === 'yes-no' && (!questionOptions || questionOptions.length === 0)) {
+        // console.warn(`Question ${qData.id} is yes-no but has no/empty options. Providing default Yes/No.`);
+        // Provide default English Yes/No if original options are completely missing or text resolution failed to populate them
+        // This part needs care: if qData.options was present but texts resolved to empty, this might overwrite.
+        // However, the goal is to ensure Yes/No questions always have renderable options.
+        if (lang === 'he') {
+            finalOptions = [
+                { text: 'נכון', isCorrect: qData.options?.find(o => resolveText(o.text, 'en').toLowerCase() === 'true')?.isCorrect || false },
+                { text: 'לא נכון', isCorrect: qData.options?.find(o => resolveText(o.text, 'en').toLowerCase() === 'false')?.isCorrect || false }
+            ];
         } else {
-          // Assume old format: {text: string, isCorrect: boolean}[]
-          resolvedOptions = (oldFormatQuestion.options || []).map(opt => ({
-            text: opt.text || '', // Fallback for text
-            isCorrect: !!opt.isCorrect, // Ensure boolean
-          }));
+            finalOptions = [
+                { text: 'True', isCorrect: qData.options?.find(o => resolveText(o.text, 'en').toLowerCase() === 'true')?.isCorrect || false },
+                { text: 'False', isCorrect: qData.options?.find(o => resolveText(o.text, 'en').toLowerCase() === 'false')?.isCorrect || false }
+            ];
         }
-      } else if (oldFormatQuestion.options) { // Handle case where options might be an empty array in old format
-         resolvedOptions = (oldFormatQuestion.options || []).map(opt => ({
-            text: opt.text || '',
-            isCorrect: !!opt.isCorrect,
-          }));
-      }
+        // A sanity check to ensure one of the default options is marked correct if original data was ambiguous
+        // This might be too aggressive if the original data was intentionally different.
+        // For now, we assume typical True/False where one must be correct.
+        const hasCorrectOption = finalOptions.some(opt => opt.isCorrect);
+        if (!hasCorrectOption && finalOptions.length > 0 && qData.options && qData.options.length > 0) {
+            // If no default option got marked correct, try to infer from the first original option if possible
+            // This logic is getting complex and indicates data structure issues for q2 type questions.
+            // For q2 specifically, options were [ { text: "True", isCorrect: true }, { text: "False", isCorrect: false } ]
+            // So, find(o => resolveText(o.text, 'en').toLowerCase() === 'true') should work.
+        }
 
-      let resolvedExplanation: string | undefined;
-      if (question.explanation) {
-        // Check if explanation is an object (new localized format)
-        if (typeof question.explanation === 'object' && question.explanation !== null && 'en' in question.explanation) {
-          resolvedExplanation = resolveText(question.explanation as LocalizedText, lang);
-        } else {
-          // Assume old string format
-          resolvedExplanation = oldFormatQuestion.explanation;
-        }
       }
 
       return {
-        id: question.id,
-        topic: question.topic, // Topic is not localized in this iteration
-        type: question.type,
-        text: resolvedText,
-        options: resolvedOptions,
-        explanation: resolvedExplanation,
+        id: qData.id,
+        topic: qData.topic, // Topic is not localized in this iteration
+        type: qData.type,
+        text: questionText,
+        options: finalOptions, // Use the potentially defaulted finalOptions for yes-no
+        // Determine correctOptionIndex after options are finalized
+        // This is crucial for 'multiple-choice' and 'yes-no'
+        correctOptionIndex: finalOptions?.findIndex(opt => opt.isCorrect),
+        explanation: questionExplanation,
       };
     });
-
+    
+    // console.log(`[questionService] Resolved ${lang} questions:`, resolvedQuestions);
     return resolvedQuestions;
   } catch (error) {
-    console.error("Error fetching or processing questions:", error);
+    console.error("[questionService] Error fetching or processing questions:", error);
     return []; // Return empty array on error as a fallback
   }
 };

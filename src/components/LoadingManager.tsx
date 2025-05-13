@@ -82,14 +82,14 @@ export function LoadingManager({ children }: { children: React.ReactNode }) {
       if (loadedCount === totalAssets) {
         console.log('[LoadingManager] All assets loaded (with', errorCount, 'errors)');
         
-        // Start transition after loading
-        setIsTransitioning(true);
+        // Start transition after loading - this might not be needed if LoadingScreen handles its own exit
+        // setIsTransitioning(true); 
         
-        // Add a longer delay for smoother transition
-        setTimeout(() => {
-          console.log('[LoadingManager] Setting isLoading to false');
-          setIsLoading(false);
-        }, 1000);
+        // Remove or shorten the delay
+        // setTimeout(() => {
+        console.log('[LoadingManager] Setting isLoading to false IMMEDIATELY');
+        setIsLoading(false); // Set false immediately
+        // }, 1000); 
       }
     };
 
@@ -100,40 +100,39 @@ export function LoadingManager({ children }: { children: React.ReactNode }) {
       
       // Load all textures simultaneously
       const texturePromises = textures.map((texturePath, i) => {
-        console.log(`[LoadingManager] Starting to load texture (${i+1}/${textures.length}): ${texturePath}`);
+        console.log(`[LoadingManager] Creating promise for texture (${i+1}/${textures.length}): ${texturePath}`);
         
-        return new Promise<void>((resolve) => {
+        return new Promise<void>((resolveOuter) => {
           const texture = globalTextureLoader.load(
             texturePath,
             (loadedTexture) => {
-              console.log('[LoadingManager] Successfully loaded texture:', texturePath);
+              console.log(`[LoadingManager] Successfully loaded texture: ${texturePath}`);
               loadedTexture.colorSpace = THREE.SRGBColorSpace;
-              // Force the texture to be fully created in WebGL
               loadedTexture.needsUpdate = true;
-              // Store texture for cleanup
               loadedTexturesRef.current.push(loadedTexture);
               setLoadedTextures(prev => [...prev, texturePath]);
-              resolve();
+              resolveOuter();
             },
             undefined,
-            (error) => {
-              console.warn('[LoadingManager] Error loading texture:', texturePath, error);
+            (errorEvent) => {
+              console.warn(`[LoadingManager] Error loading texture via THREE.TextureLoader: ${texturePath}`, errorEvent);
               errorCount++;
-              setError(error instanceof Error ? error : new Error(String(error)));
-              resolve(); // Resolve even on error to continue loading
+              resolveOuter();
             }
           );
         }).then(() => {
+          console.log(`[LoadingManager] Promise for ${texturePath} resolved. Calling updateProgress.`);
           updateProgress();
         }).catch(error => {
-          console.error('[LoadingManager] Exception loading texture:', texturePath, error);
+          console.error(`[LoadingManager] Critical error in Promise chain for ${texturePath}:`, error);
           errorCount++;
-          setError(error instanceof Error ? error : new Error(String(error)));
           updateProgress();
         });
       });
       
+      console.log('[LoadingManager] Waiting for all texture promises...');
       await Promise.all(texturePromises);
+      console.log('[LoadingManager] All texture promises have completed (resolved or rejected and caught).');
     };
 
     // Start loading assets

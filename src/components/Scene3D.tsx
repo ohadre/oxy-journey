@@ -45,7 +45,15 @@ const keyboardMap = [
 type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over';
 // -----------------------------------
 
-export default function Scene3D() {
+// --- Define Props for Scene3D ---
+interface Scene3DProps {
+  currentLanguage: LanguageCode;
+}
+// --------------------------------
+
+export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destructure currentLanguage from props
+  console.log(`[Scene3D] Component rendering/re-rendering. Lang: ${currentLanguage}`); // LOG: Component render
+
   const [isMounted, setIsMounted] = useState(false);
   // const worldSize = 10; // worldSize is declared but not used, can be removed if truly unused later
   const { isLoading: isAssetsLoading } = useLoading(); // Renamed for clarity
@@ -58,7 +66,7 @@ export default function Scene3D() {
 
   // --- MODIFIED/NEW Q&A State Variables ---
   const [allQuestions, setAllQuestions] = useState<DisplayQuestion[]>([]);
-  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
+  // const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en'); // REMOVE: This will now be a prop
   const [answeredCorrectlyIds, setAnsweredCorrectlyIds] = useState<string[]>([]);
   // Ensure currentQuestion state uses DisplayQuestion type
   const [currentDisplayQuestion, setCurrentDisplayQuestion] = useState<DisplayQuestion | null>(null);
@@ -80,6 +88,38 @@ export default function Scene3D() {
     }
     return null;
   }, []);
+
+  // --- NEW: Q&A Sound Effects Setup ---
+  const qaModalOpenSynth = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.2 },
+      }).toDestination();
+    }
+    return null;
+  }, []);
+
+  const correctAnswerSynth = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return new Tone.Synth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 },
+      }).toDestination();
+    }
+    return null;
+  }, []);
+
+  const incorrectAnswerSynth = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return new Tone.Synth({
+        oscillator: { type: 'square' },
+        envelope: { attack: 0.05, decay: 0.3, sustain: 0, release: 0.2 },
+      }).toDestination();
+    }
+    return null;
+  }, []);
+  // ---------------------------------
   // -------------------------
 
   const INITIAL_LIVES = 3;
@@ -113,7 +153,7 @@ export default function Scene3D() {
     setIsMounted(true);
     console.log('[Scene3D] Initial Q&A States:', {
       allQuestions: [],
-      currentLanguage: 'en',
+      currentLanguage: currentLanguage, // Log the prop value
       answeredCorrectlyIds: [],
       currentDisplayQuestion: null, // Updated name here for clarity in log
       isModalVisible: false,
@@ -132,13 +172,13 @@ export default function Scene3D() {
 
   useEffect(() => {
     const loadQuestions = async () => {
-      console.log(`[Scene3D] Attempting to load questions for language: ${currentLanguage}`);
+      console.log(`[Scene3D] Attempting to load questions for language: ${currentLanguage}`); // Uses prop
       setIsLoadingQuestions(true);
       setQuestionError(null);
       try {
-        const fetchedQuestions = await fetchAndResolveQuestions(currentLanguage);
+        const fetchedQuestions = await fetchAndResolveQuestions(currentLanguage); // Uses prop
         setAllQuestions(fetchedQuestions);
-        console.log('[Scene3D] Questions fetched successfully:', fetchedQuestions);
+        console.log('[Scene3D] Questions fetched successfully. Count:', fetchedQuestions.length, 'First q text:', fetchedQuestions[0]?.text); // LOG: Questions after fetch
         if (fetchedQuestions.length === 0) {
           console.warn('[Scene3D] No questions were loaded. Check questions.json or service.');
           setQuestionError('No questions found.');
@@ -155,7 +195,7 @@ export default function Scene3D() {
     if (isMounted) {
         loadQuestions();
     }
-  }, [isMounted, currentLanguage]);
+  }, [isMounted, currentLanguage]); // Dependency array now correctly uses the prop
   
   // Set gameState to playing once assets are loaded and component is mounted
   useEffect(() => {
@@ -231,11 +271,19 @@ export default function Scene3D() {
     if (isCorrect) {
       setAnsweredCorrectlyIds(prev => [...new Set([...prev, currentDisplayQuestion.id])]);
       console.log('[Scene3D] Answer CORRECT. answeredCorrectlyIds updated.');
+      if (correctAnswerSynth) { // Play correct answer sound
+        correctAnswerSynth.triggerAttackRelease("C5", "8n", Tone.now() + 0.01);
+        console.log('[Scene3D] Correct answer sound played.');
+      }
       if (lives > 0) { // Check current lives before any updates for this turn
         activateOxyInvincibility(5000);
       }
     } else {
       // Incorrect answer
+      if (incorrectAnswerSynth) { // Play incorrect answer sound
+        incorrectAnswerSynth.triggerAttackRelease("C3", "4n", Tone.now() + 0.01);
+        console.log('[Scene3D] Incorrect answer sound played.');
+      }
       setLives(prevLives => {
         const newLives = Math.max(0, prevLives - 1);
         console.log(`[Scene3D] Answer INCORRECT. Lives decreased to: ${newLives}`);
@@ -258,10 +306,14 @@ export default function Scene3D() {
     if (gameState !== 'game_over') { 
       setGameState('playing');
     } 
-  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility]);
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth]);
 
   const handleCloseModal = useCallback(() => {
     console.log('[Scene3D] Modal closed by user (penalty applied).');
+    if (incorrectAnswerSynth) { // Play incorrect/penalty sound
+      incorrectAnswerSynth.triggerAttackRelease("G2", "4n", Tone.now() + 0.01);
+      console.log('[Scene3D] Modal close (penalty) sound played.');
+    }
     setLives(prevLives => {
       const newLives = Math.max(0, prevLives - 1);
       console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
@@ -279,7 +331,7 @@ export default function Scene3D() {
     if (gameState !== 'game_over') {
       setGameState('playing');
     } 
-  }, [gameState, lives, activateOxyInvincibility]);
+  }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth]);
   // ------------------------------------
 
   // --- Game Restart Logic ---
@@ -381,6 +433,14 @@ export default function Scene3D() {
       console.log('[Scene3D] Selected question to display:', questionToDisplay);
       setCurrentDisplayQuestion(questionToDisplay);
       setIsModalVisible(true);
+      if (qaModalOpenSynth && Tone.context.state !== 'running') {
+        Tone.start(); // Ensure AudioContext is running
+        console.log('[Scene3D] AudioContext started by Q&A modal open sound.');
+      }
+      if (qaModalOpenSynth) { // Play modal open sound
+        qaModalOpenSynth.triggerAttackRelease("G4", "8n", Tone.now() + 0.01);
+        console.log('[Scene3D] Q&A modal open sound played.');
+      }
       setGameState('question_paused');
       console.log('[Scene3D] Game state changed to question_paused.');
     } else {
@@ -391,35 +451,7 @@ export default function Scene3D() {
 
     // Lives decrement will be handled based on question outcome later.
 
-  }, [gameState, allQuestions, answeredCorrectlyIds, lives, isOxyInvincible, activateOxyInvincibility]); // Added isOxyInvincible and activateOxyInvincibility
-
-  // --- REMOVE Temporary Key Listener for K/L keys as it used old testQuestion logic ---
-  /*
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'k' || event.key === 'K') {
-        console.log('[Scene3D] K key pressed, setting gameState to question_paused');
-        // console.log('[Scene3D] Current gameState:', gameState);
-        // console.log('[Scene3D] Current question:', currentDisplayQuestion); // Use new state name
-        setGameState('question_paused');
-        // setCurrentDisplayQuestion(allQuestions[0] || null); // Example: Set first loaded question
-        // console.log('[Scene3D] After update - gameState:', 'question_paused');
-        // console.log('[Scene3D] After update - question:', allQuestions[0] || null);
-      }
-      if (event.key === 'l' || event.key === 'L') {
-        console.log('[Scene3D] L key pressed, setting gameState to playing');
-        setGameState('playing');
-        setCurrentDisplayQuestion(null); 
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  // Adjust dependencies if this effect is re-enabled later
-  }, [gameState, currentDisplayQuestion, allQuestions]); 
-  */
+  }, [gameState, allQuestions, answeredCorrectlyIds, lives, isOxyInvincible, activateOxyInvincibility, collisionSynth, qaModalOpenSynth]);
 
   // Add effect to monitor state changes
   useEffect(() => {
@@ -427,6 +459,17 @@ export default function Scene3D() {
     // console.log('[Scene3D] Game State changed - gameState:', gameState);
     // console.log('[Scene3D] State changed - currentDisplayQuestion:', currentDisplayQuestion);
   }, [gameState, currentDisplayQuestion, allQuestions, isAssetsLoading, isLoadingQuestions, questionError]);
+
+  // LOG: States before render return
+  console.log('[Scene3D] PRE-RETURN STATE:', {
+    isMounted,
+    currentLanguageProp: currentLanguage,
+    allQuestionsCount: allQuestions.length,
+    isLoadingQuestions,
+    gameState,
+    questionError,
+    isAssetsLoading
+  });
 
   if (!isMounted) {
     console.log('[Scene3D] Not mounted yet, returning null');
