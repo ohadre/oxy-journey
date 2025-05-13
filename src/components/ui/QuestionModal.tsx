@@ -65,6 +65,9 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
   };
 
   const renderQuestionContent = () => {
+    if (!question) {
+      return <p>Error: Question data is missing.</p>;
+    }
     switch (question.type) {
       case 'multiple-choice':
         return (
