@@ -248,46 +248,100 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
 - **Goal:** Begin implementation of the Q&A system, focusing on data structure, localization, and initial fetching.
 - **Key Decisions & Refinements:**
     - Questions will be stored in `public/data/questions.json`.
-    - Added support for English ('en') and Hebrew ('he') localization directly within the JSON structure and TypeScript types.
-    - `QuestionType` now includes 'open-question'.
-    - Question `topic` field added.
-    - "Correctly answered" status will reset per game. If all unique questions are answered, they will repeat.
-    - For PoC, open questions will just accept input; AI review is a future feature.
-- **Implementation Steps:**
-    - Created `src/types/question.types.ts` with `LanguageCode`, `LocalizedText`, `LocalizedAnswerOption`, `Question`, and `DisplayQuestion` interfaces to support multilingual questions.
-    - Updated `public/data/questions.json` with a new structure supporting `LocalizedText` for `text`, `options.text`, and `explanation`. Populated sample questions with English and placeholder Hebrew.
-    - Created `src/lib/questionService.ts` with:
-        - `fetchAndResolveQuestions(lang: LanguageCode)` function to fetch JSON data, resolve localized strings to the target language, and handle mixed old/new question formats gracefully.
-        - Helper functions `resolveText` and `resolveOptions`.
-    - Created a temporary test page `src/pages/question-test.tsx` to visually verify the `questionService` functionality for both English and Hebrew.
-        - Fetched and displayed lists of questions in both languages.
-        - Resolved a styling issue (black text on black background) on the test page by adding a local text color style.
-- **Outcome:**
-    - Core data structures for multilingual Q&A are in place.
-    - Question fetching and language resolution service is functional.
-    - Test page confirms service behavior.
-- **Next Steps:**
-    - Integrate `questionService` into `Scene3D.tsx` for game state management.
-    - Develop the `QuestionModal.tsx` UI component.
-    - Implement Q&A trigger on collision and answer processing logic.
-    - Update `tasks/current_tasks.md` with detailed sub-tasks for the Q&A system.
+    - Support for multiple question types: multiple-choice, yes/no, open-question (AI review is future scope).
+    - Questions trigger on collision with germs/dust (future implementation detail).
+    - Do not show questions already answered correctly (resets per game session).
+    - Each question has a topic (e.g., "Lungs", "Breathing Mechanics").
+    - If all unique questions are answered, they can repeat.
+- **Implementation Steps & Outcome:**
+    - **1. Type Definitions (`src/types/question.types.ts`):**
+        - Defined `LanguageCode` ('en', 'he').
+        - Defined `LocalizedText` for i18n string fields.
+        - Defined `LocalizedAnswerOption` for i18n answer options.
+        - Defined `Question` (raw structure from JSON) and `DisplayQuestion` (resolved for current language).
+    - **2. Sample Questions (`public/data/questions.json`):**
+        - Created with sample questions in English and Hebrew, covering multiple-choice, yes/no, and open-question types.
+        - Included localized text for questions, options, and explanations.
+    - **3. Question Service (`src/lib/questionService.ts`):**
+        - Implemented `fetchAndResolveQuestions(lang: LanguageCode)` function.
+        - Fetches `questions.json`, parses it, and resolves all `LocalizedText` fields to the specified language.
+        - Handles potential mixed old/new question structures for backward compatibility during development.
+    - **4. Initial Testing (`src/pages/question-test.tsx`):
+        - Created a temporary page to test `questionService`.
+        - Fetched and displayed questions in both English and Hebrew.
+        - Resolved a visual bug (black text on black) by adding `color: '#FFF'`.
+        - Confirmed successful loading and localization of questions.
+    - **5. Development Journal & Commit:**
+        - Updated `docs_ai/session_log.md` with progress.
+        - Committed changes with "feat(qa): Initial Q&A system setup with localization".
 
-- **Update (Q&A State Management in Scene3D):**
-    - Integrated Q&A state variables (`allQuestions`, `currentLanguage`, `answeredCorrectlyIds`, `currentDisplayQuestion`, `isModalVisible`, `isLoadingQuestions`, `questionError`) into `Scene3D.tsx`.
-    - Renamed `isLoading` from `useLoading` to `isAssetsLoading` for clarity.
-    - Implemented `useEffect` to load questions via `fetchAndResolveQuestions` on mount, updating relevant states.
-    - Verified question loading and initial state setup via temporary UI elements and console logs.
-    - Added `startNewQASession` function to reset Q&A specific states, verified with a temporary button and console logs.
-    - Cleaned up `Scene3D.tsx` by removing temporary UI test elements for question loading and reset button.
-- **Outcome Update:**
-    - `Scene3D.tsx` now manages core Q&A state and loads questions.
-    - Reset logic for Q&A state is functional.
-- **Next Steps (Revised):**
-    - Develop the `QuestionModal.tsx` UI component.
-    - Implement question selection logic in `Scene3D.tsx`.
-    - Integrate Q&A trigger on collision.
-    - Implement answer processing logic.
-    - Update `tasks/current_tasks.md`.
-    - Propose update to `04_coding_conventions_and_patterns.md` regarding post-UI-test workflow.
+## 2025-05-12 Q&A System - Core State Management in Scene3D
+
+- **Goal:** Implement core Q&A state variables and initial question loading logic within `Scene3D.tsx`.
+- **Sub-tasks Completed:**
+    - **2.1 Add Q&A state variables:**
+        - Added `allQuestions: DisplayQuestion[]`, `currentLanguage: LanguageCode` (default 'en'), `answeredCorrectlyIds: string[]`, `currentDisplayQuestion: DisplayQuestion | null`, `isModalVisible: boolean`, `isLoadingQuestions: boolean`, `questionError: string | null` to `Scene3D.tsx` state.
+    - **2.2 Implement initial question loading:**
+        - Used `useEffect` to call `fetchAndResolveQuestions` on component mount and when `currentLanguage` changes.
+        - Handled loading and error states (`isLoadingQuestions`, `questionError`).
+        - Added console logs for verification. Loading was successful, showing "Questions loaded: 4".
+    - **2.3 Implement basic Q&A reset logic:**
+        - Created `startNewQASession` function to reset `answeredCorrectlyIds`, `currentDisplayQuestion`, and `isModalVisible`.
+        - Added a temporary "Reset Q&A Session (Test)" button to trigger this function.
+        - Test was successful, confirmed by console logs showing state reset.
+- **Cleanup & Commit:**
+    - Removed temporary test button and loading status UI from `Scene3D.tsx`.
+    - Updated `docs_ai/session_log.md`.
+    - Committed changes with "feat(qa): Implement Q&A state management and loading in Scene3D".
+
+## 2025-05-12 Q&A System - QuestionModal UI & Basic Integration
+
+- **Goal:** Develop the `QuestionModal.tsx` UI component and integrate it into `Scene3D.tsx` for basic display and interaction.
+- **Sub-tasks Completed:**
+    - **3.1 Develop `QuestionModal.tsx` UI Component:**
+        - Created `src/components/ui/QuestionModal.tsx`.
+        - Props: `question: DisplayQuestion | null`, `isVisible: boolean`, `onAnswer`, `onClose`.
+        - Renders different UI for `multiple-choice`, `yes-no` (combined), and `open-question` types using Tailwind CSS.
+        - For open questions: added local `useState` for `openInputText`, made textarea controlled, and ensured input clears on modal visibility/question change.
+        - Added a submit button for open questions, disabled if input is empty.
+    - **3.2 Integrate `QuestionModal` into `Scene3D.tsx`:**
+        - Imported `QuestionModal` into `Scene3D.tsx`.
+        - Implemented `handleAnswer` and `handleCloseModal` callback functions in `Scene3D.tsx`. These functions log details, hide the modal, clear `currentDisplayQuestion`, and set `gameState` to 'playing'.
+        - Rendered `QuestionModal` within `Scene3D.tsx`, passing necessary props.
+        - Added a temporary "Show Test Question Modal" button in `Scene3D.tsx` to set a random question from `allQuestions` to `currentDisplayQuestion`, set `isModalVisible` to true, and `gameState` to 'question_paused'.
+    - **UI Test & Cleanup:**
+        - Successfully tested the modal display and basic interaction (answering, closing).
+        - Console logs confirmed correct state changes and data flow.
+        - Removed the temporary "Show Test Question Modal" button from `Scene3D.tsx` after successful testing.
+- **Next Steps:**
+    - Implement logic for triggering the modal on collision.
+    - Implement actual answer checking and progression logic.
+    - Persist `answeredCorrectlyIds` and filter questions accordingly.
+
+## 2025-05-12 Q&A System - Trigger Q&A Modal on Collision
+
+- **Goal:** Modify `Scene3D.tsx` to trigger the Q&A modal when Oxy collides with a germ or dust particle.
+- **Implementation Steps:**
+    - Updated the `handleCollision` callback in `Scene3D.tsx`:
+        - Added a guard to ensure Q&A is only triggered if `gameState` is 'playing'. If a collision occurs while `gameState` is 'question_paused' (i.e., modal is already active), the entity is still removed, but a new question is not triggered.
+        - The collided entity (germ or dust) is now removed from its respective state array (`germs` or `dustParticles`) immediately upon collision.
+        - Implemented question selection logic:
+            - Filters `allQuestions` to get questions not present in `answeredCorrectlyIds`.
+            - If no unanswered questions are found, `answeredCorrectlyIds` is reset to an empty array (to allow questions to repeat, as per requirements), and all questions become available again.
+            - A random question is selected from the available pool.
+            - If no questions are loaded at all (`allQuestions` is empty), a warning is logged, and no question is shown.
+        - If a question is selected, `currentDisplayQuestion` is set, `isModalVisible` is set to `true`, and `gameState` is changed to 'question_paused'.
+    - Updated the dependency array for `useCallback` in `handleCollision` to include `gameState`, `allQuestions`, and `answeredCorrectlyIds`.
+- **Testing & Debugging:**
+    - Initial tests showed no visual change on collision. Console logs indicated an outdated version of `handleCollision` was running.
+    - Re-applied the `edit_file` operation for `Scene3D.tsx`.
+    - After restarting the dev server and hard-refreshing the browser, subsequent tests were successful:
+        - Collision correctly triggered the display of the `QuestionModal`.
+        - Console logs confirmed the new `handleCollision` logic was executing, including correct `gameState` reporting, entity removal (though visual confirmation was difficult due to speed), question selection, and `gameState` change to 'question_paused'.
+        - The guard for `gameState !== 'playing'` was also confirmed to be working, preventing multiple modals from simultaneous collisions or collisions while a question was active.
+- **Next Steps:**
+    - Implement actual answer checking and progression logic within the `handleAnswer` callback in `Scene3D.tsx`.
+    - Update `answeredCorrectlyIds` based on correct answers.
+    - Determine how lives are affected by question outcomes.
 
 ---

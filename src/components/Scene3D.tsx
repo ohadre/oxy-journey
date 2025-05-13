@@ -19,6 +19,7 @@ import { fetchAndResolveQuestions } from '../lib/questionService';
 import { DisplayQuestion, LanguageCode } from '../types/question.types';
 // import QuestionOverlay, { Question } from './QuestionOverlay'; // Assuming this Question is the old type and not needed now
 import { createPortal } from 'react-dom';
+import QuestionModal from './ui/QuestionModal';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -142,6 +143,31 @@ export default function Scene3D() {
   }, []); // No dependencies needed if it only sets state
   // -------------------------------------
 
+  // --- NEW: Modal Handler Functions ---
+  const handleAnswer = useCallback((
+    answerDetails: {
+      selectedOptionText?: string;
+      selectedOptionIndex?: number;
+      openAnswerText?: string;
+    },
+    questionId: string
+  ) => {
+    console.log('[Scene3D] Answer submitted for question ID:', questionId, 'Details:', answerDetails);
+    // For now, just hide the modal and resume game (if it was paused)
+    // Actual answer processing and state update (e.g., answeredCorrectlyIds) will come later.
+    setIsModalVisible(false);
+    setCurrentDisplayQuestion(null);
+    setGameState('playing'); // Assuming game was 'question_paused'
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    console.log('[Scene3D] Modal closed by user.');
+    setIsModalVisible(false);
+    setCurrentDisplayQuestion(null);
+    setGameState('playing'); // Assuming game was 'question_paused'
+  }, []);
+  // ------------------------------------
+
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
 
   const handleOxyPositionChange = useCallback((pos: [number, number, number]) => {
@@ -157,25 +183,61 @@ export default function Scene3D() {
   }, []);
 
   const handleCollision = useCallback((type: 'germ' | 'dust', id: string) => {
-    console.log(`[Scene3D] Collision detected with ${type}: ${id}`);
+    console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}`);
 
-    // --- Temporarily Comment Out Immediate Collision Effects (for Sub-Task 1) (MODIFIED) ---
-    // if (lives > 0) {
-    //   setLives(prevLives => Math.max(0, prevLives - 1));
-    //   if (type === 'germ') {
-    //     console.warn(`[Scene3D] !!! Collision with germ ${id} - Lives would be reduced !!!`);
-    //     // setGerms(prevGerms => prevGerms.filter(g => g.id !== id)); // Example: Actual removal might be handled by manager
-    //   } else {
-    //     console.warn(`[Scene3D] !!! Collision with dust ${id} - Lives would be reduced !!!`);
-    //     // setDustParticles(prevDust => prevDust.filter(d => d.id !== id)); // Example: Actual removal might be handled by manager
-    //   }
-    // }
-    // -----------------------------------------------------------------------------------
+    // Guard: Only trigger Q&A if game is currently 'playing'
+    if (gameState !== 'playing') {
+      console.log('[Scene3D] Collision occurred but game is not in \'playing\' state. Ignoring Q&A trigger.');
+      // Still remove the entity if desired, even if not showing a question
+      if (type === 'germ') {
+        setGerms(prevGerms => prevGerms.filter(g => g.id !== id));
+      } else {
+        setDustParticles(prevDust => prevDust.filter(d => d.id !== id));
+      }
+      return;
+    }
 
-    // For Sub-Task 2, we will set gameState to 'question_paused' here.
-    // For now, this function just logs the collision.
+    // Remove the collided entity immediately
+    if (type === 'germ') {
+      console.warn(`[Scene3D] Removing germ ${id} due to collision.`);
+      setGerms(prevGerms => prevGerms.filter(g => g.id !== id));
+    } else {
+      console.warn(`[Scene3D] Removing dust ${id} due to collision.`);
+      setDustParticles(prevDust => prevDust.filter(d => d.id !== id));
+    }
 
-  }, [lives]); // Keeping 'lives' dependency for now, though not directly used in this stub.
+    // --- Select and Display Question Logic ---
+    if (allQuestions.length === 0) {
+      console.warn('[Scene3D] Collision occurred, but no questions are loaded. Cannot display question.');
+      return; // No questions to ask
+    }
+
+    let availableQuestions = allQuestions.filter(q => !answeredCorrectlyIds.includes(q.id));
+
+    if (availableQuestions.length === 0) {
+      console.log('[Scene3D] All unique questions answered. Resetting and allowing repeats.');
+      setAnsweredCorrectlyIds([]); // Reset for repetition
+      availableQuestions = allQuestions; // Consider all questions again
+    }
+
+    if (availableQuestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+      const questionToDisplay = availableQuestions[randomIndex];
+      
+      console.log('[Scene3D] Selected question to display:', questionToDisplay);
+      setCurrentDisplayQuestion(questionToDisplay);
+      setIsModalVisible(true);
+      setGameState('question_paused');
+      console.log('[Scene3D] Game state changed to question_paused.');
+    } else {
+      // This case should ideally not be reached if allQuestions is not empty and reset logic works
+      console.warn('[Scene3D] No available questions to display even after trying to reset. Check logic.');
+    }
+    // --- End Select and Display Question Logic ---
+
+    // Lives decrement will be handled based on question outcome later.
+
+  }, [gameState, allQuestions, answeredCorrectlyIds, lives]); // Added gameState, allQuestions, answeredCorrectlyIds to dependencies
 
   // --- REMOVE Temporary Key Listener for K/L keys as it used old testQuestion logic ---
   /*
@@ -212,14 +274,6 @@ export default function Scene3D() {
     // console.log('[Scene3D] State changed - currentDisplayQuestion:', currentDisplayQuestion);
   }, [gameState, currentDisplayQuestion, allQuestions, isAssetsLoading, isLoadingQuestions, questionError]);
 
-  const handleAnswerSubmit = useCallback((answer: string | boolean) => {
-    console.log('[Scene3D] Answer submitted:', answer);
-    // For now, just resume the game
-    setGameState('playing');
-    setCurrentDisplayQuestion(null);
-    setIsModalVisible(false); // Also hide modal
-  }, []);
-
   if (!isMounted) {
     console.log('[Scene3D] Not mounted yet, returning null');
     return null;
@@ -229,6 +283,30 @@ export default function Scene3D() {
     <div className="w-full h-screen bg-black relative overflow-hidden">
       <LivesIndicator currentLives={lives} />
       
+      {/* REMOVE Temporary Test Button for Q&A Modal */}
+      {/* 
+      <div style={{ position: 'absolute', top: '60px', left: '10px', zIndex: 1000, color: 'white' }}>
+        <button
+          onClick={() => {
+            startNewQASession(); // Reset Q&A state first
+            if (allQuestions.length > 0) {
+              const testQuestion = allQuestions[Math.floor(Math.random() * allQuestions.length)]; // Pick a random question for variety
+              console.log('[Scene3D] Showing test question:', testQuestion);
+              setCurrentDisplayQuestion(testQuestion);
+              setIsModalVisible(true);
+              setGameState('question_paused'); // Pause game when modal is shown
+            } else {
+              console.warn('[Scene3D] No questions loaded to display in modal.');
+            }
+          }}
+          className="p-2 bg-red-500 text-white rounded hover:bg-red-700"
+        >
+          Show Test Question Modal
+        </button>
+      </div>
+      */}
+      {/* End Temporary Test Button */}
+
       <KeyboardControls map={keyboardMap}>
         <Canvas camera={{ position: [0, 0, 80], fov: 70 }}> 
           <color attach="background" args={['#000000']} />
@@ -299,6 +377,16 @@ export default function Scene3D() {
         </div>
       )}
       */}
+
+      {/* Render the QuestionModal */}
+      {isMounted && (
+        <QuestionModal
+          question={currentDisplayQuestion}
+          isVisible={isModalVisible}
+          onAnswer={handleAnswer}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 } 
