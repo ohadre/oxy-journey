@@ -1,0 +1,58 @@
+[
+  {
+    "id": "q1",
+    "topic": "Breathing Mechanics",
+    "type": "multiple-choice",
+    "text": {
+      "en": "What is the main muscle located below your lungs that helps you breathe in and out?",
+      "he": "מהו השריר העיקרי הממוקם מתחת לריאות המסייע לך לנשום פנימה והחוצה?"
+    },
+    "options": [
+      { "text": { "en": "Heart", "he": "לב" }, "isCorrect": false },
+      { "text": { "en": "Stomach", "he": "קיבה" }, "isCorrect": false },
+      { "text": { "en": "Diaphragm", "he": "סרעפת" }, "isCorrect": true },
+      { "text": { "en": "Ribs", "he": "צלעות" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "The diaphragm is a large, dome-shaped muscle that contracts and flattens to let you inhale, and relaxes to let you exhale.",
+      "he": "הסרעפת היא שריר גדול בצורת כיפה המתכווץ ומשתטח כדי לאפשר לך לשאוף, ונרפה כדי לאפשר לך לנשוף."
+    }
+  },
+  {
+    "id": "q2",
+    "topic": "Lungs",
+    "type": "yes-no",
+    "text": "True or False: Your right lung is slightly larger than your left lung.",
+    "options": [
+      { "text": "True", "isCorrect": true },
+      { "text": "False", "isCorrect": false }
+    ],
+    "explanation": "True! The right lung is slightly larger because the left lung needs to make space for your heart."
+  },
+  {
+    "id": "q3",
+    "topic": "Lungs",
+    "type": "multiple-choice",
+    "text": "What are the tiny air sacs in your lungs where oxygen enters the blood called?",
+    "options": [
+      { "text": "Bronchioles", "isCorrect": false },
+      { "text": "Capillaries", "isCorrect": false },
+      { "text": "Alveoli", "isCorrect": true },
+      { "text": "Trachea", "isCorrect": false }
+    ],
+    "explanation": "Alveoli are the tiny air sacs where the important exchange of oxygen and carbon dioxide happens."
+  },
+  {
+    "id": "q4",
+    "topic": "Nasal Passages",
+    "type": "open-question",
+    "text": {
+      "en": "Briefly describe one function of your nose in the breathing process.",
+      "he": "תאר בקצרה פונקציה אחת של האף שלך בתהליך הנשימה."
+    },
+    "explanation": {
+      "en": "Your nose helps to warm, moisten, and filter the air you breathe in. It also contains olfactory receptors for the sense of smell!",
+      "he": "האף שלך מסייע לחמם, להרטיב ולסנן את האוויר שאתה נושם. הוא מכיל גם קולטני ריח!"
+    }
+  }
+] 

@@ -126,14 +126,6 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
   - Temporarily removed required status checks and PR requirements to unblock solo dev workflow and deployment.
   - Direct pushes to main are now allowed for rapid iteration.
 
-## 2024-06-11 Oxy Movement Clamping & Deployment
-
-- **Oxy Movement Update:**
-  - Adjusted Z-clamping logic so Oxy can move closer to the camera (2 unit buffer), improving player freedom while keeping Oxy visible.
-- **Deployment:**
-  - Successfully pushed and deployed the latest changes to Vercel.
-  - Confirmed live deployment is working as expected.
-
 ## 2025-05-10 Tunnel Visual & Technical Enhancements
 
 - **Tunnel texture:** Applied seamless custom texture (`tunnel_tile.png`) to the tunnel interior using Three.js CylinderGeometry and meshStandardMaterial.
@@ -250,5 +242,34 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
     - Player lives are correctly impacted by collisions.
     - The game provides a more continuous and predictable challenge regarding obstacles.
     - Architecture documentation (`02_architecture_overview.md`) updated to reflect these changes.
+
+## 2025-05-12 Q&A System - Initial Setup & Localization
+
+- **Goal:** Begin implementation of the Q&A system, focusing on data structure, localization, and initial fetching.
+- **Key Decisions & Refinements:**
+    - Questions will be stored in `public/data/questions.json`.
+    - Added support for English ('en') and Hebrew ('he') localization directly within the JSON structure and TypeScript types.
+    - `QuestionType` now includes 'open-question'.
+    - Question `topic` field added.
+    - "Correctly answered" status will reset per game. If all unique questions are answered, they will repeat.
+    - For PoC, open questions will just accept input; AI review is a future feature.
+- **Implementation Steps:**
+    - Created `src/types/question.types.ts` with `LanguageCode`, `LocalizedText`, `LocalizedAnswerOption`, `Question`, and `DisplayQuestion` interfaces to support multilingual questions.
+    - Updated `public/data/questions.json` with a new structure supporting `LocalizedText` for `text`, `options.text`, and `explanation`. Populated sample questions with English and placeholder Hebrew.
+    - Created `src/lib/questionService.ts` with:
+        - `fetchAndResolveQuestions(lang: LanguageCode)` function to fetch JSON data, resolve localized strings to the target language, and handle mixed old/new question formats gracefully.
+        - Helper functions `resolveText` and `resolveOptions`.
+    - Created a temporary test page `src/pages/question-test.tsx` to visually verify the `questionService` functionality for both English and Hebrew.
+        - Fetched and displayed lists of questions in both languages.
+        - Resolved a styling issue (black text on black background) on the test page by adding a local text color style.
+- **Outcome:**
+    - Core data structures for multilingual Q&A are in place.
+    - Question fetching and language resolution service is functional.
+    - Test page confirms service behavior.
+- **Next Steps:**
+    - Integrate `questionService` into `Scene3D.tsx` for game state management.
+    - Develop the `QuestionModal.tsx` UI component.
+    - Implement Q&A trigger on collision and answer processing logic.
+    - Update `tasks/current_tasks.md` with detailed sub-tasks for the Q&A system.
 
 ---
