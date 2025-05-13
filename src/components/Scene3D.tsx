@@ -15,7 +15,9 @@ import DustManager, { DustInstance } from './DustManager';
 import { useLoading } from './LoadingManager';
 import LivesIndicator from './LivesIndicator';
 import { CollisionManager } from './CollisionManager';
-import QuestionOverlay, { Question } from './QuestionOverlay';
+import { fetchAndResolveQuestions } from '../lib/questionService';
+import { DisplayQuestion, LanguageCode } from '../types/question.types';
+// import QuestionOverlay, { Question } from './QuestionOverlay'; // Assuming this Question is the old type and not needed now
 import { createPortal } from 'react-dom';
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
@@ -40,24 +42,10 @@ const keyboardMap = [
 type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over';
 // -----------------------------------
 
-// Add test question
-const testQuestion: Question = {
-  id: 1,
-  text: "What is the main function of the respiratory system?",
-  type: "multiple_choice",
-  options: [
-    "To pump blood throughout the body",
-    "To exchange oxygen and carbon dioxide",
-    "To digest food",
-    "To filter waste from the blood"
-  ],
-  correctAnswer: "To exchange oxygen and carbon dioxide"
-};
-
 export default function Scene3D() {
   const [isMounted, setIsMounted] = useState(false);
-  const worldSize = 10;
-  const { isLoading } = useLoading();
+  // const worldSize = 10; // worldSize is declared but not used, can be removed if truly unused later
+  const { isLoading: isAssetsLoading } = useLoading(); // Renamed for clarity
 
   const oxyMeshRef = useRef<THREE.Mesh | null>(null);
   const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 140]);
@@ -65,17 +53,33 @@ export default function Scene3D() {
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
   const [lives, setLives] = useState(3);
 
-  // --- New State Variables (NEW) ---
-  const [gameState, setGameState] = useState<GameState>('loading');
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  // -------------------------------
+  // --- MODIFIED/NEW Q&A State Variables ---
+  const [allQuestions, setAllQuestions] = useState<DisplayQuestion[]>([]);
+  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
+  const [answeredCorrectlyIds, setAnsweredCorrectlyIds] = useState<string[]>([]);
+  // Ensure currentQuestion state uses DisplayQuestion type
+  const [currentDisplayQuestion, setCurrentDisplayQuestion] = useState<DisplayQuestion | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false); // This will be used by the actual modal later
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState<boolean>(true);
+  const [questionError, setQuestionError] = useState<string | null>(null);
+  // --------------------------------------
+  const [gameState, setGameState] = useState<GameState>('loading'); // Keep general gameState
 
-  // Add portal container ref
-  const portalContainerRef = useRef<HTMLDivElement>(null);
+  // Add portal container ref (if used by a future modal, keep; otherwise, can be removed if QuestionOverlay is gone)
+  // const portalContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log('[Scene3D] Component mounted');
     setIsMounted(true);
+    console.log('[Scene3D] Initial Q&A States:', {
+      allQuestions: [],
+      currentLanguage: 'en',
+      answeredCorrectlyIds: [],
+      currentDisplayQuestion: null, // Updated name here for clarity in log
+      isModalVisible: false,
+      isLoadingQuestions: true,
+      questionError: null,
+    });
     return () => {
       console.log('[Scene3D] Component unmounted');
       setIsMounted(false);
@@ -83,16 +87,60 @@ export default function Scene3D() {
   }, []);
   
   useEffect(() => {
-    console.warn(`[Scene3D] --- isLoading state changed: ${isLoading} ---`);
-  }, [isLoading]);
+    console.warn(`[Scene3D] --- isAssetsLoading state changed: ${isAssetsLoading} ---`);
+  }, [isAssetsLoading]);
 
-  // --- Set gameState to playing once mounted (NEW) ---
   useEffect(() => {
-      if (isMounted) {
-          setGameState('playing');
+    const loadQuestions = async () => {
+      console.log(`[Scene3D] Attempting to load questions for language: ${currentLanguage}`);
+      setIsLoadingQuestions(true);
+      setQuestionError(null);
+      try {
+        const fetchedQuestions = await fetchAndResolveQuestions(currentLanguage);
+        setAllQuestions(fetchedQuestions);
+        console.log('[Scene3D] Questions fetched successfully:', fetchedQuestions);
+        if (fetchedQuestions.length === 0) {
+          console.warn('[Scene3D] No questions were loaded. Check questions.json or service.');
+          setQuestionError('No questions found.');
+        }
+      } catch (error) {
+        console.error('[Scene3D] Error loading questions:', error);
+        setQuestionError(error instanceof Error ? error.message : 'Failed to load questions.');
+        setAllQuestions([]);
+      } finally {
+        setIsLoadingQuestions(false);
       }
-  }, [isMounted]);
-  // -------------------------------------------------
+    };
+
+    if (isMounted) {
+        loadQuestions();
+    }
+  }, [isMounted, currentLanguage]);
+  
+  // Set gameState to playing once assets are loaded and component is mounted
+  useEffect(() => {
+      if (isMounted && !isAssetsLoading) { // Consider asset loading status
+          setGameState('playing');
+          console.log('[Scene3D] Game state set to playing');
+      }
+  }, [isMounted, isAssetsLoading]);
+
+  // --- Sub-task 2.3: Q&A Reset Logic ---
+  const startNewQASession = useCallback(() => {
+    console.log('[Scene3D] Starting new Q&A session (resetting Q&A state).');
+    setAnsweredCorrectlyIds([]);
+    setCurrentDisplayQuestion(null);
+    setIsModalVisible(false);
+    // setOpenQuestionAnswer(''); // If we had this state
+    // Potentially set gameState to 'playing' if it was 'question_paused' or 'game_over'
+    // but primary focus here is resetting Q&A specific state.
+    console.log('[Scene3D] Q&A state after reset:', {
+      answeredCorrectlyIds: [],
+      currentDisplayQuestion: null,
+      isModalVisible: false,
+    });
+  }, []); // No dependencies needed if it only sets state
+  // -------------------------------------
 
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
 
@@ -129,22 +177,23 @@ export default function Scene3D() {
 
   }, [lives]); // Keeping 'lives' dependency for now, though not directly used in this stub.
 
-  // --- Temporary Key Listener for Testing Sub-Task 1 : K to pause, L to play (MODIFIED) ---
+  // --- REMOVE Temporary Key Listener for K/L keys as it used old testQuestion logic ---
+  /*
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'k' || event.key === 'K') {
         console.log('[Scene3D] K key pressed, setting gameState to question_paused');
-        console.log('[Scene3D] Current gameState:', gameState);
-        console.log('[Scene3D] Current question:', currentQuestion);
+        // console.log('[Scene3D] Current gameState:', gameState);
+        // console.log('[Scene3D] Current question:', currentDisplayQuestion); // Use new state name
         setGameState('question_paused');
-        setCurrentQuestion(testQuestion); // Set the test question when pausing
-        console.log('[Scene3D] After update - gameState:', 'question_paused');
-        console.log('[Scene3D] After update - question:', testQuestion);
+        // setCurrentDisplayQuestion(allQuestions[0] || null); // Example: Set first loaded question
+        // console.log('[Scene3D] After update - gameState:', 'question_paused');
+        // console.log('[Scene3D] After update - question:', allQuestions[0] || null);
       }
       if (event.key === 'l' || event.key === 'L') {
         console.log('[Scene3D] L key pressed, setting gameState to playing');
         setGameState('playing');
-        setCurrentQuestion(null); 
+        setCurrentDisplayQuestion(null); 
       }
     };
 
@@ -152,19 +201,23 @@ export default function Scene3D() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameState, currentQuestion]); // Add dependencies to track changes
+  // Adjust dependencies if this effect is re-enabled later
+  }, [gameState, currentDisplayQuestion, allQuestions]); 
+  */
 
   // Add effect to monitor state changes
   useEffect(() => {
-    console.log('[Scene3D] State changed - gameState:', gameState);
-    console.log('[Scene3D] State changed - currentQuestion:', currentQuestion);
-  }, [gameState, currentQuestion]);
+    console.log('[Scene3D] Q&A State changed - isLoadingQuestions:', isLoadingQuestions, 'Error:', questionError, 'Count:', allQuestions.length);
+    // console.log('[Scene3D] Game State changed - gameState:', gameState);
+    // console.log('[Scene3D] State changed - currentDisplayQuestion:', currentDisplayQuestion);
+  }, [gameState, currentDisplayQuestion, allQuestions, isAssetsLoading, isLoadingQuestions, questionError]);
 
   const handleAnswerSubmit = useCallback((answer: string | boolean) => {
     console.log('[Scene3D] Answer submitted:', answer);
     // For now, just resume the game
     setGameState('playing');
-    setCurrentQuestion(null);
+    setCurrentDisplayQuestion(null);
+    setIsModalVisible(false); // Also hide modal
   }, []);
 
   if (!isMounted) {
@@ -208,8 +261,8 @@ export default function Scene3D() {
             <DustParticle key={dust.id} position={dust.position} size={dust.size} />
           ))}
           <Oxy 
-            ref={oxyMeshRef} 
-            worldSize={worldSize}
+            // ref={oxyMeshRef} // ref is not a prop of Oxy. Oxy component needs to use forwardRef if direct ref access is needed by parent.
+            worldSize={10} // Pass worldSize if Oxy uses it
             initialPosition={oxyInitialPosition}
             onPositionChange={handleOxyPositionChange}
           />
@@ -217,7 +270,8 @@ export default function Scene3D() {
         </Canvas>
       </KeyboardControls>
 
-      {/* Test overlay */}
+      {/* REMOVE Test overlay based on old K/L key logic */}
+      {/* 
       {gameState === 'question_paused' && (
         <div 
           className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center" 
@@ -234,7 +288,7 @@ export default function Scene3D() {
           <div className="bg-white p-8 rounded-lg shadow-xl">
             <h2 className="text-2xl font-bold mb-4">Test Overlay</h2>
             <p>Game State: {gameState}</p>
-            <p>Question: {currentQuestion ? 'Present' : 'None'}</p>
+            <p>Question: {currentDisplayQuestion ? 'Present' : 'None'}</p> // Use new state name
             <button 
               onClick={() => setGameState('playing')}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -244,6 +298,7 @@ export default function Scene3D() {
           </div>
         </div>
       )}
+      */}
     </div>
   );
 } 

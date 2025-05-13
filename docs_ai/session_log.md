@@ -272,4 +272,22 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
     - Implement Q&A trigger on collision and answer processing logic.
     - Update `tasks/current_tasks.md` with detailed sub-tasks for the Q&A system.
 
+- **Update (Q&A State Management in Scene3D):**
+    - Integrated Q&A state variables (`allQuestions`, `currentLanguage`, `answeredCorrectlyIds`, `currentDisplayQuestion`, `isModalVisible`, `isLoadingQuestions`, `questionError`) into `Scene3D.tsx`.
+    - Renamed `isLoading` from `useLoading` to `isAssetsLoading` for clarity.
+    - Implemented `useEffect` to load questions via `fetchAndResolveQuestions` on mount, updating relevant states.
+    - Verified question loading and initial state setup via temporary UI elements and console logs.
+    - Added `startNewQASession` function to reset Q&A specific states, verified with a temporary button and console logs.
+    - Cleaned up `Scene3D.tsx` by removing temporary UI test elements for question loading and reset button.
+- **Outcome Update:**
+    - `Scene3D.tsx` now manages core Q&A state and loads questions.
+    - Reset logic for Q&A state is functional.
+- **Next Steps (Revised):**
+    - Develop the `QuestionModal.tsx` UI component.
+    - Implement question selection logic in `Scene3D.tsx`.
+    - Integrate Q&A trigger on collision.
+    - Implement answer processing logic.
+    - Update `tasks/current_tasks.md`.
+    - Propose update to `04_coding_conventions_and_patterns.md` regarding post-UI-test workflow.
+
 ---
