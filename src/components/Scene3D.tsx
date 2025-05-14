@@ -140,7 +140,47 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     return null;
   }, []);
   // ---------------------------------
-  // -------------------------
+
+  // --- NEW: Game Event Sound Effects ---
+  const winSoundPlayer = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      // Ensure Tone.start() has been called by user interaction before this
+      // Paths are relative to the public directory
+      try {
+        const player = new Tone.Player("/music/level-complete-retro-video-game-music-soundroll-variation-2-2-00-04.mp3").toDestination();
+        player.load("/music/level-complete-retro-video-game-music-soundroll-variation-2-2-00-04.mp3").then(() => {
+          console.log("[Scene3D] Win sound player loaded.");
+        }).catch(err => {
+          console.error("[Scene3D] Error loading win sound:", err);
+        });
+        return player;
+      } catch (error) {
+        console.error("[Scene3D] Error creating win sound player:", error);
+        return null;
+      }
+    }
+    return null;
+  }, []);
+
+  const gameOverSoundPlayer = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      // Ensure Tone.start() has been called by user interaction before this
+      try {
+        const player = new Tone.Player("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3").toDestination();
+        player.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3").then(() => {
+          console.log("[Scene3D] Game over sound player loaded.");
+        }).catch(err => {
+          console.error("[Scene3D] Error loading game over sound:", err);
+        });
+        return player;
+      } catch (error) {
+        console.error("[Scene3D] Error creating game over sound player:", error);
+        return null;
+      }
+    }
+    return null;
+  }, []);
+  // ---------------------------------
 
   const INITIAL_LIVES = 3;
 
@@ -181,10 +221,28 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       questionError: null,
     });
     return () => {
-      console.log('[Scene3D] Component unmounted');
-      setIsMounted(false);
+      console.log('[Scene3D] Component unmounting, disposing Tone.js objects...');
+      if (winSoundPlayer) {
+        winSoundPlayer.dispose();
+      }
+      if (gameOverSoundPlayer) {
+        gameOverSoundPlayer.dispose();
+      }
+      if (collisionSynth) {
+        collisionSynth.dispose();
+      }
+      if (qaModalOpenSynth) {
+        qaModalOpenSynth.dispose();
+      }
+      if (correctAnswerSynth) {
+        correctAnswerSynth.dispose();
+      }
+      if (incorrectAnswerSynth) {
+        incorrectAnswerSynth.dispose();
+      }
+      setIsMounted(false); // Also reset mounted state
     };
-  }, []);
+  }, [currentLanguage, winSoundPlayer, gameOverSoundPlayer, collisionSynth, qaModalOpenSynth, correctAnswerSynth, incorrectAnswerSynth]); // Added Tone.js objects and currentLanguage to dependency array
   
   useEffect(() => {
     console.warn(`[Scene3D] --- isAssetsLoading state changed: ${isAssetsLoading} ---`);
@@ -271,11 +329,21 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
 
     if (lives > 0 && uniqueQuestionsAnswered >= MIN_CORRECT_UNIQUE_QUESTIONS) {
       console.log('%c[Scene3D] WIN CONDITIONS MET! Congratulations!', 'color: green; font-weight: bold;');
-      // Log data for scoring later
-      const score = { time: elapsedTimeInSeconds, questions: uniqueQuestionsAnswered, lives }; // NEW: Define score object
+      const score = { time: elapsedTimeInSeconds, questions: uniqueQuestionsAnswered, lives }; 
       console.log(`[Scene3D] Scoring Data: Time: ${score.time}s, Questions: ${score.questions}, Lives: ${score.lives}`);
-      setFinalScore(score); // NEW: Set final score
+      setFinalScore(score); 
       setGameState('won');
+      if (winSoundPlayer && winSoundPlayer.loaded) {
+        winSoundPlayer.start(Tone.now());
+        console.log('[Scene3D] Win sound played.');
+      } else {
+        console.warn('[Scene3D] Win sound player not ready or not loaded.');
+        if (winSoundPlayer) { // Attempt to load if not loaded
+          winSoundPlayer.load("/music/level-complete-retro-video-game-music-soundroll-variation-2-2-00-04.mp3")
+            .then(() => winSoundPlayer.start(Tone.now() + 0.1)) // Play with slight delay after loading
+            .catch(e => console.error("[Scene3D] Error loading or playing win sound on demand:", e));
+        }
+      }
     } else {
       console.log('%c[Scene3D] Reached End, WIN CONDITIONS NOT MET.', 'color: orange;');
       if (lives <= 0) {
@@ -284,12 +352,20 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       if (uniqueQuestionsAnswered < MIN_CORRECT_UNIQUE_QUESTIONS) {
         console.log(`[Scene3D] Reason: Not enough unique questions answered (${uniqueQuestionsAnswered}/${MIN_CORRECT_UNIQUE_QUESTIONS}).`);
       }
-      // For now, if win conditions aren't met at the end, it's effectively a game over (didn't achieve objectives).
-      // We can differentiate this later if needed (e.g. a specific "level incomplete" screen).
       setGameState('game_over'); 
-      // Consider playing a different sound or showing a specific message for this scenario later.
+      if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
+        gameOverSoundPlayer.start(Tone.now());
+        console.log('[Scene3D] Game over sound played (win conditions not met).');
+      } else {
+        console.warn('[Scene3D] Game over sound player not ready or not loaded (win conditions not met).');
+        if (gameOverSoundPlayer) { // Attempt to load if not loaded
+           gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
+            .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1)) // Play with slight delay
+            .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (win conditions not met):", e));
+        }
+      }
     }
-  }, [lives, answeredCorrectlyIds, elapsedTimeInSeconds]);
+  }, [lives, answeredCorrectlyIds, elapsedTimeInSeconds, winSoundPlayer, gameOverSoundPlayer]);
   // -------------------------------------
 
   // --- Sub-task 2.3: Q&A Reset Logic ---
@@ -377,6 +453,17 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         if (newLives <= 0) {
           setGameState('game_over');
           console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
+          if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
+            gameOverSoundPlayer.start(Tone.now());
+            console.log('[Scene3D] Game over sound played (handleAnswer).');
+          } else {
+            console.warn('[Scene3D] Game over sound player not ready or not loaded (handleAnswer).');
+             if (gameOverSoundPlayer) { // Attempt to load if not loaded
+                gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
+                .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
+                .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleAnswer):", e));
+            }
+          }
         } else {
           activateOxyInvincibility(3000);
         }
@@ -393,7 +480,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     if (gameState !== 'game_over') { 
       setGameState('playing');
     } 
-  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth]);
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth, gameOverSoundPlayer]);
 
   const handleCloseModal = useCallback(() => {
     console.log('[Scene3D] Modal closed by user (penalty applied).');
@@ -407,6 +494,17 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       if (newLives <= 0) {
         setGameState('game_over');
         console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
+        if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
+          gameOverSoundPlayer.start(Tone.now());
+          console.log('[Scene3D] Game over sound played (handleCloseModal).');
+        } else {
+          console.warn('[Scene3D] Game over sound player not ready or not loaded (handleCloseModal).');
+          if (gameOverSoundPlayer) { // Attempt to load if not loaded
+            gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
+            .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
+            .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleCloseModal):", e));
+          }
+        }
       } else {
         activateOxyInvincibility(3000);
       }
@@ -418,7 +516,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     if (gameState !== 'game_over') {
       setGameState('playing');
     } 
-  }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth]);
+  }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth, gameOverSoundPlayer]);
   // ------------------------------------
 
   // --- Game Restart Logic --- (MODIFIED)

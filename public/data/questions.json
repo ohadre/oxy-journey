@@ -1,59 +1,688 @@
 [
   {
-    "id": "q1",
-    "topic": "Breathing Mechanics",
+    "id": "q7",
+    "topic": {
+      "en": "Respiratory System Overview",
+      "he": "מבט כללי על מערכת הנשימה"
+    },
     "type": "multiple-choice",
     "text": {
-      "en": "What is the main muscle located below your lungs that helps you breathe in and out?",
-      "he": "מהו השריר העיקרי הממוקם מתחת לריאות המסייע לך לנשום פנימה והחוצה?"
+      "en": "Oxy is looking at this cool diagram of a friend! 👇 Which part, labeled 'קנה נשימה' (trachea), is the main tube that carries air down towards the lungs?",
+      "he": "אוקסי מסתכל על התרשים המגניב הזה של חבר! 👇 איזה חלק, המסומן כ'קנה נשימה', הוא הצינור הראשי שמוביל אוויר למטה לכיוון הריאות?"
     },
     "options": [
-      { "text": { "en": "Heart", "he": "לב" }, "isCorrect": false },
-      { "text": { "en": "Stomach", "he": "קיבה" }, "isCorrect": false },
-      { "text": { "en": "Diaphragm", "he": "סרעפת" }, "isCorrect": true },
-      { "text": { "en": "Ribs", "he": "צלעות" }, "isCorrect": false }
+      { "text": { "en": "The part labeled 'פה' (mouth)", "he": "החלק המסומן 'פה'" }, "isCorrect": false },
+      { "text": { "en": "The part labeled 'ריאה' (lung)", "he": "החלק המסומן 'ריאה'" }, "isCorrect": false },
+      { "text": { "en": "The part labeled 'קנה נשימה' (trachea)", "he": "החלק המסומן 'קנה נשימה'" }, "isCorrect": true },
+      { "text": { "en": "The part labeled 'סרעפת' (diaphragm)", "he": "החלק המסומן 'סרעפת'" }, "isCorrect": false }
     ],
     "explanation": {
-      "en": "The diaphragm is a large, dome-shaped muscle that contracts and flattens to let you inhale, and relaxes to let you exhale.",
-      "he": "הסרעפת היא שריר גדול בצורת כיפה המתכווץ ומשתטח כדי לאפשר לך לשאוף, ונרפה כדי לאפשר לך לנשוף."
+      "en": "You got it! The 'קנה נשימה' (trachea), also called the windpipe, is the main passageway for air to travel from your throat to your lungs.",
+      "he": "נכון מאוד! 'קנה הנשימה' הוא המעבר הראשי של האוויר מהגרון שלך אל הריאות."
     },
-    "image_url": "/images/questions/diaphragm.png"
+    "image_url": "/images/questions/IMG_2495.jpg"
   },
   {
-    "id": "q2",
-    "topic": "Lungs",
+    "id": "q8",
+    "topic": {
+      "en": "Breathing Mechanics",
+      "he": "מכניקת הנשימה"
+    },
     "type": "yes-no",
-    "text": "True or False: Your right lung is slightly larger than your left lung.",
+    "text": {
+      "en": "Look at the person blowing up a balloon in the picture! 👇 To push the air OUT, is the big muscle labeled 'סרעפת' (diaphragm) moving UP and relaxing?",
+      "he": "הסתכלו על האדם שמנפח בלון בתמונה! 👇 כדי לדחוף את האוויר החוצה, האם השריר הגדול המסומן 'סרעפת' נע כלפי מעלה ונרפה?"
+    },
     "options": [
-      { "text": "True", "isCorrect": true },
-      { "text": "False", "isCorrect": false }
+      { "text": { "en": "True", "he": "נכון" }, "isCorrect": true },
+      { "text": { "en": "False", "he": "לא נכון" }, "isCorrect": false }
     ],
-    "explanation": "True! The right lung is slightly larger because the left lung needs to make space for your heart."
+    "explanation": {
+      "en": "That's right! When you breathe out or blow air, your diaphragm relaxes and moves up, helping to push air out of your lungs, like when blowing up a balloon!",
+      "he": "זה נכון! כשנושפים אוויר החוצה, כמו בניפוח בלון, הסרעפת נרפית ועולה למעלה, ועוזרת לדחוף את האוויר אל מחוץ לריאות!"
+    },
+    "image_url": "/images/questions/IMG_2495.jpg"
   },
   {
-    "id": "q3",
-    "topic": "Lungs",
+    "id": "q9",
+    "topic": {
+      "en": "Throat Anatomy / Swallowing",
+      "he": "אנטומיה של הגרון / בליעה"
+    },
     "type": "multiple-choice",
-    "text": "What are the tiny air sacs in your lungs where oxygen enters the blood called?",
+    "text": {
+      "en": "Uh oh, this person is about to eat! Look closely at the part labeled 'מכסה הגרון' (epiglottis) in the diagram. 👇 What's its super important job when we swallow food?",
+      "he": "אוי לא, האדם הזה עומד לאכול! הסתכלו היטב על החלק המסומן 'מכסה הגרון' בתרשים. 👇 מה התפקיד הסופר חשוב שלו כשאנחנו בולעים אוכל?"
+    },
     "options": [
-      { "text": "Bronchioles", "isCorrect": false },
-      { "text": "Capillaries", "isCorrect": false },
-      { "text": "Alveoli", "isCorrect": true },
-      { "text": "Trachea", "isCorrect": false }
+      { "text": { "en": "It helps us taste the food.", "he": "הוא עוזר לנו לטעום את האוכל." }, "isCorrect": false },
+      { "text": { "en": "It covers the windpipe to stop food from going into the lungs.", "he": "הוא מכסה את קנה הנשימה כדי למנוע מאוכל להיכנס לריאות." }, "isCorrect": true },
+      { "text": { "en": "It makes a funny noise.", "he": "הוא משמיע רעש מצחיק." }, "isCorrect": false },
+      { "text": { "en": "It helps us breathe faster.", "he": "הוא עוזר לנו לנשום מהר יותר." }, "isCorrect": false }
     ],
-    "explanation": "Alveoli are the tiny air sacs where the important exchange of oxygen and carbon dioxide happens."
+    "explanation": {
+      "en": "Exactly! The 'מכסה הגרון' (epiglottis) is like a little lid that covers your windpipe (trachea) when you swallow, making sure food goes down the esophagus (food pipe) and not into your lungs where Oxy needs to go!",
+      "he": "בדיוק! 'מכסה הגרון' הוא כמו מכסה קטן שמכסה את קנה הנשימה שלך כשאתה בולע, ומוודא שהאוכל יורד בושט (צינור האוכל) ולא נכנס לריאות, המקום שאליו אוקסי צריך להגיע!"
+    },
+    "image_url": "/images/questions/IMG_2504.jpg"
   },
   {
-    "id": "q4",
-    "topic": "Nasal Passages",
+    "id": "q10",
+    "topic": {
+      "en": "Lungs / Gas Exchange",
+      "he": "ריאות / חילוף גזים"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Zoom in with Oxy! This amazing close-up shows 'נאדיות ריאה' (alveoli) surrounded by 'נימי דם' (blood capillaries). 👇 What magical exchange happens here?",
+      "he": "התקרבו עם אוקסי! התקריב המדהים הזה מראה 'נאדיות ריאה' מוקפות ב'נימי דם'. 👇 איזה חילוף קסום קורה כאן?"
+    },
+    "options": [
+      { "text": { "en": "Air gets cleaned and warmed.", "he": "האוויר מתנקה ומתחמם." }, "isCorrect": false },
+      { "text": { "en": "Oxygen jumps from the alveoli into the blood, and carbon dioxide jumps out!", "he": "חמצן קופץ מהנאדיות אל הדם, ופחמן דו-חמצני קופץ החוצה!" }, "isCorrect": true },
+      { "text": { "en": "Loud singing noises are produced.", "he": "נוצרים קולות שירה רמים." }, "isCorrect": false },
+      { "text": { "en": "Food gets digested.", "he": "האוכל מתעכל." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You're a star! The 'נאדיות ריאה' (alveoli) are where oxygen (Oxy!) passes into the 'נימי דם' (blood) to travel all over your body, and waste gas (carbon dioxide) leaves the blood to be breathed out.",
+      "he": "אתה כוכב! 'נאדיות הריאה' הן המקום בו חמצן (אוקסי!) עובר אל 'נימי הדם' כדי לטייל בכל הגוף שלך, וגז הפסולת (פחמן דו-חמצני) עוזב את הדם כדי להינשף החוצה."
+    },
+    "image_url": "/images/questions/IMG_2509.jpg"
+  },
+  {
+    "id": "q11",
+    "topic": {
+      "en": "Airways",
+      "he": "דרכי האוויר"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Look at this path Oxy is about to take in the diagram below! 👇 Does the big tube called 'קנה נשימה' (trachea) split into two smaller tubes called 'סימפון' (bronchus), one for each lung?",
+      "he": "הסתכלו על הנתיב שאוקסי עומד לעבור בתרשים למטה! 👇 האם הצינור הגדול שנקרא 'קנה נשימה' מתפצל לשני צינורות קטנים יותר הנקראים 'סימפון', אחד לכל ריאה?"
+    },
+    "options": [
+      { "text": { "en": "Yes, that's exactly right! 👍", "he": "כן, זה בדיוק נכון! 👍" }, "isCorrect": true },
+      { "text": { "en": "No, it stays as one big tube. 😮", "he": "לא, הוא נשאר צינור אחד גדול. 😮" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Correct! The trachea (windpipe) is like a highway for air, and then it splits into two main bronchi, which are like roads leading air into the right and left lungs.",
+      "he": "נכון! קנה הנשימה הוא כמו כביש מהיר לאוויר, ואז הוא מתפצל לשני סימפונות ראשיים, שהם כמו כבישים המובילים אוויר לריאה הימנית והשמאלית."
+    },
+    "image_url": "/images/questions/IMG_2510.jpg"
+  },
+  {
+    "id": "q12",
+    "topic": {
+      "en": "Breathing Mechanics",
+      "he": "מכניקת הנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is watching how we breathe IN! The diagram shows 'כניסת אוויר' (air entering). 👇 What are the 'צלעות' (ribs) and the 'סרעפת' (diaphragm) doing to help pull air INTO the lungs?",
+      "he": "אוקסי צופה איך אנחנו שואפים אוויר! התרשים מראה 'כניסת אוויר'. 👇 מה עושים ה'צלעות' וה'סרעפת' כדי לעזור למשוך אוויר פנימה אל הריאות?"
+    },
+    "options": [
+      { "text": { "en": "Ribs move IN and DOWN, diaphragm moves UP.", "he": "הצלעות נכנסות ויורדות, הסרעפת עולה." }, "isCorrect": false },
+      { "text": { "en": "Ribs move OUT and UP, diaphragm moves DOWN.", "he": "הצלעות יוצאות ועולות, הסרעפת יורדת." }, "isCorrect": true },
+      { "text": { "en": "Ribs stay still, diaphragm makes space.", "he": "הצלעות לא זזות, הסרעפת יוצרת מקום." }, "isCorrect": false },
+      { "text": { "en": "Ribs move IN and UP, diaphragm moves UP.", "he": "הצלעות נכנסות ועולות, הסרעפת עולה." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Great job! When you breathe in, your ribs move up and out, and your diaphragm flattens and moves down. This makes more space in your chest, so air rushes into your lungs!",
+      "he": "עבודה מצוינת! כששואפים, הצלעות זזות למעלה והחוצה, והסרעפת משתטחת ויורדת למטה. זה יוצר יותר מקום בחזה, כך שהאוויר נשאב פנימה לריאות!"
+    },
+    "image_url": "/images/questions/IMG_2522.jpg"
+  },
+  {
+    "id": "q13",
+    "topic": {
+      "en": "Breathing Mechanics",
+      "he": "מכניקת הנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Now Oxy sees 'יציאת אוויר' (air leaving) in the diagram below! 👇 What happens to the 'סרעפת' (diaphragm) when we breathe OUT?",
+      "he": "עכשיו אוקסי רואה 'יציאת אוויר' בתרשים למטה! 👇 מה קורה ל'סרעפת' כשאנחנו נושפים אוויר החוצה?"
+    },
+    "options": [
+      { "text": { "en": "It tightens and moves down.", "he": "היא מתכווצת ויורדת למטה." }, "isCorrect": false },
+      { "text": { "en": "It relaxes and moves up.", "he": "היא נרפית ועולה למעלה." }, "isCorrect": true },
+      { "text": { "en": "It fills with air itself.", "he": "היא מתמלאת באוויר בעצמה." }, "isCorrect": false },
+      { "text": { "en": "It pushes the ribs apart.", "he": "היא דוחפת את הצלעות לצדדים." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You nailed it! When you breathe out, your diaphragm relaxes and moves back up to its dome shape, helping to push air out of your lungs.",
+      "he": "קלעת בול! כשנושפים, הסרעפת נרפית וחוזרת למעלה לצורת הכיפה שלה, ועוזרת לדחוף את האוויר החוצה מהריאות."
+    },
+    "image_url": "/images/questions/IMG_2527.jpg"
+  },
+  {
+    "id": "q14",
+    "topic": {
+      "en": "Control of Breathing",
+      "he": "בקרת הנשימה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "This friend in the picture is trying to hold their breath underwater! The speech bubble says, 'אי אפשר לעצור את הנשימה לזמן רב' (It's impossible to hold your breath for a long time). 👇 Is this true because our brain eventually makes us take a breath, even if we don't want to?",
+      "he": "החבר/ה בתמונה מנסה לעצור את הנשימה מתחת למים! בועת הדיבור אומרת, 'אי אפשר לעצור את הנשימה לזמן רב'. 👇 האם זה נכון מפני שהמוח שלנו בסופו של דבר גורם לנו לנשום, גם אם אנחנו לא רוצים?"
+    },
+    "options": [
+      { "text": { "en": "Yes, our brain is the boss of breathing! 🧠", "he": "כן, המוח שלנו הוא הבוס של הנשימה! 🧠" }, "isCorrect": true },
+      { "text": { "en": "No, we can hold our breath forever if we try hard enough! 💪", "he": "לא, אנחנו יכולים לעצור את הנשימה לנצח אם רק נתאמץ מספיק! 💪" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "That's right! Our brain controls our breathing automatically to make sure we always get the oxygen we need. So, even if we try to hold our breath, our brain will eventually make us breathe.",
+      "he": "נכון מאוד! המוח שלנו שולט בנשימה באופן אוטומטי כדי לוודא שאנחנו תמיד מקבלים את החמצן שאנחנו צריכים. לכן, גם אם ננסה לעצור את הנשימה, המוח שלנו בסופו של דבר יגרום לנו לנשום."
+    },
+    "image_url": "/images/questions/IMG_2529.jpg"
+  },
+  {
+    "id": "q15",
+    "topic": {
+      "en": "General Science / Respiration Basic",
+      "he": "מדע כללי / יסודות הנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy spotted this amazing 'תנשמת' (owl) flying in the picture! 👇 To fly, this owl needs energy, which it gets with oxygen. Where does the owl get its oxygen from?",
+      "he": "אוקסי זיהה 'תנשמת' מדהימה עפה בתמונה! 👇 כדי לעוף, התנשמת הזו זקוקה לאנרגיה, אותה היא מקבלת בעזרת חמצן. מאיפה התנשמת מקבלת את החמצן שלה?"
+    },
+    "options": [
+      { "text": { "en": "From the trees 🌳", "he": "מהעצים 🌳" }, "isCorrect": false },
+      { "text": { "en": "From the air it breathes through its respiratory system 🌬️", "he": "מהאוויר שהיא נושמת דרך מערכת הנשימה שלה 🌬️" }, "isCorrect": true },
+      { "text": { "en": "From the sun ☀️", "he": "מהשמש ☀️" }, "isCorrect": false },
+      { "text": { "en": "From drinking water 💧", "he": "משתיית מים 💧" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Exactly! Just like us, owls and other animals breathe in air to get oxygen. Their respiratory system helps them take in oxygen, which they need to live and fly!",
+      "he": "בדיוק! בדיוק כמונו, ינשופים ובעלי חיים אחרים נושמים אוויר כדי לקבל חמצן. מערכת הנשימה שלהם עוזרת להם לקלוט חמצן, לו הם זקוקים כדי לחיות ולעוף!"
+    },
+    "image_url": "/images/questions/IMG_2534.jpg"
+  },
+  {
+    "id": "q16",
+    "topic": {
+      "en": "Importance of Oxygen",
+      "he": "חשיבות החמצן"
+    },
     "type": "open-question",
     "text": {
-      "en": "Briefly describe one function of your nose in the breathing process.",
-      "he": "תאר בקצרה פונקציה אחת של האף שלך בתהליך הנשימה."
+      "en": "Look at this cool diagram Oxy found! 👇 It shows how oxygen helps our body. In your own words, why is oxygen SO important for us?",
+      "he": "הסתכלו על התרשים המגניב הזה שאוקסי מצא! 👇 הוא מראה איך חמצן עוזר לגוף שלנו. במילים שלכם, למה חמצן כל כך חשוב לנו?"
     },
     "explanation": {
-      "en": "Your nose helps to warm, moisten, and filter the air you breathe in. It also contains olfactory receptors for the sense of smell!",
-      "he": "האף שלך מסייע לחמם, להרטיב ולסנן את האוויר שאתה נושם. הוא מכיל גם קולטני ריח!"
+      "en": "Great thinking! Oxygen helps our body turn food into energy! We need this energy for everything – to run, play, learn, and even for our body to grow and repair itself. Oxy (oxygen) is a superhero for our cells!",
+      "he": "חשיבה מצוינת! חמצן עוזר לגוף שלנו להפוך מזון לאנרגיה! אנחנו צריכים את האנרגיה הזו לכל דבר – לרוץ, לשחק, ללמוד, ואפילו כדי שהגוף שלנו יגדל ויתקן את עצמו. אוקסי (חמצן) הוא גיבור על לתאים שלנו!"
+    },
+    "image_url": "/images/questions/oxygen_to_cells_diagram.png"
+  },
+  {
+    "id": "q17",
+    "topic": {
+      "en": "Nasal Passages Function",
+      "he": "תפקוד מעברי האף"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Check out this diagram of the nose's superpowers! 👇 What's a big advantage of air passing through your nose, as shown in the picture?",
+      "he": "תראו את התרשים הזה של כוחות העל של האף! 👇 מהו יתרון גדול של מעבר אוויר דרך האף שלך, כפי שמוצג בתמונה?"
+    },
+    "options": [
+      { "text": { "en": "It makes your voice sound deeper.", "he": "זה גורם לקול שלך להישמע עמוק יותר." }, "isCorrect": false },
+      { "text": { "en": "The nose warms, cleans (filters), and adds moisture to the air. ✨", "he": "האף מחמם, מנקה (מסנן), ומוסיף לחות לאוויר. ✨" }, "isCorrect": true },
+      { "text": { "en": "Air reaches the lungs much faster.", "he": "האוויר מגיע לריאות הרבה יותר מהר." }, "isCorrect": false },
+      { "text": { "en": "You can smell flowers better. 👃🌸", "he": "אפשר להריח פרחים טוב יותר. 👃🌸" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You got it! Your nose is amazing! It acts like a filter to trap dust and germs, warms up cold air, and adds moisture so the air isn't too dry for your lungs. This helps keep Oxy's journey smooth and your lungs healthy! (And yes, smelling flowers is a bonus!)",
+      "he": "תפסת את זה! האף שלך מדהים! הוא פועל כמו מסנן ללכידת אבק וחיידקים, מחמם אוויר קר ומוסיף לחות כך שהאוויר לא יהיה יבש מדי לריאות שלך. זה עוזר לשמור על המסע של אוקסי חלק ועל הריאות שלך בריאות! (וכן, להריח פרחים זה בונוס!)"
+    },
+    "image_url": "/images/questions/nasal_passage_functions_diagram.png"
+  },
+  {
+    "id": "q18",
+    "topic": { 
+      "en": "Respiratory Muscles", 
+      "he": "שרירי הנשימה" 
+    },
+    "type": "open-question",
+    "text": {
+      "en": "Oxy is learning about the amazing breathing team in our body! Can you name ONE important muscle or group of muscles that helps us breathe?",
+      "he": "אוקסי לומד על צוות הנשימה המדהים בגופנו! האם אתם יכולים לנקוב בשם של שריר חשוב אחד או קבוצת שרירים שעוזרת לנו לנשום?"
+    },
+    "explanation": {
+      "en": "Great job! The diaphragm (סרעפת) is a big one, and the intercostal muscles (שרירים בין צלעיים) between your ribs also play a key role in helping you inhale and exhale!",
+      "he": "עבודה נהדרת! הסרעפת היא שריר גדול וחשוב, וגם השרירים הבין-צלעיים שבין הצלעות ממלאים תפקיד מפתח ועוזרים לנו לשאוף ולנשוף!"
+    }
+  },
+  {
+    "id": "q19",
+    "topic": {
+      "en": "Breathing Mechanics - Exhalation",
+      "he": "מכניקת הנשימה - נשיפה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Look at the diagram showing 'יציאת אוויר' (air leaving). 👇 Besides the 'סרעפת' (diaphragm) moving up, what do the 'צלעות' (ribs) do when you breathe OUT?",
+      "he": "הסתכלו על התרשים המראה 'יציאת אוויר'. 👇 מלבד ה'סרעפת' שעולה למעלה, מה עושות ה'צלעות' כשאתם נושפים החוצה?"
+    },
+    "options": [
+      { "text": { "en": "Move up and out", "he": "נעות למעלה והחוצה" }, "isCorrect": false },
+      { "text": { "en": "Stay completely still", "he": "נשארות לגמרי במקום" }, "isCorrect": false },
+      { "text": { "en": "Move down and in", "he": "נעות למטה ופנימה" }, "isCorrect": true },
+      { "text": { "en": "Disappear  magically 🧙", "he": "נעלמות בקסם 🧙" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "That's right! When you exhale, your ribs move down and inward, and your diaphragm relaxes and moves up. This makes the space in your chest smaller, pushing air out of your lungs.",
+      "he": "נכון מאוד! כשנושפים, הצלעות נעות מטה ופנימה, והסרעפת נרגעת ועולה למעלה. זה מקטין את החלל בחזה ודוחף את האוויר אל מחוץ לריאות."
+    },
+    "image_url": "/images/questions/IMG_2527.jpg"
+  },
+  {
+    "id": "q20",
+    "topic": {
+      "en": "Control of Breathing",
+      "he": "בקרת הנשימה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Our brain usually controls breathing automatically. But look at the friend in the picture 👇 trying to hold their breath! Does your brain eventually send a super strong signal that makes you HAVE to breathe, even if you try not to?",
+      "he": "המוח שלנו בדרך כלל שולט בנשימה באופן אוטומטי. אבל הסתכלו על החבר/ה בתמונה 👇 שמנסה לעצור את הנשימה! האם המוח שלכם בסופו של דבר שולח אות חזק מאוד שמכריח אתכם לנשום, גם אם אתם מנסים שלא?"
+    },
+    "options": [
+      { "text": { "en": "Yes, the brain is the boss! 🧠", "he": "כן, המוח הוא הבוס! 🧠" }, "isCorrect": true },
+      { "text": { "en": "No, I can hold my breath forever if I want!", "he": "לא, אני יכול/ה לעצור את הנשימה לנצח אם ארצה!" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Exactly! Even if we try to hold our breath, our brainstem (the part of the brain in charge of vital functions) monitors oxygen and carbon dioxide levels and will ultimately override our attempt and force us to breathe to keep us safe.",
+      "he": "בדיוק! גם אם ננסה לעצור את הנשימה, גזע המוח (החלק במוח שאחראי על תפקודים חיוניים) מנטר את רמות החמצן והפחמן הדו-חמצני, ובסופו של דבר יתגבר על הניסיון שלנו ויאלץ אותנו לנשום כדי לשמור עלינו."
+    },
+    "image_url": "/images/questions/IMG_2529.jpg" 
+  },
+  {
+    "id": "q21",
+    "topic": {
+      "en": "Voluntary Breathing Control",
+      "he": "שליטה רצונית בנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is curious! While we usually breathe without thinking, when might you *consciously decide* to control your breathing?",
+      "he": "אוקסי סקרן! למרות שאנחנו נושמים בדרך כלל בלי לחשוב, מתי אתם עשויים *להחליט במודע* לשלוט על הנשימה שלכם?"
+    },
+    "options": [
+      { "text": { "en": "When sleeping 😴", "he": "בזמן שינה 😴" }, "isCorrect": false },
+      { "text": { "en": "When singing a song 🎤 or blowing bubbles", "he": "כששרים שיר 🎤 או מפריחים בועות" }, "isCorrect": true },
+      { "text": { "en": "When your heart is beating fast after running", "he": "כשהלב פועם מהר אחרי ריצה" }, "isCorrect": false },
+      { "text": { "en": "When you get hiccups", "he": "כשמקבלים שיהוקים" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You got it! While breathing is mostly automatic, we can control it when we do things like singing, playing a wind instrument, swimming, or even when a doctor asks us to take a deep breath!",
+      "he": "תפסתם את זה! למרות שהנשימה היא לרוב אוטומטית, אנחנו יכולים לשלוט בה כשאנחנו עושים דברים כמו שירה, נגינה בכלי נשיפה, שחייה, או אפילו כשהרופא מבקש מאיתנו לקחת נשימה עמוקה!"
+    }
+  },
+  {
+    "id": "q22",
+    "topic": {
+      "en": "Respiratory System Components",
+      "he": "רכיבי מערכת הנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Our breathing system has key parts like the 'שריר הסרעפת' (diaphragm muscle) and 'צלעות' (ribs). 👇 What is their main job together in helping Oxy's journey?",
+      "he": "למערכת הנשימה שלנו יש חלקים מרכזיים כמו 'שריר הסרעפת' ו'צלעות'. 👇 מה התפקיד העיקרי שלהם ביחד בעזרה למסע של אוקסי?"
+    },
+    "options": [
+      { "text": { "en": "To clean the air Oxy brings in", "he": "לנקות את האוויר שאוקסי מכניס" }, "isCorrect": false },
+      { "text": { "en": "To help pump blood to the lungs", "he": "לעזור להזרים דם לריאות" }, "isCorrect": false },
+      { "text": { "en": "To change the size of the chest for breathing in and out 🌬️", "he": "לשנות את גודל בית החזה כדי לאפשר שאיפה ונשיפה 🌬️" }, "isCorrect": true },
+      { "text": { "en": "To make sure we can smell nice things", "he": "לוודא שאנחנו יכולים להריח דברים נעימים" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Exactly! The diaphragm and rib muscles work together to expand (for inhaling) and shrink (for exhaling) your chest cavity. This movement is what pulls air into your lungs and pushes it out.",
+      "he": "בדיוק! הסרעפת ושרירי הצלעות עובדים יחד כדי להרחיב (בזמן שאיפה) ולכווץ (בזמן נשיפה) את חלל בית החזה. התנועה הזו היא שמושכת אוויר לריאות ודוחפת אותו החוצה."
+    }
+  },
+  {
+    "id": "q23",
+    "topic": {
+      "en": "Animal Respiration / Adaptation",
+      "he": "נשימת בעלי חיים / הסתגלות"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Look at the 'תנשמת' (owl) flying in the picture! 👇 Do you think having an efficient respiratory system is extra important for an animal that flies, to get lots of oxygen for energy?",
+      "he": "הסתכלו על ה'תנשמת' (ינשוף) שעפה בתמונה! 👇 האם אתם חושבים שמערכת נשימה יעילה חשובה במיוחד לחיה שעפה, כדי לקבל הרבה חמצן לאנרגיה?"
+    },
+    "options": [
+      { "text": { "en": "Yes, flying takes a LOT of energy! 🦉💨", "he": "כן, תעופה דורשת המון אנרגיה! 🦉💨" }, "isCorrect": true },
+      { "text": { "en": "No, they can just glide without much effort.", "he": "לא, הן יכולות פשוט לדאות בלי הרבה מאמץ." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Absolutely! Flying is hard work and requires a lot of energy. Birds, like owls, have very efficient respiratory systems to get the maximum amount of oxygen needed to power their flight muscles.",
+      "he": "בהחלט! תעופה היא עבודה קשה ודורשת הרבה אנרגיה. לציפורים, כמו תנשמות, יש מערכות נשימה יעילות מאוד כדי לקבל את כמות החמצן המרבית הדרושה להפעלת שרירי התעופה שלהן."
+    },
+    "image_url": "/images/questions/IMG_2534.jpg"
+  },
+  {
+    "id": "q24",
+    "topic": {
+      "en": "Breathing and Physical Activity",
+      "he": "נשימה ופעילות גופנית"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "When you do 'מאמץ גופני' (physical effort) like running or playing hard, what typically happens to Oxy's journey (your breathing rate)?",
+      "he": "כשאתם עושים 'מאמץ גופני' כמו ריצה או משחק אינטנסיבי, מה קורה בדרך כלל למסע של אוקסי (קצב הנשימה שלכם)?"
+    },
+    "options": [
+      { "text": { "en": "It slows down to save energy 🐢", "he": "הוא מאט כדי לחסוך אנרגיה 🐢" }, "isCorrect": false },
+      { "text": { "en": "It speeds up to bring in more oxygen! 🚀", "he": "הוא מאיץ כדי להכניס יותר חמצן! 🚀" }, "isCorrect": true },
+      { "text": { "en": "It stays exactly the same", "he": "הוא נשאר בדיוק אותו הדבר" }, "isCorrect": false },
+      { "text": { "en": "You stop breathing for a moment", "he": "מפסיקים לנשום לרגע" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You're right! When you exercise, your muscles work harder and need more oxygen to make energy. So, your breathing rate (and heart rate) speeds up to deliver more Oxy to your muscles!",
+      "he": "צודקים! כשמתאמנים, השרירים עובדים קשה יותר וזקוקים ליותר חמצן כדי לייצר אנרגיה. לכן, קצב הנשימה (וקצב הלב) שלכם מאיץ כדי לספק יותר אוקסי לשרירים שלכם!"
+    }
+  },
+  {
+    "id": "q25",
+    "topic": {
+      "en": "Measuring Breathing Rate",
+      "he": "מדידת קצב נשימה"
+    },
+    "type": "open-question",
+    "text": {
+      "en": "Imagine Oxy wants to know how fast you're breathing! 👇 How could you measure your own 'קצב נשימה' (breathing rate) for one minute?",
+      "he": "דמיינו שאוקסי רוצה לדעת כמה מהר אתם נושמים! 👇 איך הייתם יכולים למדוד את 'קצב הנשימה' שלכם במשך דקה אחת?"
+    },
+    "explanation": {
+      "en": "Good idea! You can count how many times your chest rises and falls in one minute. Each rise (inhale) and fall (exhale) together counts as one breath. Try it when you're resting and then after some jumping jacks to see the difference!",
+      "he": "רעיון טוב! אתם יכולים לספור כמה פעמים בית החזה שלכם עולה ויורד במשך דקה אחת. כל עלייה (שאיפה) וירידה (נשיפה) יחד נחשבות לנשימה אחת. נסו זאת כשאתם נחים ואז אחרי כמה קפיצות במקום כדי לראות את ההבדל!"
+    }
+  },
+  {
+    "id": "q26",
+    "topic": {
+      "en": "Breathing Rate Experiment",
+      "he": "ניסוי קצב נשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is doing an experiment! Why would scientists want to measure 'קצב הנשימה' (breathing rate) both 'במצב מנוחה' (at rest) and 'מיד לאחר פעילות גופנית' (right after exercise)?",
+      "he": "אוקסי עורך ניסוי! מדוע מדענים ירצו למדוד 'קצב נשימה' גם 'במצב מנוחה' וגם 'מיד לאחר פעילות גופנית'?"
+    },
+    "options": [
+      { "text": { "en": "To see if breathing stops during exercise.", "he": "כדי לראות אם הנשימה מפסיקה בזמן פעילות גופנית." }, "isCorrect": false },
+      { "text": { "en": "To check if the air quality changes.", "he": "כדי לבדוק אם איכות האוויר משתנה." }, "isCorrect": false },
+      { "text": { "en": "To understand how our body changes its oxygen intake based on activity. 💪", "he": "כדי להבין איך הגוף שלנו משנה את צריכת החמצן שלו בהתאם לפעילות. 💪" }, "isCorrect": true },
+      { "text": { "en": "Just for fun, there's no real reason. 😂", "he": "סתם בשביל הכיף, אין סיבה אמיתית. 😂" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Exactly! Measuring breathing rate at rest and after activity helps us see how our body responds to the need for more oxygen when we're active. Our breathing speeds up to supply more Oxy!",
+      "he": "בדיוק! מדידת קצב הנשימה במנוחה ואחרי פעילות עוזרת לנו לראות איך הגוף שלנו מגיב לצורך ביותר חמצן כשאנחנו פעילים. הנשימה שלנו מאיצה כדי לספק יותר אוקסי!"
+    }
+  },
+  {
+    "id": "q27",
+    "topic": {
+      "en": "Breathing Rate Changes",
+      "he": "שינויים בקצב הנשימה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Oxy just finished some 'פעילות גופנית' (physical activity)! 👇 Would you expect Oxy's breathing rate to be FASTER immediately after the activity compared to when resting?",
+      "he": "אוקסי בדיוק סיים 'פעילות גופנית'! 👇 האם הייתם מצפים שקצב הנשימה של אוקסי יהיה מהיר יותר מיד לאחר הפעילות בהשוואה למצב מנוחה?"
+    },
+    "options": [
+      { "text": { "en": "Yes, the body needs more oxygen! 💨", "he": "כן, הגוף צריך יותר חמצן! 💨" }, "isCorrect": true },
+      { "text": { "en": "No, it usually slows down.", "he": "לא, הוא בדרך כלל מאט." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "That's right! When we're active, our muscles work harder and need more oxygen. So, our breathing rate speeds up to bring more Oxy into the body. After we rest for a while, it should slow down again.",
+      "he": "נכון מאוד! כשאנחנו פעילים, השרירים שלנו עובדים קשה יותר וזקוקים ליותר חמצן. לכן, קצב הנשימה שלנו מאיץ כדי להכניס יותר אוקסי לגוף. אחרי שננוח קצת, הוא אמור להאט בחזרה."
+    }
+  },
+  {
+    "id": "q28",
+    "topic": {
+      "en": "Data Analysis in Experiments",
+      "he": "ניתוח נתונים בניסויים"
+    },
+    "type": "open-question",
+    "text": {
+      "en": "Oxy is learning about 'מעבדים נתונים ומסיקים מסקנות' (Processing data and drawing conclusions). 👇 After an experiment measuring breathing rates at different times, why is it important to compare the results from all the different situations?",
+      "he": "אוקסי לומד על 'עיבוד נתונים והסקת מסקנות'. 👇 אחרי ניסוי שמודד קצבי נשימה בזמנים שונים, למה חשוב להשוות את התוצאות מכל המצבים השונים?"
+    },
+    "explanation": {
+      "en": "Great thinking! Comparing the results helps Oxy understand how different conditions (like resting vs. exercising) affect breathing. It's how we find patterns and learn what causes changes in our body, like needing more oxygen during exercise!",
+      "he": "חשיבה מצוינת! השוואת התוצאות עוזרת לאוקסי להבין איך מצבים שונים (כמו מנוחה מול פעילות גופנית) משפיעים על הנשימה. כך אנחנו מוצאים דפוסים ולומדים מה גורם לשינויים בגוף שלנו, כמו הצורך ביותר חמצן בזמן מאמץ!"
+    }
+  },
+  {
+    "id": "q29",
+    "topic": {
+      "en": "Body Systems Cooperation",
+      "he": "שיתוף פעולה בין מערכות הגוף"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Our body systems are team players! When you exercise and your breathing speeds up, which other system works closely with Oxy's respiratory system to get oxygen to your muscles?",
+      "he": "מערכות הגוף שלנו הן שחקניות צוות! כשאתם מתאמנים והנשימה שלכם מאיצה, איזו מערכת נוספת עובדת בשיתוף פעולה הדוק עם מערכת הנשימה של אוקסי כדי להעביר חמצן לשרירים שלכם?"
+    },
+    "options": [
+      { "text": { "en": "The digestive system (for snacks 🥨)", "he": "מערכת העיכול (לחטיפים 🥨)" }, "isCorrect": false },
+      { "text": { "en": "The circulatory system (heart and blood vessels ❤️)", "he": "מערכת הדם (לב וכלי דם ❤️)" }, "isCorrect": true },
+      { "text": { "en": "The skeletal system (your bones 🦴)", "he": "מערכת השלד (העצמות שלכם 🦴)" }, "isCorrect": false },
+      { "text": { "en": "The smelling system (your nose 👃)", "he": "מערכת הריח (האף שלכם 👃)" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You got it! The respiratory system brings Oxy in, and then the circulatory system (your heart pumping blood) takes over to deliver that oxygen to all your hardworking muscles!",
+      "he": "תפסתם! מערכת הנשימה מכניסה את אוקסי, ואז מערכת הדם (הלב שמזרים דם) לוקחת פיקוד כדי להעביר את החמצן הזה לכל השרירים שעובדים קשה!"
+    }
+  },
+  {
+    "id": "q30",
+    "topic": {
+      "en": "Source of Oxygen and CO2",
+      "he": "מקור החמצן והפחמן הדו-חמצני"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is on a mission to bring 'חמצן' (oxygen) into our body for energy! 👇 Where do we get this essential oxygen from?",
+      "he": "אוקסי במשימה להכניס 'חמצן' לגופנו לצורך הפקת אנרגיה! 👇 מאיפה אנחנו מקבלים את החמצן החיוני הזה?"
+    },
+    "options": [
+      { "text": { "en": "From the food we eat 🍔", "he": "מהאוכל שאנחנו אוכלים 🍔" }, "isCorrect": false },
+      { "text": { "en": "From the water we drink 💧", "he": "מהמים שאנחנו שותים 💧" }, "isCorrect": false },
+      { "text": { "en": "From the air we breathe all around us 🌬️", "he": "מהאוויר שאנחנו נושמים מסביבנו 🌬️" }, "isCorrect": true },
+      { "text": { "en": "Our body makes it itself", "he": "הגוף שלנו מייצר אותו בעצמו" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "That's it! We get oxygen from the air we breathe. Our lungs then take this oxygen and transfer it to the blood so Oxy can travel all around the body to help make energy!",
+      "he": "זהו זה! אנחנו מקבלים חמצן מהאוויר שאנחנו נושמים. הריאות שלנו לוקחות את החמצן הזה ומעבירות אותו לדם כדי שאוקסי יוכל לטייל בכל הגוף ולעזור לייצר אנרגיה!"
+    }
+  },
+  {
+    "id": "q31",
+    "topic": {
+      "en": "Respiratory Health & Environment",
+      "he": "בריאות הנשימה והסביבה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Oxy wants to stay healthy! If we are in a 'חדר סגור' (closed room) for a very long time without fresh air, could the air quality change and make it harder for Oxy to do his job well?",
+      "he": "אוקסי רוצה להישאר בריא! אם אנחנו נמצאים ב'חדר סגור' למשך זמן רב מאוד ללא אוויר צח, האם איכות האוויר עלולה להשתנות ולהקשות על אוקסי לעשות את עבודתו היטב?"
+    },
+    "options": [
+      { "text": { "en": "Yes, fresh air is important! 🍃", "he": "כן, אוויר צח חשוב! 🍃" }, "isCorrect": true },
+      { "text": { "en": "No, the air inside is always the same.", "he": "לא, האוויר בפנים תמיד זהה." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You're right! In a closed room, we use up oxygen and breathe out carbon dioxide. If we don't let fresh air in, the amount of oxygen can decrease, and other things can build up, making the air less fresh for Oxy and for us. Ventilating rooms is important!",
+      "he": "צודקים! בחדר סגור, אנחנו צורכים חמצן ונושפים פחמן דו-חמצני. אם לא נאפשר כניסת אוויר צח, כמות החמצן עלולה לקטון, ודברים אחרים יכולים להצטבר, מה שהופך את האוויר לפחות רענן עבור אוקסי ועבורנו. חשוב לאוורר חדרים!"
+    }
+  },
+  {
+    "id": "q32",
+    "topic": {
+      "en": "Protecting Lungs from Pollutants",
+      "he": "הגנה על הריאות מפני מזהמים"
+    },
+    "type": "open-question",
+    "text": {
+      "en": "Oh no, hazards for Oxy! Things like 'חלקיקי אבק ועשן' (dust and smoke particles) in the air can harm our respiratory system. 👇 What is one thing you can do to help protect Oxy and your lungs from yucky stuff in the air?",
+      "he": "אוי לא, סכנות לאוקסי! דברים כמו 'חלקיקי אבק ועשן' באוויר יכולים להזיק למערכת הנשימה שלנו. 👇 מהו דבר אחד שאתם יכולים לעשות כדי לעזור להגן על אוקסי ועל הריאות שלכם מפני דברים מזיקים באוויר?"
+    },
+    "explanation": {
+      "en": "Great ideas! We can try to avoid smoky places, encourage grown-ups not to smoke, wash our hands often (so germs don't get in when we touch our face), and support efforts to keep our air clean. Good job looking out for Oxy!",
+      "he": "רעיונות נהדרים! אנחנו יכולים לנסות להימנע ממקומות אפופי עשן, לעודד מבוגרים לא לעשן, לשטוף ידיים לעיתים קרובות (כדי שחיידקים לא ייכנסו כשאנחנו נוגעים בפנים), ולתמוך במאמצים לשמור על האוויר שלנו נקי. כל הכבוד שאתם דואגים לאוקסי!"
+    }
+  },
+  {
+    "id": "q33",
+    "topic": {
+      "en": "Respiratory Illnesses",
+      "he": "מחלות מערכת הנשימה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Achoo! 'חיידקים ונגיפים' (bacteria and viruses) can cause illnesses like 'דלקת סימפונות' (bronchitis). 👇 What happens in the airways when they get inflamed by these tiny invaders?",
+      "he": "אפצ'י! 'חיידקים ונגיפים' יכולים לגרום למחלות כמו 'דלקת סימפונות' (ברונכיטיס). 👇 מה קורה בדרכי הנשימה כשהן מודלקות על ידי הפולשים הקטנטנים האלה?"
+    },
+    "options": [
+      { "text": { "en": "The airways get much wider for more Oxy.", "he": "דרכי הנשימה מתרחבות מאוד כדי שיכנס יותר אוקסי." }, "isCorrect": false },
+      { "text": { "en": "The airways can get swollen and make it harder for Oxy to pass. 😟", "he": "דרכי הנשימה יכולות להתנפח ולהקשות על אוקסי לעבור. 😟" }, "isCorrect": true },
+      { "text": { "en": "They start making yummy honey. 🍯", "he": "הן מתחילות לייצר דבש טעים. 🍯" }, "isCorrect": false },
+      { "text": { "en": "They turn sparkly blue. ✨", "he": "הן הופכות לכחולות ונוצצות. ✨" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Correct! When germs cause an infection like bronchitis, the airways (bronchi) can become swollen, narrow, and produce extra mucus, making it tougher for Oxy (oxygen) to travel easily to the lungs. That's why we might cough or feel breathless.",
+      "he": "נכון! כשחיידקים גורמים לזיהום כמו ברונכיטיס, דרכי הנשימה (הסימפונות) עלולות להתנפח, להצטמצם ולייצר ליחה נוספת, מה שמקשה על אוקסי (חמצן) לעבור בקלות לריאות. לכן אנחנו עלולים להשתעל או להרגיש קוצר נשימה."
+    }
+  },
+  {
+    "id": "q34",
+    "topic": {
+      "en": "Microorganisms",
+      "he": "מיקרואורגניזמים"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is learning about tiny invaders! We know 'נגיפים (וירוסים)' are even smaller than 'חיידקים' (bacteria). What else is special about where viruses can live and grow?",
+      "he": "אוקסי לומד על פולשים זעירים! אנחנו יודעים ש'נגיפים (וירוסים)' קטנים עוד יותר מ'חיידקים'. מה עוד מיוחד במקום בו נגיפים יכולים לחיות ולגדול?"
+    },
+    "options": [
+      { "text": { "en": "They can live anywhere, even on rocks.", "he": "הם יכולים לחיות בכל מקום, אפילו על סלעים." }, "isCorrect": false },
+      { "text": { "en": "They can only exist and multiply inside the living cells of other organisms. 🦠", "he": "הם יכולים להתקיים ולהתרבות רק בתוך תאים חיים של יצורים אחרים. 🦠" }, "isCorrect": true },
+      { "text": { "en": "They make their own food from sunlight.", "he": "הם מייצרים לעצמם מזון מאור השמש." }, "isCorrect": false },
+      { "text": { "en": "They are a type of tiny plant.", "he": "הם סוג של צמח זעיר." }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "You got it! Viruses are super tiny and need to be inside the living cells of another creature (like us!) to multiply. Bacteria, on the other hand, can often live and reproduce on their own in different environments.",
+      "he": "תפסתם! נגיפים הם סופר קטנטנים וצריכים להיות בתוך תאים חיים של יצור אחר (כמונו!) כדי להתרבות. חיידקים, לעומת זאת, יכולים לעיתים קרובות לחיות ולהתרבות בעצמם בסביבות שונות."
+    }
+  },
+  {
+    "id": "q35",
+    "topic": {
+      "en": "Treating Respiratory Illnesses",
+      "he": "טיפול במחלות מערכת הנשימה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Oh no, Oxy's friend isn't feeling well! If someone has 'דלקת ריאות' (pneumonia) caused by 'חיידקים' (bacteria), doctors might give them antibiotics. 👇 Would these same antibiotics also help if the sickness is caused by a 'נגיף' (virus), like the flu?",
+      "he": "אוי לא, חבר של אוקסי לא מרגיש טוב! אם למישהו יש 'דלקת ריאות' הנגרמת על ידי 'חיידקים', רופאים עשויים לתת לו אנטיביוטיקה. 👇 האם אותה אנטיביוטיקה תעזור גם אם המחלה נגרמת על ידי 'נגיף', כמו שפעת?"
+    },
+    "options": [
+      { "text": { "en": "Yes, antibiotics fight all germs!", "he": "כן, אנטיביוטיקה נלחמת בכל החיידקים!" }, "isCorrect": false },
+      { "text": { "en": "No, antibiotics only work on bacteria, not viruses. 💊", "he": "לא, אנטיביוטיקה פועלת רק על חיידקים, לא על וירוסים. 💊" }, "isCorrect": true }
+    ],
+    "explanation": {
+      "en": "That's correct! Antibiotics are powerful medicines that target bacteria. They don't work against viruses, which cause illnesses like the common cold or the flu. For viruses, usually, rest and fluids are key while your body fights it off.",
+      "he": "נכון מאוד! אנטיביוטיקה היא תרופה חזקה הפועלת נגד חיידקים. היא לא פועלת נגד וירוסים, הגורמים למחלות כמו הצטננות או שפעת. עבור וירוסים, בדרך כלל, מנוחה ונוזלים הם המפתח בזמן שהגוף שלך נלחם בהם."
+    }
+  },
+  {
+    "id": "q36",
+    "topic": {
+      "en": "Medical Technology",
+      "he": "טכנולוגיה רפואית"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Oxy is curious about how doctors help us see inside the body! 👇 Which of these 'אמצעים טכנולוגיים' (technological means) might doctors use to get a better look at what's happening inside the lungs?",
+      "he": "אוקסי סקרן לגבי איך רופאים עוזרים לנו לראות מה קורה בתוך הגוף! 👇 באילו מה'אמצעים הטכנולוגיים' הבאים עשויים רופאים להשתמש כדי לראות טוב יותר מה קורה בתוך הריאות?"
+    },
+    "options": [
+      { "text": { "en": "A super-fast race car 🏎️", "he": "מכונית מרוץ סופר מהירה 🏎️" }, "isCorrect": false },
+      { "text": { "en": "A powerful microscope to see tiny cells 🔬", "he": "מיקרוסקופ חזק לראות תאים קטנים 🔬" }, "isCorrect": false },
+      { "text": { "en": "An X-ray machine 🩻 or a CT scanner", "he": "מכונת רנטגן 🩻 או סורק CT" }, "isCorrect": true },
+      { "text": { "en": "A musical instrument like a flute 🎶", "he": "כלי נגינה כמו חליל 🎶" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Great answer! Doctors use technologies like X-rays and CT scans to take pictures of the inside of your body, including your lungs. This helps them see if everything is okay or if there's an infection or another problem. Microscopes are also used in labs to look at samples!",
+      "he": "תשובה מצוינת! רופאים משתמשים בטכנולוגיות כמו צילומי רנטגן וסריקות CT כדי לצלם את פנים הגוף שלך, כולל הריאות. זה עוזר להם לראות אם הכל בסדר או אם יש זיהום או בעיה אחרת. מיקרוסקופים משמשים גם במעבדות לבדיקת דגימות!"
+    }
+  },
+  {
+    "id": "q37",
+    "topic": {
+      "en": "Antibiotic Use",
+      "he": "שימוש באנטיביוטיקה"
+    },
+    "type": "yes-no",
+    "text": {
+      "en": "Oxy learned about Alona who was given 'אנטיביוטיקה' (antibiotics) for 10 days but wanted to stop after 3 days because she felt better. 👇 Is it super important to take ALL the antibiotics a doctor prescribes, even if you start feeling better sooner?",
+      "he": "אוקסי למד על אלונה שקיבלה 'אנטיביוטיקה' למשך 10 ימים אך רצתה להפסיק אחרי 3 ימים כי הרגישה טוב יותר. 👇 האם זה סופר חשוב לקחת את כל האנטיביוטיקה שהרופא רשם, גם אם מתחילים להרגיש טוב יותר מוקדם יותר?"
+    },
+    "options": [
+      { "text": { "en": "Yes, finish the full course! 👍", "he": "כן, לסיים את כל הטיפול! 👍" }, "isCorrect": true },
+      { "text": { "en": "No, if you feel better, you can stop. 😊", "he": "לא, אם מרגישים טוב יותר, אפשר להפסיק. 😊" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Absolutely yes! Even if you feel better, some tougher bacteria might still be around. If you stop taking antibiotics too early, these survivors can multiply and make you sick again, and they might become resistant to the antibiotic, making it harder to treat next time!",
+      "he": "בהחלט כן! גם אם מרגישים טוב יותר, ייתכן שחלק מהחיידקים העמידים יותר עדיין בסביבה. אם מפסיקים לקחת אנטיביוטיקה מוקדם מדי, השורדים הללו עלולים להתרבות ולגרום לך לחלות שוב, והם עלולים להפוך לעמידים לאנטיביוטיקה, מה שיקשה על הטיפול בפעם הבאה!"
+    }
+  },
+  {
+    "id": "q38",
+    "topic": {
+      "en": "Discovery of Antibiotics",
+      "he": "גילוי האנטיביוטיקה"
+    },
+    "type": "multiple-choice",
+    "text": {
+      "en": "Let's learn some history with Oxy! A scientist named Alexander Fleming made an amazing discovery in 1928 that changed medicine. 👇 What was this first 'אנטיביוטיקה' (antibiotic) he discovered called?",
+      "he": "בואו נלמד קצת היסטוריה עם אוקסי! מדען בשם אלכסנדר פלמינג גילה תגלית מדהימה בשנת 1928 ששינתה את הרפואה. 👇 איך נקראה ה'אנטיביוטיקה' הראשונה שהוא גילה?"
+    },
+    "options": [
+      { "text": { "en": "X-rays", "he": "קרני רנטגן" }, "isCorrect": false },
+      { "text": { "en": "Penicillin 🧪", "he": "פניצילין 🧪" }, "isCorrect": true },
+      { "text": { "en": "Microscope", "he": "מיקרוסקופ" }, "isCorrect": false },
+      { "text": { "en": "Vitamins", "he": "ויטמינים" }, "isCorrect": false }
+    ],
+    "explanation": {
+      "en": "Spot on! Alexander Fleming discovered penicillin, which was the very first antibiotic. This was a huge breakthrough because it gave doctors a way to fight off dangerous bacterial infections and save many lives!",
+      "he": "בול! אלכסנדר פלמינג גילה את הפניצילין, שהייתה האנטיביוטיקה הראשונה. זו הייתה פריצת דרך עצומה מכיוון שהיא נתנה לרופאים דרך להילחם בזיהומים חיידקיים מסוכנים ולהציל חיים רבים!"
+    }
+  },
+  {
+    "id": "q39",
+    "topic": {
+      "en": "Air Pollution",
+      "he": "זיהום אוויר"
+    },
+    "type": "open-question",
+    "text": {
+      "en": "Yikes, 'זיהום אוויר' (air pollution) is bad news for Oxy! 👇 Can you name one thing that makes air polluted and can make Oxy's journey through our lungs tough?",
+      "he": "אייקס, 'זיהום אוויר' זה חדשות רעות לאוקסי! 👇 האם אתם יכולים לנקוב בשם של דבר אחד שהופך את האוויר למזוהם ויכול להקשות על המסע של אוקסי בריאות שלנו?"
+    },
+    "explanation": {
+      "en": "Good examples! Things like 'אבק' (dust), 'אפר' (ash), 'גזים רעילים' (toxic gases) from factories or cars, and 'עשן' (smoke) from fires or cigarettes can pollute the air. These pollutants can irritate our airways and make it harder to breathe, giving Oxy a bumpy ride!",
+      "he": "דוגמאות טובות! דברים כמו 'אבק', 'אפר', 'גזים רעילים' ממפעלים או מכוניות, ו'עשן' משריפות או סיגריות יכולים לזהם את האוויר. מזהמים אלו יכולים לגרות את דרכי הנשימה שלנו ולהקשות על הנשימה, מה שהופך את הנסיעה של אוקסי לקופצנית!"
     }
   }
-] 
+]

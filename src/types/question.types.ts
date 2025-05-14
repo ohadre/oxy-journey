@@ -15,7 +15,7 @@ export interface LocalizedAnswerOption {
 
 export interface Question {
   id: string;               // Unique identifier for the question
-  topic: string;            // e.g., "Lungs", "Breathing Mechanics", "Nasal Passages"
+  topic: LocalizedText;            // e.g., "Lungs", "Breathing Mechanics", "Nasal Passages"
   type: QuestionType;
   text: LocalizedText;      // Question text is now localized
   options?: LocalizedAnswerOption[]; // Uses LocalizedAnswerOption

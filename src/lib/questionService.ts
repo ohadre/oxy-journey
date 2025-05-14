@@ -78,7 +78,7 @@ export const fetchAndResolveQuestions = async (lang: LanguageCode): Promise<Disp
 
       return {
         id: qData.id,
-        topic: qData.topic, // Topic is not localized in this iteration
+        topic: resolveText(qData.topic, lang), // Resolve topic text
         type: qData.type,
         text: questionText,
         options: finalOptions, // Use the potentially defaulted finalOptions for yes-no
