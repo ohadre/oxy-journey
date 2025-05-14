@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'; // Suspense is no longer imported or used here directly
+import React from 'react'; // Ensured React is imported for Suspense
 // useSearchParams is no longer used here
 // import { useSearchParams } from 'next/navigation'; 
 // Scene3D is no longer imported directly here
@@ -14,9 +14,12 @@ import GameSceneLoader from '../../components/GameSceneLoader'; // Import the ne
 // const GameLoadingFallback = () => { ... };
 
 export default function GamePage() {
-  console.log('[GamePage] Rendering, will render GameSceneLoader directly.');
+  console.log('[GamePage] Rendering, will render GameSceneLoader directly wrapped in Suspense.');
 
-  // The Suspense boundary is now inside GameSceneLoader
-  return <GameSceneLoader key="static-game-loader-key" />;
+  return (
+    <React.Suspense fallback={<div>Loading game parameters...</div>}>
+      <GameSceneLoader key="static-game-loader-key" />
+    </React.Suspense>
+  );
   // Retaining the key for now, though its effect might change with Suspense moved.
 } 
