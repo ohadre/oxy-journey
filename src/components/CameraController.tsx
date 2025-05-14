@@ -6,7 +6,7 @@ interface CameraControllerProps {
   oxyRef: React.RefObject<THREE.Mesh | null>;
   offset?: THREE.Vector3;
   smoothness?: number;
-  gameState?: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won';
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions';
 }
 
 const CameraController: React.FC<CameraControllerProps> = ({ 

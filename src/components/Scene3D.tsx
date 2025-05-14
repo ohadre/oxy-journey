@@ -23,6 +23,7 @@ import QuestionModal from './ui/QuestionModal';
 import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
 import WinModal from './ui/WinModal'; // NEW: Import WinModal
 import FinishLine from './FinishLine'; // NEW: Import FinishLine
+import InstructionsModal from './ui/InstructionsModal'; // NEW: Import InstructionsModal
 import * as Tone from 'tone'; // Import Tone.js
 
 // --- NEW: Define Tunnel End Z-coordinate ---
@@ -50,17 +51,18 @@ const keyboardMap = [
 ];
 
 // --- Define Game State Type (NEW) ---
-type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won'; // Added 'won'
+type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Added 'instructions'
 // -----------------------------------
 
 // --- Define Props for Scene3D ---
 interface Scene3DProps {
   currentLanguage: LanguageCode;
+  showInstructions?: boolean; // NEW PROP
 }
 // --------------------------------
 
-export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destructure currentLanguage from props
-  console.log(`[Scene3D] Component rendering/re-rendering. Lang: ${currentLanguage}`); // LOG: Component render
+export default function Scene3D({ currentLanguage, showInstructions }: Scene3DProps) { // Destructure props
+  console.log(`[Scene3D] Component rendering/re-rendering. Lang: ${currentLanguage}, ShowInstructions: ${showInstructions}`); // LOG: Component render
 
   const [isMounted, setIsMounted] = useState(false);
   // const worldSize = 10; // worldSize is declared but not used, can be removed if truly unused later
@@ -92,6 +94,8 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   const invincibilityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [gameSessionId, setGameSessionId] = useState(0); // NEW: For re-keying components on restart
   const [finalScore, setFinalScore] = useState<{time: number, questions: number, lives: number} | null>(null); // NEW: For WinModal score
+  const [isInstructionsModalVisible, setIsInstructionsModalVisible] = useState(false); // NEW: For InstructionsModal
+  const [hasShownInstructions, setHasShownInstructions] = useState(false); // NEW: To track if instructions have been shown this session
 
   // Add portal container ref (if used by a future modal, keep; otherwise, can be removed if QuestionOverlay is gone)
   // const portalContainerRef = useRef<HTMLDivElement>(null);
@@ -214,13 +218,24 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   
   // Set gameState to playing once assets are loaded and component is mounted
   useEffect(() => {
-      if (isMounted && !isAssetsLoading && gameState === 'loading') { // Ensure this only runs once when transitioning from loading
-          setGameState('playing');
-          setGameStartTime(Date.now()); // Start game timer
-          setElapsedTimeInSeconds(0); // Reset elapsed time
-          console.log('[Scene3D] Game state set to playing, timer started');
+      if (isMounted && !isAssetsLoading && gameState === 'loading') {
+          // Show instructions only if requested, not yet shown this session, and it's the very first game load (gameSessionId === 0)
+          if (showInstructions && !hasShownInstructions && gameSessionId === 0) {
+            console.log('[Scene3D] Conditions met to show instructions modal for the first time.');
+            setGameState('instructions');
+            setIsInstructionsModalVisible(true);
+            // It's important NOT to set setHasShownInstructions(true) here,
+            // as the user might close the game before interacting with the modal.
+            // It should be set when the modal is actively closed by the user.
+          } else {
+            // If instructions were already shown, or not requested, or not the very first session load with showInstructions=true
+            setGameState('playing');
+            setGameStartTime(Date.now()); // Start game timer
+            setElapsedTimeInSeconds(0); // Reset elapsed time
+            console.log('[Scene3D] Game state set to playing, timer started');
+          }
       }
-  }, [isMounted, isAssetsLoading, gameState]); // Added gameState to dependencies
+  }, [isMounted, isAssetsLoading, gameState, showInstructions, hasShownInstructions, gameSessionId, isInstructionsModalVisible]); // Added hasShownInstructions and isInstructionsModalVisible to dependencies
 
   // --- Update elapsed time when game is playing ---
   useEffect(() => {
@@ -416,6 +431,8 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
     }
     setIsOxyInvincible(false);
     setFinalScore(null); // NEW: Reset final score
+    setIsInstructionsModalVisible(false); // Ensure instructions modal is hidden on restart
+    setHasShownInstructions(false); // Reset for potential re-trigger if gameSessionId logic were different, safe to reset.
 
     setLives(INITIAL_LIVES);
     setAnsweredCorrectlyIds([]);
@@ -437,6 +454,17 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
     console.log('[Scene3D] Game restart initiated. State set to loading. New session ID:', gameSessionId + 1);
   }, [gameSessionId]); // Added gameSessionId to dependency array
   // -------------------------
+
+  // --- NEW: Instructions Modal Handler ---
+  const handleCloseInstructionsModal = useCallback(() => {
+    console.log('[Scene3D] Instructions modal closed by user.');
+    setIsInstructionsModalVisible(false);
+    setHasShownInstructions(true); // Mark instructions as shown so they don't reappear this session.
+    // Transition to loading, which will then transition to playing via the useEffect
+    setGameState('loading'); 
+    // gameStartTime will be set when gameState transitions from 'loading' to 'playing'
+  }, []); // Dependencies for useCallback should be empty if it only calls setters for state defined in the component.
+  // -------------------------------------
 
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
 
@@ -559,7 +587,8 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
     gameState,
     questionError,
     isAssetsLoading,
-    finalScore
+    finalScore,
+    isInstructionsModalVisible // NEW: Log instructions modal visibility
   });
 
   // --- LivesIndicator Rendering (Modified for debug) ---
@@ -718,6 +747,15 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
           isVisible={gameState === 'won'}
           onRestart={handleRestartGame}
           scoreData={finalScore}
+          currentLang={currentLanguage}
+        />
+      )}
+
+      {/* NEW: Render the InstructionsModal */}
+      {isMounted && (
+        <InstructionsModal
+          isVisible={isInstructionsModalVisible}
+          onClose={handleCloseInstructionsModal}
           currentLang={currentLanguage}
         />
       )}

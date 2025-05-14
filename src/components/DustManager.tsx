@@ -46,7 +46,7 @@ export interface DustInstance {
 interface DustManagerProps {
   dustParticles: DustInstance[];
   onDustChange: (updatedDust: DustInstance[]) => void;
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won'; // Add gameState prop
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Add gameState prop
 }
 
 const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, gameState }) => {

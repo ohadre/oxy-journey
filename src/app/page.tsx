@@ -22,8 +22,14 @@ export default function HomePage() {
   const mainTitleText = currentLang === 'he' ? 'המסע של חמצנון' : "Oxy's Journey"; // New dynamic title
 
   const handleStartGame = () => {
+    console.log("[HomePage] Start Game button clicked. Language:", currentLang);
     setIsLoading(true);
-    router.push(`/game?lang=${currentLang}`);
+    // Navigate to the game page with the selected language and showInstructions flag
+    router.push(`/game?lang=${currentLang}&showInstructions=true`);
+  };
+
+  const toggleLanguage = () => {
+    // ... existing code ...
   };
 
   if (isLoading) {

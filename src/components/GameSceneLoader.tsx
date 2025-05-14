@@ -1,99 +1,54 @@
 'use client';
 
-import React, { useMemo, Suspense, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { LanguageCode } from '../types/question.types'; // Adjust path
-import { LoadingManager } from './LoadingManager'; // Import LoadingManager
+import React, { Suspense, useEffect, useMemo, use } from 'react';
+// Remove direct useSearchParams import if searchParams are passed as props
+// import { useSearchParams } from 'next/navigation'; 
+import Scene3D from './Scene3D'; 
+import { LoadingManager as LoadingProvider } from './LoadingManager'; // Renamed to LoadingProvider for clarity if preferred
+import { LanguageCode } from '../types/question.types';
 
-// Dynamically import Scene3D with no SSR
-const Scene3D = dynamic(() => import('./Scene3D'), { // Adjust path as necessary
-  ssr: false,
-  loading: () => (
-    <div style={{ 
-      width: '100vw', 
-      height: '100vh', 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      backgroundColor: '#000',
-      color: 'white',
-      fontSize: '2rem'
-    }}>
-      Preparing 3D environment...
-    </div>
-  )
-});
+const GameLoadingFallback = () => (
+  <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black', color: 'white', fontSize: '2rem' }}>
+    Loading 3D Assets...
+  </div>
+);
 
-// Define GameLoadingFallback here or import if it's shared
-// This fallback is for the Suspense boundary if Scene3D itself needs to suspend
-// The dynamic import's loading prop handles initial component load
-const GameLoadingFallback = () => {
-  return (
-    <div style={{ 
-      width: '100vw', 
-      height: '100vh', 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      backgroundColor: '#000',
-      color: 'white',
-      fontSize: '2rem'
-    }}>
-      Loading 3D Scene Components... 
-    </div>
-  );
-};
-
+// Define props for GameSceneLoader to accept searchParams
 interface GameSceneLoaderProps {
-  // No props needed from parent initially, it fetches its own data via hook
+  // searchParams can be an object or a Promise that resolves to an object
+  searchParams?: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const GameSceneLoader: React.FC<GameSceneLoaderProps> = () => {
-  const searchParams = useSearchParams();
-  const langParam = searchParams?.get('lang');
+const GameSceneLoader: React.FC<GameSceneLoaderProps> = ({ searchParams: searchParamsProp }) => {
+  // Use React.use to resolve the searchParams if it's a Promise or handle it directly if it's an object.
+  // This aligns with the error message about unwrapping searchParams.
+  const resolvedSearchParams = searchParamsProp ? use(searchParamsProp) : {};
 
-  const gameLanguage: LanguageCode = useMemo(() => {
+  const currentLanguage: LanguageCode = useMemo(() => {
+    const langParam = resolvedSearchParams?.['lang'];
     console.log('[GameSceneLoader] Calculating gameLanguage. langParam:', langParam);
-    if (langParam === 'he') {
-      return 'he';
-    }
+    if (langParam === 'he') return 'he';
     return 'en'; // Default to 'en'
-  }, [langParam]);
+  }, [resolvedSearchParams]);
 
-  // Add effect to focus the window on load
+  const showInstructions: boolean = useMemo(() => {
+    const instructionParam = resolvedSearchParams?.['showInstructions'];
+    return instructionParam === 'true';
+  }, [resolvedSearchParams]);
+
+  console.log(`[GameSceneLoader] Effective Lang: ${currentLanguage}, ShowInstructions: ${showInstructions}`);
+
   useEffect(() => {
-    // Force the window to have focus on component mount
-    window.focus();
-    console.log('[GameSceneLoader] Window focused.');
-
-    // Focus handling function
-    const handleWindowClick = () => {
-      window.focus();
-    };
-
-    // Add event listeners
-    window.addEventListener('click', handleWindowClick);
-    
-    return () => {
-      window.removeEventListener('click', handleWindowClick);
-    };
+    // Focus the window when the component mounts, useful for keyboard controls
+    window.focus(); 
   }, []);
 
-  console.log('[GameSceneLoader] Rendering Scene3D with language:', gameLanguage);
   return (
-    // The outer div from Scene3DWrapper for focus and event handling might be useful
-    <div 
-      className="w-full h-screen bg-black" 
-      tabIndex={0} 
-      // onKeyDown={(e) => e.stopPropagation()} // This might interfere with game controls, let's test without it first
-    >
-      <LoadingManager>
-        <Suspense fallback={<GameLoadingFallback />}>
-          <Scene3D currentLanguage={gameLanguage} />
-        </Suspense>
-      </LoadingManager>
-    </div>
+    <LoadingProvider>
+      <Suspense fallback={<GameLoadingFallback />}>
+        <Scene3D currentLanguage={currentLanguage} showInstructions={showInstructions} />
+      </Suspense>
+    </LoadingProvider>
   );
 };
 
