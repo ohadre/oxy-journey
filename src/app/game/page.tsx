@@ -15,17 +15,17 @@ import GameSceneLoader from '@/components/GameSceneLoader'; // Import the new lo
 
 // Define the props for the Page component if you need to access searchParams
 interface GamePageProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>; // Expect Promise here
 }
 
 // export default function GamePage() { // OLD
-export default function GamePage({ searchParams }: GamePageProps) { // NEW: Destructure searchParams
+export default function GamePage({ searchParams: searchParamsPromise }: GamePageProps) { // Rename to denote Promise
   console.log('[GamePage] Rendering, will render GameSceneLoader directly wrapped in Suspense.');
 
   return (
     <React.Suspense fallback={<div>Loading 3D Scene...</div>}> {/* Suspense for GameSceneLoader itself if it were to do heavy async work before Scene3D, or for Scene3D */}
-      {/* Pass searchParams to GameSceneLoader, wrapped in Promise.resolve */}
-      <GameSceneLoader searchParams={Promise.resolve(searchParams || {})} />
+      {/* Pass the searchParamsPromise directly to GameSceneLoader */}
+      <GameSceneLoader searchParams={searchParamsPromise} />
     </React.Suspense>
   );
   // Retaining the key for now, though its effect might change with Suspense moved.
