@@ -48,18 +48,15 @@ const WinModal: React.FC<WinModalProps> = ({ isVisible, onRestart, scoreData, cu
       <div className="bg-gradient-to-br from-green-400 to-blue-500 p-6 sm:p-8 rounded-xl shadow-2xl text-white text-center max-w-md w-full transform transition-all scale-100 opacity-100">
         <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">{langMessages.title}</h2>
         
-        {/* Placeholder for User-Provided Image */}
+        {/* User-Provided Image */}
         <div className="my-4 sm:my-6">
-          <p className="text-sm text-gray-200">(Image Placeholder: User will provide an image)</p>
-          {/* Example of how image could be added later:
           <Image 
-            src="/path/to/your/victory-image.png" // User will provide this path
+            src="/textures/win.png" // Path to the image in the public directory
             alt={langMessages.imageAlt}
-            width={200} 
-            height={150} 
-            className="mx-auto rounded-lg" 
+            width={200} // Example width, adjust as needed
+            height={150} // Example height, adjust as needed
+            className="mx-auto rounded-lg shadow-lg" 
           /> 
-          */}
         </div>
 
         <div className="space-y-2 sm:space-y-3 text-lg sm:text-xl mb-6 sm:mb-8">

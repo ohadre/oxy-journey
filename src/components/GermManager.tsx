@@ -6,8 +6,8 @@ import * as THREE from 'three';
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
 const OUT_OF_BOUNDS_Z = 160;
-const MAX_GERMS = 20;
-const SPAWN_INTERVAL = 1.5; // seconds
+const MAX_GERMS = 30;
+const SPAWN_INTERVAL = 1.0; // seconds
 const INITIAL_SPAWN_DELAY = 1.5; // seconds
 
 function randomXY(radius: number): [number, number] {

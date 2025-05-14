@@ -6,8 +6,8 @@ import * as THREE from 'three';
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
 const OUT_OF_BOUNDS_Z = 160;
-const MAX_DUST = 15; // Define max dust particles
-const SPAWN_INTERVAL = 1.0; // Define spawn interval (seconds)
+const MAX_DUST = 25; // Define max dust particles
+const SPAWN_INTERVAL = 0.7; // Define spawn interval (seconds)
 const INITIAL_SPAWN_DELAY = 2.0; // seconds delay after loading before first spawn
 
 function randomXY(radius: number): [number, number] {

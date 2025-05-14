@@ -22,6 +22,7 @@ import { createPortal } from 'react-dom';
 import QuestionModal from './ui/QuestionModal';
 import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
 import WinModal from './ui/WinModal'; // NEW: Import WinModal
+import FinishLine from './FinishLine'; // NEW: Import FinishLine
 import * as Tone from 'tone'; // Import Tone.js
 
 // --- NEW: Define Tunnel End Z-coordinate ---
@@ -615,6 +616,7 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
           
           <Suspense fallback={null}>
             <Tunnel key={`tunnel-${gameSessionId}`} />
+            <FinishLine key={`finishline-${gameSessionId}`} position={[0, 0, TUNNEL_END_Z]} />
           </Suspense>
           <GermManager
             key={`germ-manager-${gameSessionId}`}

@@ -85,6 +85,9 @@ To understand this project in depth, please refer to the following:
 - **Enemy System**: Implemented germs that spawn and navigate toward the player with fluid movement.
 - **Comprehensive Loading System**: Added a robust asset preloading system with visual progress feedback to prevent white flashes during transitions.
 - **Deployment & Infrastructure**: Consolidated Vercel deployment pipeline for streamlined continuous deployment.
+- **Game Win Condition & Modal**: Implemented a full win condition (reach tunnel end + minimum unique correct answers + lives > 0). A "You Won!" modal (`WinModal.tsx`) now appears with the player's score (time, questions answered, lives remaining) and offers a restart option. This modal supports English and Hebrew.
+- **Question Image Support**: Added the ability to include images with questions. The `QuestionModal.tsx` now displays these images, using the question topic as alt text. Images are stored in `public/images/questions/`.
+- **Home Page Redesign (v0)**: Successfully implemented a new home page design based on user-provided v0 code. This involved updating `tailwind.config.ts`, `globals.css`, `layout.tsx`, and `page.tsx`, creating a `ThemeProvider`, and debugging issues related to `next-themes`, CSS paths, Tailwind configuration, and image paths. The page now features a responsive background, dark/light mode toggle (via `ThemeProvider`), and language selection (English/Hebrew) with a localized title.
 
 ## 🏁 Getting Started / Setup
 

@@ -91,10 +91,10 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
     -   ✅ `DONE` 2. Track Unique Correct Answers (`answeredCorrectlyIds` set, `MIN_CORRECT_UNIQUE_QUESTIONS` const).
     -   ✅ `DONE` 3. Implement Win Check Logic (`checkWinConditionsAndProceed()`, sets `gameState` to `'won'` or `'game_over'`).
     -   ✅ `DONE` 4. Implement Game Restart Logic (Reset timer, entities via re-keying, invincibility, `gameState` to `loading`).
-    -   ✅ `DONE` 5. Display Win Modal with Score & Restart Option.
-    -   ⏳ `PENDING USER FEEDBACK` 6. Refine/Confirm Win/Loss/Restart flow based on testing.
-    -   📄 `TODO` 7. Create a basic scoring display/calculation (details TBD post-win condition implementation).
-    -   📄 `TODO` 8. Add placeholder for win/game over celebratory images/sounds (assets to be provided by user).
+    -   ✅ `DONE` 5. Create and Integrate `WinModal.tsx` (Display score, offer restart, localize EN/HE).
+    -   ⏳ `PENDING USER FEEDBACK / NEXT` 6. Create and Integrate `GameOverModal.tsx` (If `lives <= 0` or win conditions not met at tunnel end, offer restart, localize EN/HE).
+    -   ◻️ `TODO` 7. Add a Placeholder Image to `WinModal.tsx` (User to provide image, then integrate).
+    -   ✅ `DONE` 8. Basic Scoring Display & Logic (Log current score factors: time, unique correct answers, lives. `WinModal` shows these).
     -   📄 `TODO` 9. Documentation update for new game mechanics.
 
 ### UI/UX

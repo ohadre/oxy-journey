@@ -207,3 +207,22 @@
 
 ### Next Steps
 - Update other documentation files.
+
+## May 14, 2025 (Continued)
+
+### Game Completion & Scoring - Win Modal Implementation & Debugging
+- **Implemented `WinModal.tsx`**: Created a new modal component to display when the player wins the game.
+    - Includes display of score (time, questions answered, lives remaining).
+    - Supports localization (English and Hebrew).
+    - Contains a placeholder for a future celebratory image.
+- **Integrated `WinModal` into `Scene3D.tsx`**:
+    - Added state `finalScore` to hold the score data when the game is won.
+    - Updated `checkWinConditionsAndProceed` to populate `finalScore` and set `gameState` to `'won'`.
+    - Ensured `finalScore` is reset in `handleRestartGame`.
+    - Conditionally rendered the `WinModal` when `gameState` is `'won'` and `finalScore` is available.
+- **Debugged Modal Display Logic**:
+    - Initially, the modal was not appearing despite win conditions being met.
+    - Added detailed logging to `Scene3D.tsx` to trace `gameState` and `finalScore` through render cycles.
+    - Identified and removed a problematic conditional `console.log` statement that was interfering with JSX rendering and causing a linter error.
+    - Confirmed that `gameState` was correctly transitioning to `'won'` and `finalScore` was being populated.
+- **Outcome**: Win Modal now displays correctly upon meeting win conditions, showing the player's score and offering a "Play Again" option. Hebrew localization confirmed functional.
