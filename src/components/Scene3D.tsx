@@ -30,7 +30,7 @@ import * as Tone from 'tone'; // Import Tone.js
 // --- NEW: Define Tunnel End Z-coordinate ---
 const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
 // --- NEW: Minimum unique questions for win ---
-const MIN_CORRECT_UNIQUE_QUESTIONS = 3; // Example value, can be tuned
+const MIN_CORRECT_UNIQUE_QUESTIONS = 10; // Example value, can be tuned
 // -------------------------------------------
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
@@ -403,16 +403,16 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       return;
     }
 
-    // Ensure the answer is for the current question
     if (currentDisplayQuestion.id !== questionId) {
       console.warn('[Scene3D] Answer received for a different question ID than current. Ignoring.', 
                    { currentId: currentDisplayQuestion.id, receivedId: questionId });
-      // Do not close the modal or change state if it's for a mismatched question
       return;
     }
 
     let isCorrect = false;
-    switch (currentDisplayQuestion.type) {
+    const questionType = currentDisplayQuestion.type; // Store type for later check
+
+    switch (questionType) {
       case 'multiple-choice':
       case 'yes-no':
         if (typeof answerDetails.selectedOptionIndex === 'number') {
@@ -423,27 +423,35 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         }
         break;
       case 'open-question':
-        // For PoC, any non-empty answer is considered correct
         isCorrect = !!(answerDetails.openAnswerText && answerDetails.openAnswerText.trim());
         console.log(`[Scene3D] Open Question Answer: User input: \"${answerDetails.openAnswerText}\". Considered Correct (PoC): ${isCorrect}`);
         break;
       default:
-        console.warn('[Scene3D] Unknown question type in handleAnswer:', currentDisplayQuestion.type);
+        console.warn('[Scene3D] Unknown question type in handleAnswer:', questionType);
     }
 
     if (isCorrect) {
       setAnsweredCorrectlyIds(prev => [...new Set([...prev, currentDisplayQuestion.id])]);
       console.log('[Scene3D] Answer CORRECT. answeredCorrectlyIds updated.');
-      if (correctAnswerSynth) { // Play correct answer sound
+      if (correctAnswerSynth) {
         correctAnswerSynth.triggerAttackRelease("C5", "8n", Tone.now() + 0.01);
         console.log('[Scene3D] Correct answer sound played.');
       }
-      if (lives > 0) { // Check current lives before any updates for this turn
+      if (lives > 0) {
         activateOxyInvincibility(3000);
+      }
+      // If it's an open question, modal will handle its own state for showing explanation.
+      // So, we don't hide it or change game state here.
+      if (questionType !== 'open-question') {
+        setIsModalVisible(false);
+        setCurrentDisplayQuestion(null);
+        if (gameState !== 'game_over') {
+          setGameState('playing');
+        }
       }
     } else {
       // Incorrect answer
-      if (incorrectAnswerSynth) { // Play incorrect answer sound
+      if (incorrectAnswerSynth) {
         incorrectAnswerSynth.triggerAttackRelease("C3", "4n", Tone.now() + 0.01);
         console.log('[Scene3D] Incorrect answer sound played.');
       }
@@ -458,10 +466,52 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
             console.log('[Scene3D] Game over sound played (handleAnswer).');
           } else {
             console.warn('[Scene3D] Game over sound player not ready or not loaded (handleAnswer).');
-             if (gameOverSoundPlayer) { // Attempt to load if not loaded
+             if (gameOverSoundPlayer) {
                 gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
                 .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
                 .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleAnswer):", e));
+            }
+          }
+        } else {
+          activateOxyInvincibility(3000);
+        }
+        return newLives;
+      });
+      // For incorrect answers (any type), close modal and return to play
+      setIsModalVisible(false);
+      setCurrentDisplayQuestion(null);
+      if (gameState !== 'game_over') {
+        setGameState('playing');
+      }
+    }
+    // Removed general modal closing from here; handled conditionally above.
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth, gameOverSoundPlayer]);
+
+  const handleCloseModal = useCallback((isContinuation?: boolean) => {
+    if (isContinuation) {
+      console.log('[Scene3D] Modal closed after explanation (continuation). No penalty.');
+      // No penalty, just close and resume
+    } else {
+      console.log('[Scene3D] Modal closed by user (penalty applied).');
+      if (incorrectAnswerSynth) {
+        incorrectAnswerSynth.triggerAttackRelease("G2", "4n", Tone.now() + 0.01);
+        console.log('[Scene3D] Modal close (penalty) sound played.');
+      }
+      setLives(prevLives => {
+        const newLives = Math.max(0, prevLives - 1);
+        console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
+        if (newLives <= 0) {
+          setGameState('game_over');
+          console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
+          if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
+            gameOverSoundPlayer.start(Tone.now());
+            console.log('[Scene3D] Game over sound played (handleCloseModal).');
+          } else {
+            console.warn('[Scene3D] Game over sound player not ready or not loaded (handleCloseModal).');
+            if (gameOverSoundPlayer) {
+              gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
+              .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
+              .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleCloseModal):", e));
             }
           }
         } else {
@@ -473,49 +523,9 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
 
     setIsModalVisible(false);
     setCurrentDisplayQuestion(null);
-    // If, after all updates, gameState is not 'game_over', set to playing.
-    // This needs to account for the async nature of setGameState within setLives.
-    // A more robust way would be to use an effect that reacts to lives changes.
-    // For now, we rely on the sequence and check the current gameState value in closure.
-    if (gameState !== 'game_over') { 
-      setGameState('playing');
-    } 
-  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth, gameOverSoundPlayer]);
-
-  const handleCloseModal = useCallback(() => {
-    console.log('[Scene3D] Modal closed by user (penalty applied).');
-    if (incorrectAnswerSynth) { // Play incorrect/penalty sound
-      incorrectAnswerSynth.triggerAttackRelease("G2", "4n", Tone.now() + 0.01);
-      console.log('[Scene3D] Modal close (penalty) sound played.');
-    }
-    setLives(prevLives => {
-      const newLives = Math.max(0, prevLives - 1);
-      console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
-      if (newLives <= 0) {
-        setGameState('game_over');
-        console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
-        if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
-          gameOverSoundPlayer.start(Tone.now());
-          console.log('[Scene3D] Game over sound played (handleCloseModal).');
-        } else {
-          console.warn('[Scene3D] Game over sound player not ready or not loaded (handleCloseModal).');
-          if (gameOverSoundPlayer) { // Attempt to load if not loaded
-            gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
-            .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
-            .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleCloseModal):", e));
-          }
-        }
-      } else {
-        activateOxyInvincibility(3000);
-      }
-      return newLives;
-    });
-
-    setIsModalVisible(false);
-    setCurrentDisplayQuestion(null);
     if (gameState !== 'game_over') {
       setGameState('playing');
-    } 
+    }
   }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth, gameOverSoundPlayer]);
   // ------------------------------------
 

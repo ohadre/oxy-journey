@@ -20,7 +20,7 @@
       "en": "You got it! The 'קנה נשימה' (trachea), also called the windpipe, is the main passageway for air to travel from your throat to your lungs.",
       "he": "נכון מאוד! 'קנה הנשימה' הוא המעבר הראשי של האוויר מהגרון שלך אל הריאות."
     },
-    "image_url": "/images/questions/IMG_2495.jpg"
+    "image_url": "/images/questions/IMG_2495.jpeg"
   },
   {
     "id": "q8",
@@ -41,7 +41,7 @@
       "en": "That's right! When you breathe out or blow air, your diaphragm relaxes and moves up, helping to push air out of your lungs, like when blowing up a balloon!",
       "he": "זה נכון! כשנושפים אוויר החוצה, כמו בניפוח בלון, הסרעפת נרפית ועולה למעלה, ועוזרת לדחוף את האוויר אל מחוץ לריאות!"
     },
-    "image_url": "/images/questions/IMG_2495.jpg"
+    "image_url": "/images/questions/IMG_2495.jpeg"
   },
   {
     "id": "q9",
@@ -64,7 +64,7 @@
       "en": "Exactly! The 'מכסה הגרון' (epiglottis) is like a little lid that covers your windpipe (trachea) when you swallow, making sure food goes down the esophagus (food pipe) and not into your lungs where Oxy needs to go!",
       "he": "בדיוק! 'מכסה הגרון' הוא כמו מכסה קטן שמכסה את קנה הנשימה שלך כשאתה בולע, ומוודא שהאוכל יורד בושט (צינור האוכל) ולא נכנס לריאות, המקום שאליו אוקסי צריך להגיע!"
     },
-    "image_url": "/images/questions/IMG_2504.jpg"
+    "image_url": "/images/questions/IMG_2504.jpeg"
   },
   {
     "id": "q10",
@@ -87,7 +87,7 @@
       "en": "You're a star! The 'נאדיות ריאה' (alveoli) are where oxygen (Oxy!) passes into the 'נימי דם' (blood) to travel all over your body, and waste gas (carbon dioxide) leaves the blood to be breathed out.",
       "he": "אתה כוכב! 'נאדיות הריאה' הן המקום בו חמצן (אוקסי!) עובר אל 'נימי הדם' כדי לטייל בכל הגוף שלך, וגז הפסולת (פחמן דו-חמצני) עוזב את הדם כדי להינשף החוצה."
     },
-    "image_url": "/images/questions/IMG_2509.jpg"
+    "image_url": "/images/questions/IMG_2509.jpeg"
   },
   {
     "id": "q11",
@@ -108,7 +108,7 @@
       "en": "Correct! The trachea (windpipe) is like a highway for air, and then it splits into two main bronchi, which are like roads leading air into the right and left lungs.",
       "he": "נכון! קנה הנשימה הוא כמו כביש מהיר לאוויר, ואז הוא מתפצל לשני סימפונות ראשיים, שהם כמו כבישים המובילים אוויר לריאה הימנית והשמאלית."
     },
-    "image_url": "/images/questions/IMG_2510.jpg"
+    "image_url": "/images/questions/IMG_2510.jpeg"
   },
   {
     "id": "q12",
@@ -131,7 +131,7 @@
       "en": "Great job! When you breathe in, your ribs move up and out, and your diaphragm flattens and moves down. This makes more space in your chest, so air rushes into your lungs!",
       "he": "עבודה מצוינת! כששואפים, הצלעות זזות למעלה והחוצה, והסרעפת משתטחת ויורדת למטה. זה יוצר יותר מקום בחזה, כך שהאוויר נשאב פנימה לריאות!"
     },
-    "image_url": "/images/questions/IMG_2522.jpg"
+    "image_url": "/images/questions/IMG_2522.jpeg"
   },
   {
     "id": "q13",
@@ -154,7 +154,7 @@
       "en": "You nailed it! When you breathe out, your diaphragm relaxes and moves back up to its dome shape, helping to push air out of your lungs.",
       "he": "קלעת בול! כשנושפים, הסרעפת נרפית וחוזרת למעלה לצורת הכיפה שלה, ועוזרת לדחוף את האוויר החוצה מהריאות."
     },
-    "image_url": "/images/questions/IMG_2527.jpg"
+    "image_url": "/images/questions/IMG_2527.jpeg"
   },
   {
     "id": "q14",
@@ -175,7 +175,7 @@
       "en": "That's right! Our brain controls our breathing automatically to make sure we always get the oxygen we need. So, even if we try to hold our breath, our brain will eventually make us breathe.",
       "he": "נכון מאוד! המוח שלנו שולט בנשימה באופן אוטומטי כדי לוודא שאנחנו תמיד מקבלים את החמצן שאנחנו צריכים. לכן, גם אם ננסה לעצור את הנשימה, המוח שלנו בסופו של דבר יגרום לנו לנשום."
     },
-    "image_url": "/images/questions/IMG_2529.jpg"
+    "image_url": "/images/questions/IMG_2529.jpeg"
   },
   {
     "id": "q15",
@@ -198,7 +198,7 @@
       "en": "Exactly! Just like us, owls and other animals breathe in air to get oxygen. Their respiratory system helps them take in oxygen, which they need to live and fly!",
       "he": "בדיוק! בדיוק כמונו, ינשופים ובעלי חיים אחרים נושמים אוויר כדי לקבל חמצן. מערכת הנשימה שלהם עוזרת להם לקלוט חמצן, לו הם זקוקים כדי לחיות ולעוף!"
     },
-    "image_url": "/images/questions/IMG_2534.jpg"
+    "image_url": "/images/questions/IMG_2534.jpeg"
   },
   {
     "id": "q16",
@@ -277,7 +277,7 @@
       "en": "That's right! When you exhale, your ribs move down and inward, and your diaphragm relaxes and moves up. This makes the space in your chest smaller, pushing air out of your lungs.",
       "he": "נכון מאוד! כשנושפים, הצלעות נעות מטה ופנימה, והסרעפת נרגעת ועולה למעלה. זה מקטין את החלל בחזה ודוחף את האוויר אל מחוץ לריאות."
     },
-    "image_url": "/images/questions/IMG_2527.jpg"
+    "image_url": "/images/questions/IMG_2527.jpeg"
   },
   {
     "id": "q20",
@@ -298,7 +298,7 @@
       "en": "Exactly! Even if we try to hold our breath, our brainstem (the part of the brain in charge of vital functions) monitors oxygen and carbon dioxide levels and will ultimately override our attempt and force us to breathe to keep us safe.",
       "he": "בדיוק! גם אם ננסה לעצור את הנשימה, גזע המוח (החלק במוח שאחראי על תפקודים חיוניים) מנטר את רמות החמצן והפחמן הדו-חמצני, ובסופו של דבר יתגבר על הניסיון שלנו ויאלץ אותנו לנשום כדי לשמור עלינו."
     },
-    "image_url": "/images/questions/IMG_2529.jpg" 
+    "image_url": "/images/questions/IMG_2529.jpeg" 
   },
   {
     "id": "q21",
@@ -363,7 +363,7 @@
       "en": "Absolutely! Flying is hard work and requires a lot of energy. Birds, like owls, have very efficient respiratory systems to get the maximum amount of oxygen needed to power their flight muscles.",
       "he": "בהחלט! תעופה היא עבודה קשה ודורשת הרבה אנרגיה. לציפורים, כמו תנשמות, יש מערכות נשימה יעילות מאוד כדי לקבל את כמות החמצן המרבית הדרושה להפעלת שרירי התעופה שלהן."
     },
-    "image_url": "/images/questions/IMG_2534.jpg"
+    "image_url": "/images/questions/IMG_2534.jpeg"
   },
   {
     "id": "q24",

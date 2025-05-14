@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DisplayQuestion } from '../../types/question.types'; // Adjust path as needed
 import Image from 'next/image'; // Import next/image
@@ -15,7 +15,7 @@ interface QuestionModalProps {
     },
     questionId: string
   ) => void;
-  onClose: () => void;
+  onClose: (isContinuation?: boolean) => void; // Modified to accept optional flag
 }
 
 const modalVariants = {
@@ -43,26 +43,38 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
   onAnswer, 
   onClose 
 }) => {
-  // State for open question text input
   const [openInputText, setOpenInputText] = useState('');
+  const [isShowingExplanation, setIsShowingExplanation] = useState(false); // New state
 
   const titleText = currentLang === 'he' ? '!חידון חמצנון' : 'Oxy Challenge!';
 
-  // Reset input text when question changes or modal becomes hidden
   useEffect(() => {
-    if (!isVisible || (question && question.type !== 'open-question')) {
+    if (!isVisible) {
       setOpenInputText('');
-    } else if (isVisible && question && question.type === 'open-question') {
-      // Optionally pre-fill or clear. For now, ensure it's clear if it becomes visible again.
-      setOpenInputText('');
+      setIsShowingExplanation(false);
+    } else if (question) {
+      // Reset if question changes OR if it's not an open question currently showing explanation
+      if (!isShowingExplanation || question.id !== (currentQuestionForEffectRef.current?.id) || question.type !== 'open-question') {
+        setOpenInputText('');
+        setIsShowingExplanation(false);
+      }
     }
-  }, [question, isVisible]);
+    currentQuestionForEffectRef.current = question; // Keep track of current question for next effect run
+  }, [question, isVisible, isShowingExplanation]);
+
+  // Ref to help useEffect track the question for which an explanation might be showing
+  const currentQuestionForEffectRef = useRef<DisplayQuestion | null>(null);
 
   const handleOpenAnswerSubmit = () => {
-    if (question) { // question should not be null here due to the check above
+    if (question) {
       onAnswer({ openAnswerText: openInputText }, question.id);
-      setOpenInputText(''); // Clear input after submission
+      // Don't clear openInputText here, allow explanation to show first
+      setIsShowingExplanation(true); 
     }
+  };
+
+  const handleContinueAfterExplanation = () => {
+    onClose(true); // Pass true to indicate this is a continuation
   };
 
   const renderQuestionContent = () => {
@@ -73,7 +85,12 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
       case 'multiple-choice':
         return (
           <div>
-            <p className="text-xl md:text-2xl font-semibold text-indigo-800 mb-6 text-center">{question.text}</p>
+            <p 
+              className={`text-xl md:text-2xl font-semibold text-indigo-800 mb-6 ${currentLang === 'he' ? 'text-right' : 'text-center'}`}
+              dir={currentLang === 'he' ? 'rtl' : 'ltr'}
+            >
+              {question.text}
+            </p>
             {question.options?.map((option, index) => (
               <button
                 key={index}
@@ -88,7 +105,12 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
       case 'yes-no': 
         return (
           <div>
-            <p className="text-xl md:text-2xl font-semibold text-indigo-800 mb-8 text-center">{question.text}</p>
+            <p 
+              className={`text-xl md:text-2xl font-semibold text-indigo-800 mb-8 ${currentLang === 'he' ? 'text-right' : 'text-center'}`}
+              dir={currentLang === 'he' ? 'rtl' : 'ltr'}
+            >
+              {question.text}
+            </p>
             <div className="flex justify-center space-x-4 md:space-x-6">
               {question.options?.map((option, index) => (
                 <button
@@ -103,9 +125,42 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
           </div>
         );
       case 'open-question':
+        if (isShowingExplanation && question.explanation) {
+          return (
+            <div>
+              <p 
+                className={`text-xl md:text-2xl font-semibold text-indigo-800 mb-4 ${currentLang === 'he' ? 'text-right' : 'text-center'}`}
+                dir={currentLang === 'he' ? 'rtl' : 'ltr'}
+              >
+                {question.text}
+              </p>
+              {openInputText && ( // Optionally show the user's answer
+                <div className="mb-4 p-3 bg-indigo-100 border border-indigo-300 rounded-md">
+                  <p className="text-sm text-gray-600 mb-1">Your answer:</p>
+                  <p className="text-indigo-800">{openInputText}</p>
+                </div>
+              )}
+              <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-md">
+                <h4 className="text-lg font-semibold text-green-800 mb-2">Explanation:</h4>
+                <p className="text-green-700 whitespace-pre-line">{question.explanation}</p>
+              </div>
+              <button 
+                onClick={handleContinueAfterExplanation}
+                className="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
+              >
+                Continue
+              </button>
+            </div>
+          );
+        }
         return (
           <div>
-            <p className="text-xl md:text-2xl font-semibold text-indigo-800 mb-6 text-center">{question.text}</p>
+            <p 
+              className={`text-xl md:text-2xl font-semibold text-indigo-800 mb-6 ${currentLang === 'he' ? 'text-right' : 'text-center'}`}
+              dir={currentLang === 'he' ? 'rtl' : 'ltr'}
+            >
+              {question.text}
+            </p>
             <textarea 
               className="w-full p-3 mb-4 text-indigo-900 bg-white border-2 border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-500"
               rows={3}
@@ -177,17 +232,12 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
               </div>
             )}
 
-            <div className="flex justify-between items-center mb-6 pt-4 md:pt-6">
-              <h3 className="text-2xl md:text-3xl font-bold text-purple-700">
+            <div 
+              className="flex justify-center items-center mb-6 pt-4 md:pt-6"
+            >
+              <h3 className="text-2xl md:text-3xl font-bold text-purple-700 text-center">
                 {question ? question.topic : 'Loading Topic...'}
               </h3>
-              <button 
-                onClick={onClose}
-                className="text-purple-400 hover:text-purple-600 text-4xl leading-none p-1 -mr-2 -mt-3 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-                aria-label="Close modal"
-              >
-                &times;
-              </button>
             </div>
             
             {question ? renderQuestionContent() : (

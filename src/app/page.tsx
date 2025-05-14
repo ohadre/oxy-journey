@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'; // Assuming this path is correc
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
-  const [currentLang, setCurrentLang] = useState<'en' | 'he'>('en');
+  const [currentLang, setCurrentLang] = useState<'en' | 'he'>('he');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 

@@ -28,7 +28,8 @@ const GameSceneLoader: React.FC<GameSceneLoaderProps> = ({ searchParams: searchP
     const langParam = resolvedSearchParams?.['lang'];
     console.log('[GameSceneLoader] Calculating gameLanguage. langParam:', langParam);
     if (langParam === 'he') return 'he';
-    return 'en'; // Default to 'en'
+    if (langParam === 'en') return 'en'; // Explicitly handle 'en' if provided
+    return 'he'; // Default to 'he'
   }, [resolvedSearchParams]);
 
   const showInstructions: boolean = useMemo(() => {
