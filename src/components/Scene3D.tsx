@@ -24,6 +24,7 @@ import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
 import WinModal from './ui/WinModal'; // NEW: Import WinModal
 import FinishLine from './FinishLine'; // NEW: Import FinishLine
 import InstructionsModal from './ui/InstructionsModal'; // NEW: Import InstructionsModal
+import WinProgressIndicator from './ui/WinProgressIndicator'; // NEW: Import WinProgressIndicator
 import * as Tone from 'tone'; // Import Tone.js
 
 // --- NEW: Define Tunnel End Z-coordinate ---
@@ -611,6 +612,14 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
       {renderLivesIndicator()}
+      {/* NEW: Render WinProgressIndicator if game is in a state where it makes sense (e.g., playing) */}
+      {isMounted && (gameState === 'playing' || gameState === 'question_paused') && (
+        <WinProgressIndicator 
+          currentCorrect={answeredCorrectlyIds.length} 
+          targetCorrect={MIN_CORRECT_UNIQUE_QUESTIONS}
+          currentLang={currentLanguage} 
+        />
+      )}
       
       {/* REMOVE Temporary Test Button for Q&A Modal */}
       {/* 
