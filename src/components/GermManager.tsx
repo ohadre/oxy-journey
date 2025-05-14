@@ -19,7 +19,8 @@ function randomXY(radius: number): [number, number] {
 function randomSpeed() {
   // Adjusted speed range (units per second)
   // return 17 + Math.random() * 12; // Old range: 17-29 units per second
-  return 40 + Math.random() * 20; // Faster range: 40-60 units per second
+  // return 40 + Math.random() * 20; // Previous faster range: 40-60 units per second
+  return 48 + Math.random() * 24; // New range: 48-72 units per second (20% faster than 40-60)
 }
 
 function randomLifetime() {

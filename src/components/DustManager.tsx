@@ -18,7 +18,7 @@ function randomXY(radius: number): [number, number] {
 
 function randomDustSpeed() {
   // Adjusted speed range (units per second, similar to germs but maybe slightly slower)
-  return 30 + Math.random() * 15; // 30-45 units per second 
+  return 36 + Math.random() * 18; // New range: 36-54 units per second (20% faster than 30-45)
 }
 
 function randomDustLifetime() {

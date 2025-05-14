@@ -362,7 +362,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         console.log('[Scene3D] Correct answer sound played.');
       }
       if (lives > 0) { // Check current lives before any updates for this turn
-        activateOxyInvincibility(5000);
+        activateOxyInvincibility(3000);
       }
     } else {
       // Incorrect answer
@@ -377,7 +377,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
           setGameState('game_over');
           console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
         } else {
-          activateOxyInvincibility(5000); // Grant invincibility if not game over
+          activateOxyInvincibility(3000);
         }
         return newLives;
       });
@@ -407,7 +407,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         setGameState('game_over');
         console.log('[Scene3D] GAME OVER triggered from handleCloseModal.');
       } else {
-        activateOxyInvincibility(5000); // Grant invincibility if not game over
+        activateOxyInvincibility(3000);
       }
       return newLives;
     });
