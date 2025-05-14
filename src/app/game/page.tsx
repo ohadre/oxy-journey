@@ -24,8 +24,8 @@ export default function GamePage({ searchParams }: GamePageProps) { // NEW: Dest
 
   return (
     <React.Suspense fallback={<div>Loading 3D Scene...</div>}> {/* Suspense for GameSceneLoader itself if it were to do heavy async work before Scene3D, or for Scene3D */}
-      {/* Pass searchParams to GameSceneLoader */}
-      <GameSceneLoader searchParams={searchParams} />
+      {/* Pass searchParams to GameSceneLoader, wrapped in Promise.resolve */}
+      <GameSceneLoader searchParams={Promise.resolve(searchParams || {})} />
     </React.Suspense>
   );
   // Retaining the key for now, though its effect might change with Suspense moved.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo } from 'react';
+import React, { Suspense, useEffect, useMemo, use } from 'react';
 // Remove direct useSearchParams import if searchParams are passed as props
 // import { useSearchParams } from 'next/navigation'; 
 import Scene3D from './Scene3D'; 
@@ -15,12 +15,11 @@ const GameLoadingFallback = () => (
 
 // Define props for GameSceneLoader to accept searchParams
 interface GameSceneLoaderProps {
-  searchParams?: { [key: string]: string | string[] | undefined }; // Removed Promise type
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>; // Expect a Promise again
 }
 
 const GameSceneLoader: React.FC<GameSceneLoaderProps> = ({ searchParams: searchParamsProp }) => {
-  // searchParamsProp is now expected to be the resolved object or undefined
-  const resolvedSearchParams = searchParamsProp || {}; // Use directly, provide fallback
+  const resolvedSearchParams = searchParamsProp ? use(searchParamsProp) : {}; // Reinstate use(searchParamsProp)
 
   const currentLanguage: LanguageCode = useMemo(() => {
     const langParam = resolvedSearchParams?.['lang'];
