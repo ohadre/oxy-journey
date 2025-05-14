@@ -1,5 +1,5 @@
 # Oxy Journey - Current Tasks
-Last Updated: YYYY-MM-DD Current Date (Home Page Redesign & Theming Implemented)
+Last Updated: YYYY-MM-DD (Win Condition Designed, Vercel Fix)
 
 ## Introduction
 This document tracks the actionable tasks for the "Oxy Journey" project. It's a living document that will be updated regularly as per the "Vibe Session" protocol.
@@ -78,9 +78,36 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
     - [x] Define Question data structure and localization support (`src/types/question.types.ts`, `public/data/questions.json`)
     - [x] Implement question loading and resolving service (`src/lib/questionService.ts`)
     - [x] Implement Q&A state management in `Scene3D.tsx` (loading, current question, answered questions)
-    - [ ] Implement logic in `Scene3D.tsx` to select and display a question upon collision event
+    - [-] Implement logic in `Scene3D.tsx` to select and display a question upon collision event
     - [ ] Implement logic in `Scene3D.tsx` to handle answer from modal and update game state (e.g., hide modal, proceed game)
 - [ ] Implement Game Over logic (when lives reach 0).
+
+### Game Completion & Scoring (Iteration 1)
+- [x] Design "Game Win" Condition: "Successful Delivery & Knowledge Check" with Efficiency Score.
+    - [ ] Define "Tunnel End": Determine a Z-coordinate or implement a trigger mechanism for when Oxy reaches the end of the explorable tunnel area.
+    - [ ] Implement Unique Correct Answer Tracking:
+        - [ ] Confirm `answeredCorrectlyIds` in `Scene3D.tsx` accurately tracks unique correct answers per game session.
+        - [ ] Define a constant/variable for `MinCorrectUniqueQuestions` (e.g., 5) required to win.
+    - [ ] Implement Win Check Logic:
+        - [ ] In `Scene3D.tsx` (or a dedicated game state manager if refactored), create a function to check win conditions.
+        - [ ] This function should be callable when the player reaches the "Tunnel End" trigger.
+        - [ ] The check must verify: `lives > 0` AND `answeredCorrectlyIds.length >= MinCorrectUniqueQuestions`.
+    - [ ] Design & Implement "Win Screen / Efficiency Score" UI:
+        - [ ] Create a new React component (e.g., `WinScreen.tsx`) to display the win message and efficiency score.
+        - [ ] Determine the factors for the Efficiency Score calculation:
+            - [ ] Factor 1: Time taken to complete the level (less time = higher score).
+            - [ ] Factor 2: Number of unique correct answers (exceeding `MinCorrectUniqueQuestions` could provide bonus points).
+            - [ ] Factor 3: Number of lives remaining at the end (more lives = higher score).
+        - [ ] Implement the UI to display the calculated score, possibly as a grade (e.g., Bronze, Silver, Gold) or a numerical value.
+        - [ ] The Win Screen should be displayed by `Scene3D` when win conditions are met.
+    - [ ] Implement Game State Transition for Win:
+        - [ ] Update `gameState` in `Scene3D.tsx` to a new state like 'won'.
+        - [ ] When in 'won' state, pause game entities and display the `WinScreen` component.
+        - [ ] The `WinScreen` should offer options like "Play Again" or "Return to Main Menu".
+- [ ] Playtest and Balance Win Condition & Scoring:
+    - [ ] Iteratively adjust `MinCorrectUniqueQuestions` based on average play session length and difficulty.
+    - [ ] Fine-tune obstacle density and tunnel length (Z-end) to ensure a fair opportunity to meet the question quota before reaching the end.
+    - [ ] Balance the weighting of scoring factors (time, questions, lives) for a meaningful and motivating efficiency score.
 
 ### UI/UX
 - [x] Design and implement basic HUD (`LivesIndicator`)
@@ -88,6 +115,7 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
     - [x] Create basic `QuestionModal.tsx` structure and props
     - [x] Implement rendering for multiple-choice, yes/no, and open-question types (basic layout)
     - [x] Integrate `QuestionModal.tsx` into `Scene3D.tsx` (visibility toggle, passing question data)
+    - [x] Add image display support to `QuestionModal.tsx`
     - [ ] Style `QuestionModal.tsx` for all question types (including input fields, buttons)
     - [ ] Implement answer submission logic within `QuestionModal.tsx` (calling `onAnswer` prop)
     - [ ] Add animations (e.g., using Framer Motion) for modal appearance/disappearance
@@ -116,11 +144,9 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
   - [ ] Configure production deployment process
 
 ## Next Steps
-1. Complete `QuestionModal.tsx` UI and answer submission logic.
-2. Implement Q&A trigger on collision and answer handling in `Scene3D.tsx`.
-3. Add Game Over logic when lives reach zero.
-4. Add sound effects for collisions, Q&A events, etc.
-5. Refine visual appearance of entities if needed.
+1. Implement the "Game Win" condition and Efficiency Score system (all sub-tasks under "Game Completion & Scoring (Iteration 1)").
+2. Complete any remaining styling or animation tasks for `QuestionModal.tsx` if not fully done.
+3. Conduct thorough playtesting and balancing for all implemented game mechanics (Q&A, Game Over, Game Win, Scoring).
 
 ---
 This task list will be reviewed and updated at the beginning and end of each "Vibe Session."

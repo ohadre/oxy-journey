@@ -5,6 +5,37 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
 
 --- 
 
+## YYYY-MM-DD Game Win Condition Design (Vibe Session)
+
+- **Intent:** Define a game mechanic for successfully finishing a game session that is engaging and aligns with project goals.
+- **Discussion:**
+    - Considered various mechanics including simple Z-coordinate completion, time-based challenges, and survival duration.
+    - Discussed the importance of balancing fun, challenge, and the core educational goal of question exposure.
+- **Decision: "Successful Delivery & Knowledge Check" with an Efficiency Score.**
+    - **Win Conditions:**
+        1.  Reach a defined "Tunnel End."
+        2.  Answer a minimum number of unique questions correctly (e.g., 5).
+        3.  Have at least one life remaining.
+    - **Efficiency Score:** Calculated based on time taken, total unique correct answers, and lives remaining. This score will be shown on a win screen to encourage replayability.
+- **Rationale:** This approach provides a clear win state, integrates educational elements naturally, and adds a replayability factor without making the core win too punishing or complex.
+- **Outcome:** Agreed on the win condition design. Tasks for implementation have been broken down and added to `tasks/current_tasks.md` under "Game Completion & Scoring (Iteration 1)". `docs/development-journal.md` also updated.
+- **Next Steps:** Proceed with implementing the Q&A modal styling and answer logic, followed by the Game Over and newly designed Game Win conditions.
+
+## YYYY-MM-DD Question Image Support (Vibe Session)
+
+- **Intent:** Enhance the question system to allow images to be displayed alongside question text in the `QuestionModal`.
+- **Work Done:**
+    - Modified `src/types/question.types.ts` to add `image_url?: string` to `Question` and `LocalizedQuestion` types.
+    - Updated `public/data/questions.json`, adding an `image_url` to question "q1" (`"/images/questions/diaphragm.png"`).
+    - Ensured the new image `diaphragm.png` was correctly placed in `public/images/questions/`.
+    - Updated `src/lib/questionService.ts` in `getLocalizedQuestionById` to include `image_url` when creating the localized question object.
+    - Modified `src/components/ui/QuestionModal.tsx` to render an `<img>` tag if `currentQuestion.image_url` is present, using `currentQuestion.topic` for the alt text.
+    - **Troubleshooting & Fixes:**
+        - Corrected a syntax error (`Expected '}', got '<eof>'`) in `src/lib/questionService.ts` by restoring a truncated `try...catch` block and function closing from a previous edit.
+        - Confirmed image display for "q1" after initial observation of "q2" (which has no image) due to random question selection.
+- **Outcome:** Successfully added image support to the Q&A feature. The image for question "q1" now displays correctly in the modal. Git commit `9ea5cb9` pushed to `main`.
+- **Next Steps:** Update remaining documentation.
+
 ## YYYY-MM-DD Home Page Redesign & Theming Implementation (Vibe Session)
 
 - **Intent:** Overhaul the home page (`src/app/page.tsx`) with a new v0 design aesthetic, integrate a new Tailwind CSS theming system (Shadcn/ui style), preserve existing language selection and navigation, and resolve any arising technical issues.

@@ -147,3 +147,64 @@
 - **Texture Handling Improvements**:
   - Created a global TextureLoader instance for consistency
   - Updated textures to use proper `colorSpace = THREE.SRGBColorSpace`
+
+## YYYY-MM-DD Game Win Condition Design: Efficiency Score
+
+### Goals
+- Define a clear and engaging win condition for the game that aligns with educational objectives and promotes replayability.
+
+### Design Discussion & Decision
+- Explored several options for a win condition, including purely distance-based, time-based, and survival-based mechanics.
+- **Selected Approach: "Successful Delivery & Knowledge Check" with an Efficiency Score.**
+    - **Core Win Requirements:**
+        1.  Player navigates Oxy to a designated "Tunnel End" (specific Z-coordinate or trigger).
+        2.  Player answers a minimum number of unique questions correctly (e.g., `MinCorrectUniqueQuestions = 5`) during the run.
+        3.  Player has at least one life remaining upon reaching the Tunnel End.
+    - **Efficiency Score for Replayability:**
+        - Upon successfully meeting the win requirements, the player will be presented with an "Efficiency Score."
+        - This score will be calculated based on:
+            - Time taken to complete the level (less time is better).
+            - Total number of unique questions answered correctly (exceeding the minimum could be a bonus).
+            - Number of lives remaining (more lives is better).
+        - The score aims to encourage players to improve their performance on subsequent playthroughs.
+- **Rationale:**
+    - This approach balances the core gameplay loop (navigation, avoiding obstacles) with the educational goal (answering questions).
+    - It provides a definitive end-point to the game session.
+    - The efficiency score adds a layer of "fun" and challenge without making the primary win condition overly complex or strictly time-gated, which could detract from careful consideration of questions.
+    - It leverages existing systems (lives, question tracking, tunnel structure) and requires manageable new UI for a win screen/score display.
+
+### Next Steps (Implementation Tasks)
+- Detailed implementation tasks have been added to `tasks/current_tasks.md` under "Game Completion & Scoring (Iteration 1)". These include defining the tunnel end, tracking unique correct answers, implementing the win check logic, designing the win screen/score UI, and playtesting/balancing the system.
+
+## YYYY-MM-DD Question Image Support
+Today's Date
+
+### Goals
+- Enhance the Q&A system to support optional images within questions.
+- Update the question data structure, service, and UI modal to handle and display these images.
+
+### Implementation Details
+- **Data Structure (`src/types/question.types.ts`):**
+    - Added an optional `image_url?: string` field to the `Question` and `LocalizedQuestion` types.
+- **Question Data (`public/data/questions.json`):**
+    - Updated an existing question ("q1") to include an `image_url` pointing to `"/images/questions/diaphragm.png"`.
+    - The image file `diaphragm.png` was placed in `public/images/questions/`.
+- **Question Service (`src/lib/questionService.ts`):**
+    - Modified `getLocalizedQuestionById` to pass through the `image_url` from the base question data to the localized question object.
+- **UI (`src/components/ui/QuestionModal.tsx`):**
+    - Updated the `QuestionModal` component to display an `<img>` tag if `currentQuestion.image_url` is present.
+    - The image is displayed above the question text.
+    - The `alt` text for the image is derived from the question's topic (e.g., `currentQuestion.topic`).
+
+### Debugging & Fixes
+- **Syntax Error in `questionService.ts`:**
+    - Corrected a truncation error from a previous edit that removed the closing `try...catch` block and function definition, causing an `Expected '}', got '<eof>'` error. Restored the missing code.
+- **Image Not Displaying (Initial):**
+    - Investigated why the image for "q1" wasn't initially visible. Deduced it was due to the random question selection logic in `Scene3D.tsx` initially picking questions without images. Confirmed working once "q1" was displayed.
+
+### Current Status
+- The Q&A system now successfully supports and displays images for questions.
+- All related files have been updated and tested.
+
+### Next Steps
+- Update other documentation files.
