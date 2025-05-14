@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { Canvas } from '@react-three/fiber';
 import WinModal from '../ui/WinModal';
 import GameOverModal from '../ui/GameOverModal'; // Assuming you will create this
-import SoundManager, { SoundManagerHandle } from '../audio/SoundManager';
+// import SoundManager, { SoundManagerHandle } from '../audio/SoundManager'; // Commented out
 import QuestionModal from '../ui/QuestionModal'; // Added import for QuestionModal
 
 // Intentionally throw an error to see if this module code is running
-throw new Error("ERROR_MARKER: Scene3D.tsx module level code is EXECUTING. If you see this, the file is current.");
+// throw new Error("ERROR_MARKER: Scene3D.tsx module level code is EXECUTING. If you see this, the file is current."); // Commented out for build
 
 // console.log('[Scene3D MODULE LEVEL] Checking imported SoundManager immediately:', SoundManager); // MODULE LEVEL LOG
 // try {
@@ -45,8 +45,8 @@ const Scene3D: React.FC<Scene3DProps> = ({ initialGameData, onBackToHome, onSess
   // } catch (e) {
   //   console.error('[Scene3D COMPONENT BODY START] Error accessing SoundManager.magicProperty:', e);
   // }
-  const [isSoundManagerLoaded, setIsSoundManagerLoaded] = useState(false);
-  const soundManagerRef = useRef<SoundManagerHandle>(null);
+  // const [isSoundManagerLoaded, setIsSoundManagerLoaded] = useState(false); // Commented out
+  // const soundManagerRef = useRef<SoundManagerHandle>(null); // Commented out
 
   // --------- START: Added useState definitions for missing variables ---------
   const [gameState, setGameState] = useState<string>('loading'); // Or 'idle', 'playing', etc.
@@ -81,6 +81,7 @@ const Scene3D: React.FC<Scene3DProps> = ({ initialGameData, onBackToHome, onSess
   // --------- END: Added useState definitions for missing variables ---------
 
   // Effect for managing background music based on gameState
+  /* // Commented out SoundManager effect
   useEffect(() => {
     console.log('[Scene3D] Background music effect triggered. gameState:', gameState, 'isSoundManagerLoaded:', isSoundManagerLoaded, 'soundManagerRef.current:', soundManagerRef.current);
     if (!isSoundManagerLoaded || !soundManagerRef.current) {
@@ -97,6 +98,7 @@ const Scene3D: React.FC<Scene3DProps> = ({ initialGameData, onBackToHome, onSess
       soundManagerRef.current.pauseBackgroundMusic();
     }
   }, [gameState, isSoundManagerLoaded]);
+  */
 
   return (
     <>
@@ -139,10 +141,10 @@ const Scene3D: React.FC<Scene3DProps> = ({ initialGameData, onBackToHome, onSess
         />
       )}
 
-      <SoundManager onLoaded={() => { // Temporarily comment out SoundManager invocation
+      {/* <SoundManager onLoaded={() => { // Commented out SoundManager instance
         console.log("[Scene3D] SoundManager onLoaded callback fired!");
         setIsSoundManagerLoaded(true);
-      }} />
+      }} /> */}
     </>
   );
 };
