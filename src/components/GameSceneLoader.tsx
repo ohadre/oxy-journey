@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, use } from 'react';
+import React, { Suspense, useEffect, useMemo } from 'react';
 // Remove direct useSearchParams import if searchParams are passed as props
 // import { useSearchParams } from 'next/navigation'; 
 import Scene3D from './Scene3D'; 
