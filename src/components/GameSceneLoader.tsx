@@ -15,14 +15,12 @@ const GameLoadingFallback = () => (
 
 // Define props for GameSceneLoader to accept searchParams
 interface GameSceneLoaderProps {
-  // searchParams can be an object or a Promise that resolves to an object
-  searchParams?: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: { [key: string]: string | string[] | undefined }; // Removed Promise type
 }
 
 const GameSceneLoader: React.FC<GameSceneLoaderProps> = ({ searchParams: searchParamsProp }) => {
-  // Use React.use to resolve the searchParams if it's a Promise or handle it directly if it's an object.
-  // This aligns with the error message about unwrapping searchParams.
-  const resolvedSearchParams = searchParamsProp ? use(searchParamsProp) : {};
+  // searchParamsProp is now expected to be the resolved object or undefined
+  const resolvedSearchParams = searchParamsProp || {}; // Use directly, provide fallback
 
   const currentLanguage: LanguageCode = useMemo(() => {
     const langParam = resolvedSearchParams?.['lang'];
