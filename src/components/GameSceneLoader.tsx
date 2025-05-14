@@ -51,7 +51,7 @@ interface GameSceneLoaderProps {
 
 const GameSceneLoader: React.FC<GameSceneLoaderProps> = () => {
   const searchParams = useSearchParams();
-  const langParam = searchParams.get('lang');
+  const langParam = searchParams?.get('lang');
 
   const gameLanguage: LanguageCode = useMemo(() => {
     console.log('[GameSceneLoader] Calculating gameLanguage. langParam:', langParam);
