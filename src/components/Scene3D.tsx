@@ -21,7 +21,14 @@ import { DisplayQuestion, LanguageCode } from '../types/question.types';
 import { createPortal } from 'react-dom';
 import QuestionModal from './ui/QuestionModal';
 import GameOverModal from './ui/GameOverModal'; // Import GameOverModal
+import WinModal from './ui/WinModal'; // NEW: Import WinModal
 import * as Tone from 'tone'; // Import Tone.js
+
+// --- NEW: Define Tunnel End Z-coordinate ---
+const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
+// --- NEW: Minimum unique questions for win ---
+const MIN_CORRECT_UNIQUE_QUESTIONS = 3; // Example value, can be tuned
+// -------------------------------------------
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
 const Tunnel = dynamic(() => import('./Tunnel'), { 
@@ -42,7 +49,7 @@ const keyboardMap = [
 ];
 
 // --- Define Game State Type (NEW) ---
-type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over';
+type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won'; // Added 'won'
 // -----------------------------------
 
 // --- Define Props for Scene3D ---
@@ -64,6 +71,11 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
   const [lives, setLives] = useState(3);
 
+  // --- NEW: Game Time Tracking State ---
+  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
+  const [elapsedTimeInSeconds, setElapsedTimeInSeconds] = useState(0);
+  // -------------------------------------
+
   // --- MODIFIED/NEW Q&A State Variables ---
   const [allQuestions, setAllQuestions] = useState<DisplayQuestion[]>([]);
   // const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en'); // REMOVE: This will now be a prop
@@ -77,6 +89,8 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   const [gameState, setGameState] = useState<GameState>('loading'); // Keep general gameState
   const [isOxyInvincible, setIsOxyInvincible] = useState(false);
   const invincibilityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [gameSessionId, setGameSessionId] = useState(0); // NEW: For re-keying components on restart
+  const [finalScore, setFinalScore] = useState<{time: number, questions: number, lives: number} | null>(null); // NEW: For WinModal score
 
   // Add portal container ref (if used by a future modal, keep; otherwise, can be removed if QuestionOverlay is gone)
   // const portalContainerRef = useRef<HTMLDivElement>(null);
@@ -199,11 +213,67 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   
   // Set gameState to playing once assets are loaded and component is mounted
   useEffect(() => {
-      if (isMounted && !isAssetsLoading) { // Consider asset loading status
+      if (isMounted && !isAssetsLoading && gameState === 'loading') { // Ensure this only runs once when transitioning from loading
           setGameState('playing');
-          console.log('[Scene3D] Game state set to playing');
+          setGameStartTime(Date.now()); // Start game timer
+          setElapsedTimeInSeconds(0); // Reset elapsed time
+          console.log('[Scene3D] Game state set to playing, timer started');
       }
-  }, [isMounted, isAssetsLoading]);
+  }, [isMounted, isAssetsLoading, gameState]); // Added gameState to dependencies
+
+  // --- Update elapsed time when game is playing ---
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | undefined;
+    if (gameState === 'playing' && gameStartTime) {
+      intervalId = setInterval(() => {
+        setElapsedTimeInSeconds(Math.floor((Date.now() - gameStartTime) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [gameState, gameStartTime]);
+  // ---------------------------------------------
+
+  // --- NEW: Check for Tunnel End --- (Will be modified to call checkWinConditionsAndProceed)
+  useEffect(() => {
+    if (gameState === 'playing' && oxyPosition[2] <= TUNNEL_END_Z) {
+      console.log(`[Scene3D] Oxy reached defined Tunnel End trigger point at Z: ${oxyPosition[2]}.`);
+      checkWinConditionsAndProceed();
+    }
+  }, [oxyPosition, gameState]); // Removed elapsedTimeInSeconds for now, will be logged in checkWinConditions
+  // ---------------------------------
+
+  // --- NEW: Win Condition Check Logic ---
+  const checkWinConditionsAndProceed = useCallback(() => {
+    console.log('[Scene3D] Checking win conditions...');
+    const uniqueQuestionsAnswered = answeredCorrectlyIds.length;
+    console.log(`[Scene3D] Current stats: Lives: ${lives}, Unique Questions Answered: ${uniqueQuestionsAnswered}, Required: ${MIN_CORRECT_UNIQUE_QUESTIONS}, Elapsed Time: ${elapsedTimeInSeconds}s`);
+
+    if (lives > 0 && uniqueQuestionsAnswered >= MIN_CORRECT_UNIQUE_QUESTIONS) {
+      console.log('%c[Scene3D] WIN CONDITIONS MET! Congratulations!', 'color: green; font-weight: bold;');
+      // Log data for scoring later
+      const score = { time: elapsedTimeInSeconds, questions: uniqueQuestionsAnswered, lives }; // NEW: Define score object
+      console.log(`[Scene3D] Scoring Data: Time: ${score.time}s, Questions: ${score.questions}, Lives: ${score.lives}`);
+      setFinalScore(score); // NEW: Set final score
+      setGameState('won');
+    } else {
+      console.log('%c[Scene3D] Reached End, WIN CONDITIONS NOT MET.', 'color: orange;');
+      if (lives <= 0) {
+        console.log('[Scene3D] Reason: No lives left.');
+      }
+      if (uniqueQuestionsAnswered < MIN_CORRECT_UNIQUE_QUESTIONS) {
+        console.log(`[Scene3D] Reason: Not enough unique questions answered (${uniqueQuestionsAnswered}/${MIN_CORRECT_UNIQUE_QUESTIONS}).`);
+      }
+      // For now, if win conditions aren't met at the end, it's effectively a game over (didn't achieve objectives).
+      // We can differentiate this later if needed (e.g. a specific "level incomplete" screen).
+      setGameState('game_over'); 
+      // Consider playing a different sound or showing a specific message for this scenario later.
+    }
+  }, [lives, answeredCorrectlyIds, elapsedTimeInSeconds]);
+  // -------------------------------------
 
   // --- Sub-task 2.3: Q&A Reset Logic ---
   const startNewQASession = useCallback(() => {
@@ -334,20 +404,37 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth]);
   // ------------------------------------
 
-  // --- Game Restart Logic ---
+  // --- Game Restart Logic --- (MODIFIED)
   const handleRestartGame = useCallback(() => {
     console.log('[Scene3D] Restarting game...');
+
+    // Clear invincibility
+    if (invincibilityTimerRef.current) {
+      clearTimeout(invincibilityTimerRef.current);
+      invincibilityTimerRef.current = null;
+    }
+    setIsOxyInvincible(false);
+    setFinalScore(null); // NEW: Reset final score
+
     setLives(INITIAL_LIVES);
     setAnsweredCorrectlyIds([]);
-    setCurrentDisplayQuestion(null); // Ensure no question is showing
-    setIsModalVisible(false);      // Ensure question modal is hidden
-    setOxyPosition([0, 0, 146]); // Reset Oxy position - Updated Z from 140 to 146
-    // TODO: Reset germs and dust particles to initial state or clear them
+    setCurrentDisplayQuestion(null); 
+    setIsModalVisible(false);      
+    setOxyPosition([0, 0, 146]); 
     setGerms([]);
     setDustParticles([]);
-    setGameState('playing'); // Or 'loading' if questions/assets need reload
-    console.log('[Scene3D] Game restarted. State set to playing.');
-  }, []);
+
+    // Reset timers
+    setElapsedTimeInSeconds(0);
+    // gameStartTime will be reset when gameState transitions from 'loading' to 'playing'
+
+    // Increment gameSessionId to force re-mount of key components
+    setGameSessionId(prevId => prevId + 1);
+    
+    // Set gameState to 'loading' to allow re-initialization sequence
+    setGameState('loading'); 
+    console.log('[Scene3D] Game restart initiated. State set to loading. New session ID:', gameSessionId + 1);
+  }, [gameSessionId]); // Added gameSessionId to dependency array
   // -------------------------
 
   const oxyInitialPosition = useMemo(() => new THREE.Vector3(oxyPosition[0], oxyPosition[1], oxyPosition[2]), [oxyPosition]);
@@ -421,8 +508,8 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
     let availableQuestions = allQuestions.filter(q => !answeredCorrectlyIds.includes(q.id));
 
     if (availableQuestions.length === 0) {
-      console.log('[Scene3D] All unique questions answered. Resetting and allowing repeats.');
-      setAnsweredCorrectlyIds([]); // Reset for repetition
+      console.log('[Scene3D] All unique questions have been answered correctly. Allowing questions to repeat.');
+      // setAnsweredCorrectlyIds([]); // DO NOT RESET: We want to keep track of all unique correct answers for the win condition.
       availableQuestions = allQuestions; // Consider all questions again
     }
 
@@ -461,15 +548,30 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
   }, [gameState, currentDisplayQuestion, allQuestions, isAssetsLoading, isLoadingQuestions, questionError]);
 
   // LOG: States before render return
-  console.log('[Scene3D] PRE-RETURN STATE:', {
+  const isWonStateForLog = gameState === 'won'; // Capture for logging
+
+  console.log(`[Scene3D] PRE-RETURN STATE (isWon: ${isWonStateForLog}):`, { // MODIFIED for clarity
     isMounted,
     currentLanguageProp: currentLanguage,
     allQuestionsCount: allQuestions.length,
     isLoadingQuestions,
     gameState,
     questionError,
-    isAssetsLoading
+    isAssetsLoading,
+    finalScore
   });
+
+  // --- LivesIndicator Rendering (Modified for debug) ---
+  const renderLivesIndicator = () => {
+    if (gameState === 'level_complete_debug') { // This state will be removed eventually
+      return <LivesIndicator currentLives={0} maxLives={0} />; 
+    } else if (gameState === 'won') {
+      return <LivesIndicator currentLives={lives} maxLives={INITIAL_LIVES} />; // Show lives at point of winning
+      // Or a custom message like <LivesIndicator message="YOU WON!" /> if we adapt LivesIndicator
+    }
+    return <LivesIndicator currentLives={lives} />;
+  };
+  // ---------------------------------------------------
 
   if (!isMounted) {
     console.log('[Scene3D] Not mounted yet, returning null');
@@ -478,7 +580,7 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      <LivesIndicator currentLives={lives} />
+      {renderLivesIndicator()}
       
       {/* REMOVE Temporary Test Button for Q&A Modal */}
       {/* 
@@ -512,20 +614,23 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
           <directionalLight position={[0, -10, -40]} intensity={1.2} color="#a0c8ff" />
           
           <Suspense fallback={null}>
-            <Tunnel />
+            <Tunnel key={`tunnel-${gameSessionId}`} />
           </Suspense>
           <GermManager
+            key={`germ-manager-${gameSessionId}`}
             oxyPosition={oxyPosition}
             onGermsChange={handleGermsChange}
             germs={germs}
             gameState={gameState}
           />
           <DustManager
+            key={`dust-manager-${gameSessionId}`}
             onDustChange={handleDustChange}
             dustParticles={dustParticles}
             gameState={gameState}
           />
           <CollisionManager
+            key={`collision-manager-${gameSessionId}`}
             oxyPosition={oxyPosition}
             germs={germs}
             dustParticles={dustParticles}
@@ -538,6 +643,7 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
             <DustParticle key={dust.id} position={dust.position} size={dust.size} />
           ))}
           <Oxy 
+            key={`oxy-${gameSessionId}`}
             ref={oxyMeshRef}
             worldSize={10} // Pass worldSize if Oxy uses it
             initialPosition={oxyInitialPosition}
@@ -546,6 +652,7 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
             isInvincible={isOxyInvincible} // Pass invincibility state
           />
           <CameraController 
+            key={`camera-controller-${gameSessionId}`}
             oxyRef={oxyMeshRef} 
             offset={new THREE.Vector3(0, 0.5, 3.5)} // Reverted Z offset to 3.5
             gameState={gameState} // Pass gameState
@@ -599,6 +706,16 @@ export default function Scene3D({ currentLanguage }: Scene3DProps) { // Destruct
         <GameOverModal 
           isVisible={gameState === 'game_over'}
           onRestart={handleRestartGame}
+          currentLang={currentLanguage}
+        />
+      )}
+
+      {/* NEW: Render the WinModal */}
+      {isMounted && (
+        <WinModal
+          isVisible={gameState === 'won'}
+          onRestart={handleRestartGame}
+          scoreData={finalScore}
           currentLang={currentLanguage}
         />
       )}

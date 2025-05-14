@@ -83,31 +83,19 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
 - [ ] Implement Game Over logic (when lives reach 0).
 
 ### Game Completion & Scoring (Iteration 1)
-- [x] Design "Game Win" Condition: "Successful Delivery & Knowledge Check" with Efficiency Score.
-    - [ ] Define "Tunnel End": Determine a Z-coordinate or implement a trigger mechanism for when Oxy reaches the end of the explorable tunnel area.
-    - [ ] Implement Unique Correct Answer Tracking:
-        - [ ] Confirm `answeredCorrectlyIds` in `Scene3D.tsx` accurately tracks unique correct answers per game session.
-        - [ ] Define a constant/variable for `MinCorrectUniqueQuestions` (e.g., 5) required to win.
-    - [ ] Implement Win Check Logic:
-        - [ ] In `Scene3D.tsx` (or a dedicated game state manager if refactored), create a function to check win conditions.
-        - [ ] This function should be callable when the player reaches the "Tunnel End" trigger.
-        - [ ] The check must verify: `lives > 0` AND `answeredCorrectlyIds.length >= MinCorrectUniqueQuestions`.
-    - [ ] Design & Implement "Win Screen / Efficiency Score" UI:
-        - [ ] Create a new React component (e.g., `WinScreen.tsx`) to display the win message and efficiency score.
-        - [ ] Determine the factors for the Efficiency Score calculation:
-            - [ ] Factor 1: Time taken to complete the level (less time = higher score).
-            - [ ] Factor 2: Number of unique correct answers (exceeding `MinCorrectUniqueQuestions` could provide bonus points).
-            - [ ] Factor 3: Number of lives remaining at the end (more lives = higher score).
-        - [ ] Implement the UI to display the calculated score, possibly as a grade (e.g., Bronze, Silver, Gold) or a numerical value.
-        - [ ] The Win Screen should be displayed by `Scene3D` when win conditions are met.
-    - [ ] Implement Game State Transition for Win:
-        - [ ] Update `gameState` in `Scene3D.tsx` to a new state like 'won'.
-        - [ ] When in 'won' state, pause game entities and display the `WinScreen` component.
-        - [ ] The `WinScreen` should offer options like "Play Again" or "Return to Main Menu".
-- [ ] Playtest and Balance Win Condition & Scoring:
-    - [ ] Iteratively adjust `MinCorrectUniqueQuestions` based on average play session length and difficulty.
-    - [ ] Fine-tune obstacle density and tunnel length (Z-end) to ensure a fair opportunity to meet the question quota before reaching the end.
-    - [ ] Balance the weighting of scoring factors (time, questions, lives) for a meaningful and motivating efficiency score.
+-   **Status:** In Progress
+-   **Last Update:** May 14, 2025
+-   **Goal:** Implement the agreed-upon "Efficiency Score" win condition and a basic game over/restart flow.
+-   **Sub-Tasks:**
+    -   ✅ `DONE` 1. Define Tunnel End & Test UI Trigger (`TUNNEL_END_Z`, `gameState = 'level_complete_debug'`, `LivesIndicator` shows end).
+    -   ✅ `DONE` 2. Track Unique Correct Answers (`answeredCorrectlyIds` set, `MIN_CORRECT_UNIQUE_QUESTIONS` const).
+    -   ✅ `DONE` 3. Implement Win Check Logic (`checkWinConditionsAndProceed()`, sets `gameState` to `'won'` or `'game_over'`).
+    -   ✅ `DONE` 4. Implement Game Restart Logic (Reset timer, entities via re-keying, invincibility, `gameState` to `loading`).
+    -   ✅ `DONE` 5. Display Win Modal with Score & Restart Option.
+    -   ⏳ `PENDING USER FEEDBACK` 6. Refine/Confirm Win/Loss/Restart flow based on testing.
+    -   📄 `TODO` 7. Create a basic scoring display/calculation (details TBD post-win condition implementation).
+    -   📄 `TODO` 8. Add placeholder for win/game over celebratory images/sounds (assets to be provided by user).
+    -   📄 `TODO` 9. Documentation update for new game mechanics.
 
 ### UI/UX
 - [x] Design and implement basic HUD (`LivesIndicator`)
@@ -150,3 +138,5 @@ This document tracks the actionable tasks for the "Oxy Journey" project. It's a 
 
 ---
 This task list will be reviewed and updated at the beginning and end of each "Vibe Session."
+
+### Language & Content (Ongoing)

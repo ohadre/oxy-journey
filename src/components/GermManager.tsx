@@ -46,7 +46,7 @@ interface GermManagerProps {
   oxyPosition: [number, number, number]; // Accept Oxy's position
   germs: GermInstance[]; // Accept the current list of germs
   onGermsChange: (updatedGerms: GermInstance[]) => void; // Callback to update state in parent
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over'; // Add gameState prop
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won'; // Add gameState prop
 }
 
 const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameState }) => {

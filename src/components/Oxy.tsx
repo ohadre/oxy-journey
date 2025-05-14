@@ -13,7 +13,7 @@ interface OxyProps {
   worldSize: number; // This will be the tunnel radius
   initialPosition?: THREE.Vector3;
   onPositionChange?: (pos: [number, number, number]) => void;
-  gameState?: 'loading' | 'playing' | 'question_paused' | 'game_over';
+  gameState?: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won';
   isInvincible?: boolean; // Add isInvincible prop
 }
 
