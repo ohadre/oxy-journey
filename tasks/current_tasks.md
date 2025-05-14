@@ -1,5 +1,5 @@
 # Oxy Journey - Current Tasks
-Last Updated: YYYY-MM-DD (Win Condition Designed, Vercel Fix)
+Last Updated: 2025-05-14 (Win Condition Designed, Vercel Fix)
 
 ## Introduction
 This document tracks the actionable tasks for the "Oxy Journey" project. It's a living document that will be updated regularly as per the "Vibe Session" protocol.

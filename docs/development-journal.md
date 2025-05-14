@@ -148,7 +148,7 @@
   - Created a global TextureLoader instance for consistency
   - Updated textures to use proper `colorSpace = THREE.SRGBColorSpace`
 
-## YYYY-MM-DD Game Win Condition Design: Efficiency Score
+## 2025-05-14 Game Win Condition Design: Efficiency Score
 
 ### Goals
 - Define a clear and engaging win condition for the game that aligns with educational objectives and promotes replayability.
@@ -176,8 +176,7 @@
 ### Next Steps (Implementation Tasks)
 - Detailed implementation tasks have been added to `tasks/current_tasks.md` under "Game Completion & Scoring (Iteration 1)". These include defining the tunnel end, tracking unique correct answers, implementing the win check logic, designing the win screen/score UI, and playtesting/balancing the system.
 
-## YYYY-MM-DD Question Image Support
-Today's Date
+## 2025-05-14 Question Image Support
 
 ### Goals
 - Enhance the Q&A system to support optional images within questions.
