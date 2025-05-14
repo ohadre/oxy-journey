@@ -20,6 +20,7 @@ export interface Question {
   text: LocalizedText;      // Question text is now localized
   options?: LocalizedAnswerOption[]; // Uses LocalizedAnswerOption
   explanation?: LocalizedText;    // Explanation is now localized
+  image_url?: string;         // Optional URL for an accompanying image
 }
 
 // For displaying a question with strings resolved to a single language
@@ -31,4 +32,5 @@ export interface DisplayQuestion {
   options?: { text: string; isCorrect: boolean }[]; // Options text resolved
   correctOptionIndex?: number; // Added for multiple-choice and yes-no
   explanation?: string; // Resolved
+  image_url?: string; // Optional URL for an accompanying image
 } 

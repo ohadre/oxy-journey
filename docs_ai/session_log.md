@@ -5,6 +5,29 @@ This document tracks all "Vibe Sessions" for the Oxy Journey project, maintainin
 
 --- 
 
+## YYYY-MM-DD Home Page Redesign & Theming Implementation (Vibe Session)
+
+- **Intent:** Overhaul the home page (`src/app/page.tsx`) with a new v0 design aesthetic, integrate a new Tailwind CSS theming system (Shadcn/ui style), preserve existing language selection and navigation, and resolve any arising technical issues.
+- **Work Done:**
+    - Replaced `tailwind.config.ts` and `src/styles/globals.css` with new v0 versions, introducing CSS variables for theming, new fonts (`Bangers`), and animations.
+    - Created `src/components/theme-provider.tsx` using `next-themes` for theme management.
+    - Updated `src/app/layout.tsx` to use the new `ThemeProvider`, link the Bangers font, and import the new global styles.
+    - Rebuilt `src/app/page.tsx` with the v0 design:
+        - Used `next/image` for background (`object-cover`) and animated character elements (Oxy, Dust, Germ).
+        - Implemented character animations using `framer-motion`.
+        - Integrated existing language selection dropdown (English/Hebrew), ensuring styling was functional and title text (`Oxy's Journey` / `המסע של חמצנון`) and `startGameText` updated dynamically.
+        - Maintained existing `isLoading` state for immediate feedback on button click and navigation to `/game?lang=[selectedLang]`.
+    - **Troubleshooting & Fixes:**
+        - Installed missing dependencies: `next-themes`, `tailwindcss-animate`.
+        - Corrected `globals.css` import path in `layout.tsx`.
+        - Updated Tailwind `content` paths in `tailwind.config.ts` to correctly scan `src` directory, resolving `border-border` class not found error.
+        - Guided user to update `components.json` to point `tailwind.config` to the `.ts` file instead of `.js`, which was crucial for the new theme to load.
+        - Resolved 404 errors for images by updating `src` paths in `page.tsx` to use existing images in `/public/textures/` and the correct background image name (`main page bg.png`).
+        - Addressed React hydration mismatch error by adding `suppressHydrationWarning` to `<html>` tag in `layout.tsx`.
+        - Fixed an earlier Vercel deployment error in `GameSceneLoader.tsx` by using optional chaining for `searchParams`.
+- **Outcome:** Successfully implemented the new home page design. All core functionality is preserved, and theming is active. Technical issues encountered during the process were resolved. Git commit `ec189bb` pushed to `main`.
+- **Next Steps:** Update `tasks/current_tasks.md` and `README.md`.
+
 ## 2024-03-19 Oxy Movement and Visual Representation Planning
 
 - **Movement Constraints:**

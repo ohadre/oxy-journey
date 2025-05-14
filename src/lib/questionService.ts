@@ -42,6 +42,7 @@ export const fetchAndResolveQuestions = async (lang: LanguageCode): Promise<Disp
       const questionText = resolveText(qData.text, lang);
       const questionOptions = resolveOptions(qData.options, lang);
       const questionExplanation = qData.explanation ? resolveText(qData.explanation, lang) : undefined;
+      const imageUrl = qData.image_url; // Get the image_url
 
       // For Yes/No questions that might not have options defined in questions.json but expect them for rendering
       // (especially if they were string-only and we want consistent DisplayQuestion structure)
@@ -85,6 +86,7 @@ export const fetchAndResolveQuestions = async (lang: LanguageCode): Promise<Disp
         // This is crucial for 'multiple-choice' and 'yes-no'
         correctOptionIndex: finalOptions?.findIndex(opt => opt.isCorrect),
         explanation: questionExplanation,
+        image_url: imageUrl, // Pass the image_url
       };
     });
     
@@ -108,13 +110,13 @@ const loadQuestions = async () => {
   console.log('EN Questions:', enQuestions);
 
   // Test with a question that might be in old format (if q2/q3 weren't updated)
-  console.log('\nEnglish Question (potentially old format ID q2):', 
+  console.log('\nEnglish Question (potentially old format ID q2):',
     enQuestions.find(q => q.id === 'q2')
   );
-  console.log('\nHebrew Question (potentially old format ID q2 - would fallback to EN if text was string):', 
-    heQuestions.find(q => q.id === 'q2') 
+  console.log('\nHebrew Question (potentially old format ID q2 - would fallback to EN if text was string):',
+    heQuestions.find(q => q.id === 'q2')
   );
 };
 
 loadQuestions();
-*/ 
+*/

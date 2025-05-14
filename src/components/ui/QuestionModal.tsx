@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DisplayQuestion } from '../../types/question.types'; // Adjust path as needed
+import Image from 'next/image'; // Import next/image
 
 interface QuestionModalProps {
   question: DisplayQuestion | null;
@@ -126,6 +127,10 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
     }
   };
 
+  if (!isVisible || !question) {
+    return null;
+  }
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -157,6 +162,20 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
                 {titleText}
               </h2>
             </div>
+
+            {/* Optional Image Display */}
+            {question.image_url && (
+              <div className="mb-4 w-full max-h-60 overflow-hidden rounded-lg flex justify-center items-center">
+                <Image 
+                  src={question.image_url} 
+                  alt={question.topic || 'Question image'} // Use topic as alt text, or generic fallback
+                  width={300} // Provide a base width, will be constrained by max-h-60 and object-fit
+                  height={240} // Provide a base height
+                  className="object-contain w-auto h-auto max-w-full max-h-full"
+                  priority // Consider if images are critical enough for priority loading
+                />
+              </div>
+            )}
 
             <div className="flex justify-between items-center mb-6 pt-4 md:pt-6">
               <h3 className="text-2xl md:text-3xl font-bold text-purple-700">

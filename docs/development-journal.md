@@ -1,5 +1,51 @@
 # Development Journal
 
+## Home Page Redesign & Theming (YYYY-MM-DD) Current Date
+
+### Goals
+- Implement a new v0 design for the home page (`src/app/page.tsx`).
+- Integrate a new Tailwind CSS theming system based on Shadcn/ui principles.
+- Ensure existing functionality (language selection, navigation to game) is preserved.
+- Resolve any resulting technical issues (build errors, runtime errors, visual glitches).
+
+### Implementation Details
+- **UI & Styling:**
+    - Replaced the previous home page structure with a new layout using `next/image` for background and animated character elements (Oxy, Dust, Germ) and `framer-motion` for animations.
+    - Applied the `.font-game` class (Bangers font) to titles and buttons for a consistent game aesthetic.
+    - Updated `tailwind.config.ts` with a new theme structure based on CSS variables (e.g., `hsl(var(--border))`), added new animations, and included the `tailwindcss-animate` plugin.
+    - Replaced content of `src/styles/globals.css` with new base styles, CSS variable definitions for light/dark themes, and the `.font-game` definition.
+- **Theming Infrastructure:**
+    - Created `src/components/theme-provider.tsx` to manage light/dark mode using `next-themes`.
+    - Updated `src/app/layout.tsx` to include the `ThemeProvider`, new Google Fonts link (Bangers), and to import the updated global styles.
+- **Functionality Preservation:**
+    - Integrated the existing language selection dropdown (English/Hebrew) into the new design.
+    - Ensured the main page title dynamically changes based on the selected language (e.g., "Oxy's Journey" to "המסע של חמצנון").
+    - Kept the `isLoading` state and immediate loading screen feedback upon clicking the "START" button.
+    - Maintained navigation to `/game?lang=[selectedLang]`.
+
+### Debugging & Fixes
+- **Dependency Management:**
+    - Installed missing `next-themes` and `tailwindcss-animate` packages.
+- **Tailwind Configuration:**
+    - Corrected `content` paths in `tailwind.config.ts` to ensure proper scanning of `src` directory files, resolving issues where utility classes like `border-border` were not found.
+    - Ensured `components.json` was updated to point to `tailwind.config.ts` instead of a non-existent/outdated `.js` version, which was critical for the new theme to be applied.
+- **Image Loading:**
+    - Resolved 404 errors for page images by updating `src` paths in `src/app/page.tsx` to point to the correct `/textures/` directory and existing image filenames (e.g., `main page bg.png`).
+- **Hydration Errors:**
+    - Fixed React hydration mismatch errors in `src/app/layout.tsx` (caused by `next-themes` modifying `<html>` attributes) by adding `suppressHydrationWarning` to the `<html>` tag.
+- **Deployment Error (Initial):**
+    - Fixed a TypeScript error (`'searchParams' is possibly 'null'`) in `src/components/GameSceneLoader.tsx` by using optional chaining (`searchParams?.get('lang')`).
+
+### Current Status
+- New home page design is implemented and functional.
+- Theming system is in place.
+- Language selection and navigation work as expected.
+- Major bugs related to the redesign have been addressed.
+
+### Next Steps
+- (If any) Minor style adjustments to the language selector to better match the new theme.
+- Proceed with other tasks from `tasks/current_tasks.md`.
+
 ## Project Migration and Setup (2024-03-19)
 
 ### Project Structure Changes
@@ -100,65 +146,4 @@
 
 - **Texture Handling Improvements**:
   - Created a global TextureLoader instance for consistency
-  - Updated textures to use proper `colorSpace = THREE.SRGBColorSpace` instead of deprecated `sRGBEncoding`
-  - Added `toneMapped={false}` to materials for consistent rendering
-  - Used `texture.needsUpdate = true` to ensure textures are fully processed
-
-- **Enhanced Game Component Loading**:
-  - Updated `Germ.tsx` to use preloaded textures
-  - Added delayed spawning in `GermManager.tsx` to ensure scene stability
-  - Improved error handling for texture loading failures
-
-### Deployment and Testing
-- Successfully implemented the solution and tested on local development environment
-- Consolidated multiple Vercel projects to a single deployment
-- Confirmed the fix is working in the production environment
-- Eliminated white flashes for a smoother, more professional user experience
-
-### Development Guidelines
-- **Test Locally Before Commit:** Every new feature, bugfix, or refactor must be tested in the local development environment before committing and pushing to the repository. This ensures that changes work as intended and reduces the risk of introducing bugs to the main codebase or production deployment. 
-
-## Entity Management & Collision System Refactor (2024-06-11)
-
-### Goals
-- Implement reliable collision detection between player (Oxy) and enemies (Germs, Dust).
-- Refactor entity management (Germs, Dust) for better state handling and separation of concerns.
-- Ensure a continuous flow of enemies/obstacles.
-- Connect collisions to player lives.
-
-### Implementation Details
-- **State Management (`Scene3D.tsx`):**
-    - Centralized state for `oxyPosition`, `germs`, `dustParticles`, and `lives`.
-    - Added callbacks (`handleGermsChange`, `handleDustChange`, `handleCollision`) for child components to update state.
-- **Logic Components (`GermManager.tsx`, `DustManager.tsx`):
-    - Refactored to be logic-only (movement, spawning, filtering).
-    - Accept state arrays and update callbacks as props.
-    - Implemented refined movement logic (preventing overshoot).
-    - Tuned spawning parameters (`MAX_GERMS=20`, `MAX_DUST=15`, intervals, speed, lifetimes) for continuous flow.
-- **Visual Components (`Germ.tsx`, `DustParticle.tsx`):
-    - Created/updated to be purely visual, rendering based on props from `Scene3D`.
-    - Used textured planes facing the camera.
-- **Collision Handling (`CollisionManager.tsx`, `Scene3D.tsx`):
-    - `CollisionManager` checks for collisions between Oxy and both Germs and Dust based on distance vs. combined radii.
-    - Reports collision type (`'germ'` or `'dust'`) and `id` to `Scene3D`.
-    - `Scene3D`'s `handleCollision` decrements `lives` state and filters the collided entity from the appropriate state array.
-- **UI Update (`LivesIndicator.tsx`):
-    - Ensured `LivesIndicator` correctly displays the `lives` state passed from `Scene3D`.
-
-### Debugging & Fixes
-- Resolved issue where germs snapped instantly to target due to large delta in initial frames.
-- Fixed spawning logic stopping prematurely due to hitting `MAX_GERMS` too quickly; addressed by increasing limits and tuning parameters.
-- Corrected build errors related to incorrect prop names (`lives` vs `currentLives`) and duplicate component calls.
-
-### Current Status
-- Germs and Dust particles spawn continuously, move correctly, and are rendered visually.
-- Collision detection between Oxy and both entity types is functional.
-- Collisions correctly decrement the player's lives, reflected in the UI.
-- Core architecture for entity management and collision is established.
-
-### Next Steps
-- Implement Q&A mechanic triggered on collision.
-- Add game over logic when lives reach zero.
-- Refine visual appearance of Dust particles if needed.
-- Add sound effects for collisions.
- 
+  - Updated textures to use proper `colorSpace = THREE.SRGBColorSpace`

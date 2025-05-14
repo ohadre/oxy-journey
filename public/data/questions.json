@@ -16,7 +16,8 @@
     "explanation": {
       "en": "The diaphragm is a large, dome-shaped muscle that contracts and flattens to let you inhale, and relaxes to let you exhale.",
       "he": "הסרעפת היא שריר גדול בצורת כיפה המתכווץ ומשתטח כדי לאפשר לך לשאוף, ונרפה כדי לאפשר לך לנשוף."
-    }
+    },
+    "image_url": "/images/questions/diaphragm.png"
   },
   {
     "id": "q2",

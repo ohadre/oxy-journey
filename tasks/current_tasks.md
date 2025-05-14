@@ -1,5 +1,5 @@
 # Oxy Journey - Current Tasks
-Last Updated: 2025-05-10
+Last Updated: YYYY-MM-DD Current Date (Home Page Redesign & Theming Implemented)
 
 ## Introduction
 This document tracks the actionable tasks for the "Oxy Journey" project. It's a living document that will be updated regularly as per the "Vibe Session" protocol.
