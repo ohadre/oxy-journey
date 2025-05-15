@@ -36,7 +36,7 @@ import KnowledgeManager from './KnowledgeManager';
 // --- NEW: Define Tunnel End Z-coordinate ---
 const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
 // --- NEW: Minimum KNOWLEDGE OBJECT questions for win (set to 1 for testing) ---
-const MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN = 8; 
+const MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN = 8; // Adjusted from 1 to 8 previously
 // -------------------------------------------
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
