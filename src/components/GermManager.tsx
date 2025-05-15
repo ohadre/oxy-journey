@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useLoading } from './LoadingManager';
 import * as THREE from 'three';
+import { GameState } from '../types/game.types';
 
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
@@ -47,7 +48,7 @@ interface GermManagerProps {
   oxyPosition: [number, number, number]; // Accept Oxy's position
   germs: GermInstance[]; // Accept the current list of germs
   onGermsChange: (updatedGerms: GermInstance[]) => void; // Callback to update state in parent
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Add gameState prop
+  gameState: GameState; // Use imported GameState type
   gameSessionId: number; // Added for unique ID generation and reset logic
 }
 

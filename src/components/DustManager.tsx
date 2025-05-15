@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useLoading } from './LoadingManager';
 import * as THREE from 'three';
+import { GameState } from '../types/game.types';
 
 const TUNNEL_RADIUS = 6;
 const SPAWN_Z = -140;
@@ -46,7 +47,7 @@ export interface DustInstance {
 interface DustManagerProps {
   dustParticles: DustInstance[];
   onDustChange: (updatedDust: DustInstance[]) => void;
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Add gameState prop
+  gameState: GameState; // Use imported GameState type
   gameSessionId: number; // Added for unique ID generation and reset logic
 }
 

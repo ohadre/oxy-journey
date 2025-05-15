@@ -26,8 +26,8 @@ import FinishLine from './FinishLine'; // NEW: Import FinishLine
 import InstructionsModal from './ui/InstructionsModal'; // NEW: Import InstructionsModal
 import WinProgressIndicator from './ui/WinProgressIndicator'; // NEW: Import WinProgressIndicator
 import * as Tone from 'tone'; // Import Tone.js
-// NEW: Import KnowledgeInstance (adjust path if you placed it elsewhere)
-import { KnowledgeInstance } from '../types/game.types';
+// NEW: Import shared GameState type
+import { KnowledgeInstance, GameState } from '../types/game.types';
 // NEW: Import KnowledgeObject
 import KnowledgeObject from './KnowledgeObject';
 // NEW: Import KnowledgeManager
@@ -58,7 +58,7 @@ const keyboardMap = [
 ];
 
 // --- Define Game State Type (NEW) ---
-type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Added 'instructions'
+// type GameState = 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // REMOVED: Will use imported type
 // -----------------------------------
 
 // --- Define Props for Scene3D ---

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { KnowledgeInstance } from '../types/game.types'; // Fixed import path
+import { KnowledgeInstance, GameState } from '../types/game.types'; // Fixed import path
 
 // Constants for Knowledge Object behavior (can be tuned)
 const MAX_KNOWLEDGE_OBJECTS = 7; // Maximum number of knowledge objects on screen
@@ -16,7 +16,7 @@ const KNOWLEDGE_OBJECT_LIFETIME = (OUT_OF_BOUNDS_Z_KO - SPAWN_Z_KO) / MOVEMENT_S
 export interface KnowledgeManagerProps {
   knowledgeObjects: KnowledgeInstance[];
   onKnowledgeObjectsChange: (knowledgeObjects: KnowledgeInstance[]) => void;
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'won' | 'instructions'; // To control spawning
+  gameState: GameState; // Use imported GameState type
   gameSessionId: number; // Added for unique ID generation
 }
 
