@@ -619,7 +619,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}, Invincible: ${isOxyInvincible}`);
 
     if (isOxyInvincible) {
-      console.log('[Scene3D] Collision occurred while Oxy is invincible. Ignoring penalty and question.');
+      console.log('[Scene3D] Collision occurred while Oxy is invincible. Ignoring penalty.');
       // Still remove the entity to prevent immediate re-collision when invincibility ends
       if (type === 'germ') {
         setGerms(prevGerms => prevGerms.filter(g => g.id !== id));
@@ -629,10 +629,10 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       return;
     }
 
-    // Guard: Only trigger Q&A if game is currently 'playing'
+    // Guard: Only process collision if game is currently 'playing'
     if (gameState !== 'playing') {
-      console.log('[Scene3D] Collision occurred but game is not in \'playing\' state. Ignoring Q&A trigger.');
-      // Still remove the entity if desired, even if not showing a question
+      console.log('[Scene3D] Collision occurred but game is not in \'playing\' state. Ignoring.');
+      // Still remove the entity if desired
       if (type === 'germ') {
         setGerms(prevGerms => prevGerms.filter(g => g.id !== id));
       } else {
@@ -643,14 +643,13 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
 
     // --- Play Collision Sound ---
     if (collisionSynth && Tone.context.state !== 'running') {
-      Tone.start(); // Ensure AudioContext is running
+      Tone.start();
       console.log('[Scene3D] AudioContext started by collision sound.');
     }
     if (collisionSynth) {
-      // Explicitly stop any ongoing note and schedule the new one with a slight delay
       collisionSynth.triggerRelease(Tone.now()); 
       collisionSynth.triggerAttackRelease("C4", "8n", Tone.now() + 0.01); 
-      console.log('[Scene3D] Collision sound played.');
+      console.log('[Scene3D] Collision sound played for germ/dust impact.');
     }
     // ---------------------------
 
@@ -663,46 +662,63 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       setDustParticles(prevDust => prevDust.filter(d => d.id !== id));
     }
 
-    // --- Select and Display Question Logic ---
+    // --- NEW LOGIC: Directly penalize player --- 
+    console.log(`[Scene3D] Germ/Dust collision: Applying direct penalty.`);
+    setLives(prevLives => {
+      const newLives = Math.max(0, prevLives - 1);
+      console.log(`[Scene3D] Lives decreased to: ${newLives} due to germ/dust collision.`);
+      if (newLives <= 0) {
+        setGameState('game_over');
+        console.log('[Scene3D] GAME OVER triggered from Germ/Dust collision.');
+        if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
+          gameOverSoundPlayer.start(Tone.now());
+          console.log('[Scene3D] Game over sound played (Germ/Dust collision).');
+        } else {
+          console.warn('[Scene3D] Game over sound player not ready or not loaded (Germ/Dust collision).');
+           if (gameOverSoundPlayer) {
+              gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
+              .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
+              .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (Germ/Dust collision):", e));
+          }
+        }
+      } else {
+        // Apply invincibility only if game is not over
+        activateOxyInvincibility(3000); 
+      }
+      return newLives;
+    });
+    // --- END NEW LOGIC ---
+
+    // --- REMOVE OLD Q&A Trigger Logic for Germ/Dust ---
+    /*
     if (allQuestions.length === 0) {
       console.warn('[Scene3D] Collision occurred, but no questions are loaded. Cannot display question.');
-      return; // No questions to ask
+      return; 
     }
-
     let availableQuestions = allQuestions.filter(q => !answeredCorrectlyIds.includes(q.id));
-
     if (availableQuestions.length === 0) {
       console.log('[Scene3D] All unique questions have been answered correctly. Allowing questions to repeat.');
-      // setAnsweredCorrectlyIds([]); // DO NOT RESET: We want to keep track of all unique correct answers for the win condition.
-      availableQuestions = allQuestions; // Consider all questions again
+      availableQuestions = allQuestions; 
     }
-
     if (availableQuestions.length > 0) {
       const randomIndex = Math.floor(Math.random() * availableQuestions.length);
       const questionToDisplay = availableQuestions[randomIndex];
-      
-      console.log('[Scene3D] Selected question to display:', questionToDisplay);
       setCurrentDisplayQuestion(questionToDisplay);
       setIsModalVisible(true);
       if (qaModalOpenSynth && Tone.context.state !== 'running') {
-        Tone.start(); // Ensure AudioContext is running
-        console.log('[Scene3D] AudioContext started by Q&A modal open sound.');
+        Tone.start();
       }
-      if (qaModalOpenSynth) { // Play modal open sound
+      if (qaModalOpenSynth) { 
         qaModalOpenSynth.triggerAttackRelease("G4", "8n", Tone.now() + 0.01);
-        console.log('[Scene3D] Q&A modal open sound played.');
       }
       setGameState('question_paused');
-      console.log('[Scene3D] Game state changed to question_paused.');
     } else {
-      // This case should ideally not be reached if allQuestions is not empty and reset logic works
       console.warn('[Scene3D] No available questions to display even after trying to reset. Check logic.');
     }
-    // --- End Select and Display Question Logic ---
+    */
+    // --- END REMOVE OLD Q&A --- 
 
-    // Lives decrement will be handled based on question outcome later.
-
-  }, [gameState, allQuestions, answeredCorrectlyIds, lives, isOxyInvincible, activateOxyInvincibility, collisionSynth, qaModalOpenSynth]);
+  }, [gameState, allQuestions, answeredCorrectlyIds, lives, isOxyInvincible, activateOxyInvincibility, collisionSynth, qaModalOpenSynth, gameOverSoundPlayer]); // Added gameOverSoundPlayer
 
   // Add effect to monitor state changes
   useEffect(() => {
