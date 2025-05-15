@@ -445,55 +445,41 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         correctAnswerSynth.triggerAttackRelease("C5", "8n", Tone.now() + 0.01);
         console.log('[Scene3D] Correct answer sound played.');
       }
-      if (lives > 0) {
-        activateOxyInvincibility(3000);
+      // No life change for correct KO answer. Invincibility might be nice for smooth continuation.
+      if (lives > 0) { // Only grant invincibility if player is alive
+        activateOxyInvincibility(1500); // Short invincibility after correct KO answer
       }
-      // If it's an open question, modal will handle its own state for showing explanation.
-      // So, we don't hide it or change game state here.
+      
       if (questionType !== 'open-question') {
         setIsModalVisible(false);
         setCurrentDisplayQuestion(null);
-        if (gameState !== 'game_over') {
+        if (gameState !== 'game_over' && gameState !== 'won') {
           setGameState('playing');
         }
       }
     } else {
-      // Incorrect answer
+      // Incorrect answer from Knowledge Object Question
+      console.log('[Scene3D] Answer INCORRECT (from Knowledge Object). No life lost from this answer.');
       if (incorrectAnswerSynth) {
         incorrectAnswerSynth.triggerAttackRelease("C3", "4n", Tone.now() + 0.01);
         console.log('[Scene3D] Incorrect answer sound played.');
       }
-      setLives(prevLives => {
-        const newLives = Math.max(0, prevLives - 1);
-        console.log(`[Scene3D] Answer INCORRECT. Lives decreased to: ${newLives}`);
-        if (newLives <= 0) {
-          setGameState('game_over');
-          console.log('[Scene3D] GAME OVER triggered from handleAnswer.');
-          if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
-            gameOverSoundPlayer.start(Tone.now());
-            console.log('[Scene3D] Game over sound played (handleAnswer).');
-          } else {
-            console.warn('[Scene3D] Game over sound player not ready or not loaded (handleAnswer).');
-             if (gameOverSoundPlayer) {
-                gameOverSoundPlayer.load("/music/game-over-retro-video-game-music-soundroll-melody-4-4-00-03.mp3")
-                .then(() => gameOverSoundPlayer.start(Tone.now() + 0.1))
-                .catch(e => console.error("[Scene3D] Error loading or playing game over sound on demand (handleAnswer):", e));
-            }
-          }
-        } else {
-          activateOxyInvincibility(3000);
-        }
-        return newLives;
-      });
-      // For incorrect answers (any type), close modal and return to play
+      // NO life deduction here for KO questions.
+      // The "penalty" is not getting the question right for win conditions.
+      // Optional: activate short invincibility to prevent immediate new collision if player is in a tight spot.
+      // if (lives > 0) { // Only grant invincibility if player is alive
+      //   activateOxyInvincibility(1000); 
+      // }
+
+      // For incorrect answers from KO, close modal and return to play
       setIsModalVisible(false);
       setCurrentDisplayQuestion(null);
-      if (gameState !== 'game_over') {
+      if (gameState !== 'game_over' && gameState !== 'won') { // Ensure we don't override win/loss states
         setGameState('playing');
       }
     }
     // Removed general modal closing from here; handled conditionally above.
-  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth, gameOverSoundPlayer]);
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth /* Removed gameOverSoundPlayer as it's not directly used here now */]);
 
   const handleCloseModal = useCallback((isContinuation?: boolean) => {
     if (isContinuation) {
@@ -604,16 +590,50 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
 
   // NEW: Callback for Knowledge Object collision
   const handleKnowledgeObjectCollision = useCallback((collidedObjectId: string) => {
-    console.log(`[Scene3D] Knowledge Object collected: ${collidedObjectId}. Q&A to be triggered here in a future step.`);
+    console.log(`[Scene3D] Knowledge Object collected: ${collidedObjectId}. Attempting to trigger Q&A.`);
     // Remove the collected object
     setKnowledgeObjects(prevKOs => prevKOs.filter(ko => ko.id !== collidedObjectId));
     
-    // Play a sound? (Optional for now)
-    // if (someCollectionSound && Tone.context.state !== 'running') Tone.start();
-    // if (someCollectionSound) someCollectionSound.triggerAttackRelease("E5", "8n", Tone.now() + 0.01);
+    // --- NEW: Trigger Q&A Sequence ---
+    if (gameState !== 'playing') {
+      console.warn('[Scene3D] Knowledge Object collected, but game not in \'playing\' state. Q&A not triggered.');
+      return;
+    }
 
-    // For now, no direct impact on lives or game state other than removing the object.
-  }, []);
+    if (allQuestions.length === 0) {
+      console.warn('[Scene3D] Knowledge Object collected, but no questions are loaded. Cannot display question.');
+      return; // No questions to ask
+    }
+
+    let availableQuestions = allQuestions.filter(q => !answeredCorrectlyIds.includes(q.id));
+
+    if (availableQuestions.length === 0) {
+      console.log('[Scene3D] All unique questions have been answered correctly (from KO). Allowing questions to repeat.');
+      availableQuestions = allQuestions; // Consider all questions again
+    }
+
+    if (availableQuestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+      const questionToDisplay = availableQuestions[randomIndex];
+      
+      console.log('[Scene3D] Selected question from KO to display:', questionToDisplay);
+      setCurrentDisplayQuestion(questionToDisplay);
+      setIsModalVisible(true);
+      if (qaModalOpenSynth && Tone.context.state !== 'running') {
+        Tone.start();
+      }
+      if (qaModalOpenSynth) { 
+        qaModalOpenSynth.triggerAttackRelease("A4", "8n", Tone.now() + 0.01); // Slightly different note for KO Q&A open
+        console.log('[Scene3D] Knowledge Object Q&A modal open sound played.');
+      }
+      setGameState('question_paused');
+      console.log('[Scene3D] Game state changed to question_paused for Knowledge Object Q&A.');
+    } else {
+      console.warn('[Scene3D] No available questions to display from KO even after trying to reset. Check logic.');
+    }
+    // --- END NEW Q&A Sequence ---
+
+  }, [gameState, allQuestions, answeredCorrectlyIds, qaModalOpenSynth]); // Added dependencies
 
   const handleCollision = useCallback((type: 'germ' | 'dust', id: string) => {
     console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}, Invincible: ${isOxyInvincible}`);
