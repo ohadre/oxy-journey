@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DisplayQuestion } from '../../types/question.types'; // Adjust path as needed
 import Image from 'next/image'; // Import next/image
+import * as Tone from 'tone'; // Import Tone
 
 interface QuestionModalProps {
   question: DisplayQuestion | null;
@@ -16,6 +17,8 @@ interface QuestionModalProps {
     questionId: string
   ) => void;
   onClose: (isContinuation?: boolean) => void; // Modified to accept optional flag
+  correctAnswerSynth: Tone.Synth | null; // Add prop
+  incorrectAnswerSynth: Tone.Synth | null; // Add prop
 }
 
 const modalVariants = {
@@ -41,29 +44,79 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
   isVisible, 
   currentLang, 
   onAnswer, 
-  onClose 
+  onClose, 
+  correctAnswerSynth, // Destructure new prop
+  incorrectAnswerSynth // Destructure new prop
 }) => {
   const [openInputText, setOpenInputText] = useState('');
-  const [isShowingExplanation, setIsShowingExplanation] = useState(false); // New state
+  const [isShowingExplanation, setIsShowingExplanation] = useState(false);
+
+  // New states for answer feedback
+  const [submittedOptionIndex, setSubmittedOptionIndex] = useState<number | null>(null);
+  const [answerFeedback, setAnswerFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [isFeedbackActive, setIsFeedbackActive] = useState(false);
+  const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const titleText = currentLang === 'he' ? '!חידון חמצנון' : 'Oxy Challenge!';
+
+  useEffect(() => {
+    // Clear pending timeout if component unmounts or modal becomes invisible
+    return () => {
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isVisible) {
       setOpenInputText('');
       setIsShowingExplanation(false);
+      // Reset feedback states when modal is hidden
+      setSubmittedOptionIndex(null);
+      setAnswerFeedback(null);
+      setIsFeedbackActive(false);
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
     } else if (question) {
-      // Reset if question changes OR if it's not an open question currently showing explanation
       if (!isShowingExplanation || question.id !== (currentQuestionForEffectRef.current?.id) || question.type !== 'open-question') {
         setOpenInputText('');
         setIsShowingExplanation(false);
       }
+      // Reset feedback for new question
+      setSubmittedOptionIndex(null);
+      setAnswerFeedback(null);
+      setIsFeedbackActive(false);
     }
-    currentQuestionForEffectRef.current = question; // Keep track of current question for next effect run
+    currentQuestionForEffectRef.current = question;
   }, [question, isVisible, isShowingExplanation]);
 
-  // Ref to help useEffect track the question for which an explanation might be showing
   const currentQuestionForEffectRef = useRef<DisplayQuestion | null>(null);
+
+  const handleOptionClick = (selectedIndex: number, selectedText: string) => {
+    if (isFeedbackActive || !question) return;
+
+    setIsFeedbackActive(true);
+    setSubmittedOptionIndex(selectedIndex);
+    const isCorrect = selectedIndex === question.correctOptionIndex;
+    setAnswerFeedback(isCorrect ? 'correct' : 'incorrect');
+
+    // Play sound immediately with visual feedback
+    if (isCorrect) {
+      if (correctAnswerSynth && Tone.context.state !== 'running') Tone.start();
+      correctAnswerSynth?.triggerAttackRelease("C5", "8n", Tone.now() + 0.01);
+    } else {
+      if (incorrectAnswerSynth && Tone.context.state !== 'running') Tone.start();
+      incorrectAnswerSynth?.triggerAttackRelease("C3", "4n", Tone.now() + 0.01);
+    }
+
+    feedbackTimerRef.current = setTimeout(() => {
+      onAnswer({ selectedOptionText: selectedText, selectedOptionIndex: selectedIndex }, question.id);
+      feedbackTimerRef.current = null;
+    }, 1500); 
+  };
 
   const handleOpenAnswerSubmit = () => {
     if (question) {
@@ -91,15 +144,31 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
             >
               {question.text}
             </p>
-            {question.options?.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => onAnswer({ selectedOptionText: option.text, selectedOptionIndex: index }, question.id)}
-                className="block w-full text-center p-3 mb-3 bg-orange-400 hover:bg-orange-500 text-indigo-900 font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-opacity-75"
-              >
-                {option.text}
-              </button>
-            ))}
+            {question.options?.map((option, index) => {
+              let buttonClass = "block w-full text-center p-3 mb-3 font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-75";
+              if (isFeedbackActive && submittedOptionIndex === index) {
+                if (answerFeedback === 'correct') {
+                  buttonClass += " bg-green-500 hover:bg-green-600 text-white focus:ring-green-600";
+                } else {
+                  buttonClass += " bg-red-500 hover:bg-red-600 text-white focus:ring-red-600";
+                }
+              } else if (isFeedbackActive && answerFeedback === 'incorrect' && index === question.correctOptionIndex) {
+                buttonClass += " bg-green-300 hover:bg-green-400 text-green-800 border-2 border-green-500 focus:ring-green-500"; // Highlight correct answer on incorrect submission
+              } else {
+                buttonClass += " bg-orange-400 hover:bg-orange-500 text-indigo-900 focus:ring-orange-600";
+              }
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleOptionClick(index, option.text)}
+                  className={buttonClass}
+                  disabled={isFeedbackActive}
+                >
+                  {option.text}
+                </button>
+              );
+            })}
           </div>
         );
       case 'yes-no': 
@@ -112,15 +181,31 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
               {question.text}
             </p>
             <div className="flex justify-center space-x-4 md:space-x-6">
-              {question.options?.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => onAnswer({ selectedOptionText: option.text, selectedOptionIndex: index }, question.id)}
-                  className="flex-1 max-w-xs text-center px-6 py-3 bg-orange-400 hover:bg-orange-500 text-indigo-900 font-bold text-lg rounded-xl shadow-md transition-all duration-150 ease-in-out hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-opacity-75 active:bg-orange-600"
-                >
-                  {option.text}
-                </button>
-              ))}
+              {question.options?.map((option, index) => {
+                let buttonClass = "flex-1 max-w-xs text-center px-6 py-3 font-bold text-lg rounded-xl shadow-md transition-all duration-150 ease-in-out hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-opacity-75 active:bg-orange-600";
+                if (isFeedbackActive && submittedOptionIndex === index) {
+                  if (answerFeedback === 'correct') {
+                    buttonClass += " bg-green-500 hover:bg-green-600 text-white focus:ring-green-600";
+                  } else {
+                    buttonClass += " bg-red-500 hover:bg-red-600 text-white focus:ring-red-600";
+                  }
+                } else if (isFeedbackActive && answerFeedback === 'incorrect' && index === question.correctOptionIndex) {
+                  buttonClass += " bg-green-300 hover:bg-green-400 text-green-800 border-2 border-green-500 focus:ring-green-500";
+                } else {
+                  buttonClass += " bg-orange-400 hover:bg-orange-500 text-indigo-900 focus:ring-orange-600";
+                }
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleOptionClick(index, option.text)}
+                    className={buttonClass}
+                    disabled={isFeedbackActive}
+                  >
+                    {option.text}
+                  </button>
+                );
+              })}
             </div>
           </div>
         );

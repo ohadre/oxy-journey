@@ -6,57 +6,67 @@ import { X, AlertTriangle, CheckCircle, Heart, Target, Gamepad2 } from 'lucide-r
 import Image from 'next/image';
 
 interface InstructionsModalProps {
-  isVisible: boolean;
-  onClose: () => void; // This will typically set gameState to 'loading' or 'playing'
+  isOpen: boolean;
+  onClose: () => void;
+  gameWinConditionKnowledge: number;
   currentLang: string;
+  initialLives: number;
 }
 
-const InstructionsModal: React.FC<InstructionsModalProps> = ({ isVisible, onClose, currentLang }) => {
-  if (!isVisible) {
-    return null;
-  }
+const InstructionsModal: React.FC<InstructionsModalProps> = ({
+  isOpen,
+  onClose,
+  gameWinConditionKnowledge,
+  currentLang,
+  initialLives,
+}) => {
+  if (!isOpen) return null;
 
   const messages = {
     en: {
       title: "Oxy's Grand Journey Awaits!",
-      welcome: "Hey there, Oxygen hero! Get ready for an epic quest!",
-      objectiveHeader: "Your Vital Mission",
-      objectiveText: "Brave the winding paths of the respiratory system! Dodge dangers, answer wisely when you meet a Germ or Dust, and guide Oxy safely to the very end!",
+      welcome: "Hey there, Oxygen Hero! Ready for an epic quest through the amazing respiratory system?",
+      objectiveHeader: "Your Vital Mission!",
+      objectiveText: `Guide Oxy safely! Collect shimmering Knowledge Objects, answer their questions wisely to make progress, and skillfully dodge hazardous Germs and pesky Dust particles to survive!`,
       controlsHeader: "Master Your Moves",
       controlsText: [
-        "Up/Down/Left/Right: Use ↑ ↓ ← → Arrow Keys",
+        "Navigate: Use your ↑ ↓ ← → Arrow Keys.",
         "Zoom Forward: Press E to dive deeper!",
-        "Ease Backward: Tap Q (but not too much!)",
+        "Ease Backward: Tap Q for a gentle retreat.",
       ],
-      questionsHeader: "Microscopic Encounters!",
-      germText: "Watch out for Germs!",
-      dustText: "Dust Bunnies Ahead!",
-      questionDetailsText: "Colliding pauses your journey for a quick quiz! Answer RIGHT for a shield of invincibility. A WRONG answer, or closing the question, costs a precious life!",
-      livesHeader: "Guard Your Lives",
-      livesText: "You start with 3! Lose them all, and the adventure's over. Stay sharp!",
-      winConditionHeader: "The Finish Line!",
-      winConditionText: "Reach the tunnel's end with at least one life and by correctly answering enough unique questions. Victory awaits!",
+      knowledgeAndHazardsHeader: "Knowledge, Hazards & Survival!",
+      knowledgeObjectText: "Grab glowing Knowledge Objects! Each one holds a question. Answer correctly for a temporary shield of invincibility and to get closer to victory! Wrong answers from these don't cost lives, but you won't progress.",
+      hazardsText: "Watch Out! Direct hits from Germs or Dust will cost a precious life! Stay alert!",
+      collectKOsPrompt: "Collect these for questions & power-ups!",
+      avoidGermsPrompt: "Dodge these pesky Germs!",
+      avoidDustPrompt: "Steer clear of Dust clouds!",
+      livesHeader: "Guard Your Lives!",
+      livesText: `You have ${initialLives} lives. Lose them all, and the adventure resets. Be careful out there!`,
+      winConditionHeader: "Path to Victory!",
+      winConditionText: `Correctly answer ${gameWinConditionKnowledge} question${gameWinConditionKnowledge === 1 ? '' : 's'} from Knowledge Objects to complete Oxy's journey and win! Good luck, hero!`,
       startButton: "Let's Begin the Adventure!",
     },
     he: {
       title: "המסע הגדול של חמצנון מחכה!",
-      welcome: "שלום לך, גיבור חמצן! היכון למסע מופלא!",
-      objectiveHeader: "המשימה החיונית שלך",
-      objectiveText: "התמודד באומץ עם שבילי מערכת הנשימה המתפתלים! התחמק מסכנות, ענה בחוכמה כשתפגוש חיידק או אבק, והוביל את חמצנון בבטחה עד הסוף!",
+      welcome: "שלום לך, גיבור חמצן! מוכן למסע מופלא במערכת הנשימה המדהימה?",
+      objectiveHeader: "משימתך החיונית!",
+      objectiveText: `הוביל את חמצנון בבטחה! אסוף חפצי ידע זוהרים, ענה על שאלותיהם בחוכמה כדי להתקדם, והתחמק במיומנות מחיידקים מזיקים ומחלקיקי אבק טורדניים כדי לשרוד!`,
       controlsHeader: "שלוט בתנועותיך",
       controlsText: [
-        "למעלה/למטה/שמאלה/ימינה: השתמש במקשי החצים ↑ ↓ ← →",
+        "ניווט: השתמש במקשי החצים ↑ ↓ ← →.",
         "זינוק קדימה: לחץ E כדי לצלול עמוק יותר!",
-        "נסיגה זהירה: הקש Q (אך לא יותר מדי!)",
+        "נסיגה זהירה: הקש Q לנסיגה קלה.",
       ],
-      questionsHeader: "מפגשים מיקרוסקופיים!",
-      germText: "היזהר מחיידקים!",
-      dustText: "אבקנים לפניך!",
-      questionDetailsText: "התנגשות תשהה את מסעך לשאלון מהיר! תשובה נכונה תעניק לך מגן חסינות. תשובה שגויה, או סגירת השאלה, תעלה בחיי חמצן יקרים!",
-      livesHeader: "שמור על חייך",
-      livesText: "מתחילים עם 3! אם תאבד את כולם, ההרפתקה נגמרת. הישאר חד!",
-      winConditionHeader: "קו הסיום!",
-      winConditionText: "הגע לסוף המנהרה עם לפחות חיים אחד ועל ידי מתן תשובות נכונות למספר מספיק של שאלות ייחודיות. הניצחון מחכה!",
+      knowledgeAndHazardsHeader: "ידע, סכנות והישרדות!",
+      knowledgeObjectText: "תפוס חפצי ידע זוהרים! כל אחד מהם טומן בחובו שאלה. ענה נכון כדי לזכות במגן חסינות זמני ולהתקרב לניצחון! תשובות שגויות מאובייקטים אלו לא עולות חיים, אך לא תתקדם.",
+      hazardsText: "היזהר! פגיעה ישירה מחיידקים או אבק תעלה בחיי חמצן יקרים! הישאר ערני!",
+      collectKOsPrompt: "אסוף אותם לשאלות וחיזוקים!",
+      avoidGermsPrompt: "התחמק מהחיידקים המציקים!",
+      avoidDustPrompt: "התרחק מענני האבק!",
+      livesHeader: "שמור על חייך!",
+      livesText: `ברשותך ${initialLives} חיים. אם תאבד את כולם, ההרפתקה מתאפסת. היזהר שם בחוץ!`,
+      winConditionHeader: "הדרך לניצחון!",
+      winConditionText: `ענה נכון על ${gameWinConditionKnowledge} שאלה${gameWinConditionKnowledge === 1 ? '' : 'ות'} מחפצי ידע כדי להשלים את מסעו של חמצנון ולנצח! בהצלחה, גיבור!`,
       startButton: "בוא נתחיל את ההרפתקה!",
     },
   };
@@ -105,17 +115,23 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isVisible, onClos
           <div className="bg-white/10 p-3 sm:p-4 rounded-lg shadow-md mb-3">
             <div className="flex items-center mb-2">
               <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-300" />
-              <h3 className={`font-semibold text-lg sm:text-xl ml-2 ${currentLang === 'he' ? 'font-game-he' : 'font-game'}`}>{langMessages.questionsHeader}</h3>
+              <h3 className={`font-semibold text-lg sm:text-xl ml-2 ${currentLang === 'he' ? 'font-game-he' : 'font-game'}`}>{langMessages.knowledgeAndHazardsHeader}</h3>
             </div>
-            <div className="flex items-start sm:items-center mb-2 text-sm sm:text-base">
-              <Image src="/textures/germ.png" alt="Germ" width={36} height={36} className="mr-2 mt-1 sm:mt-0" /> {/* Slightly larger image */}
-              <p><span className="font-semibold">{langMessages.germText}</span></p>
+            <p className="text-sm sm:text-base mb-2 leading-relaxed">{langMessages.knowledgeObjectText}</p>
+            <div className="flex items-start sm:items-center mb-1 text-sm sm:text-base">
+              <Image src="/textures/knowledge.png" alt="Knowledge Object" width={30} height={30} className="mr-2 mt-1 sm:mt-0" />
+              <span className="italic text-teal-200">{langMessages.collectKOsPrompt}</span>
             </div>
-            <div className="flex items-start sm:items-center mb-2 text-sm sm:text-base">
-              <Image src="/textures/dust.png" alt="Dust" width={36} height={36} className="mr-2 mt-1 sm:mt-0" /> {/* Slightly larger image */}
-              <p><span className="font-semibold">{langMessages.dustText}</span></p>
+            <hr className="my-3 border-white/20" />
+            <p className="text-sm sm:text-base font-semibold mb-2 text-red-300">{langMessages.hazardsText}</p>
+            <div className="flex items-center mb-1 text-sm sm:text-base">
+              <Image src="/textures/germ.png" alt="Germ" width={30} height={30} className="mr-2" />
+              <span className="italic text-red-200">{langMessages.avoidGermsPrompt}</span>
             </div>
-            <p className="text-sm sm:text-base mt-1">{langMessages.questionDetailsText}</p>
+            <div className="flex items-center text-sm sm:text-base">
+              <Image src="/textures/dust.png" alt="Dust" width={30} height={30} className="mr-2" />
+              <span className="italic text-orange-200">{langMessages.avoidDustPrompt}</span>
+            </div>
           </div>
           
           {renderSection(<Heart className="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />, langMessages.livesHeader, langMessages.livesText)}

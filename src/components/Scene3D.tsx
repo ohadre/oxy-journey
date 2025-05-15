@@ -35,8 +35,8 @@ import KnowledgeManager from './KnowledgeManager';
 
 // --- NEW: Define Tunnel End Z-coordinate ---
 const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
-// --- NEW: Minimum unique questions for win ---
-const MIN_CORRECT_UNIQUE_QUESTIONS = 10; // Example value, can be tuned
+// --- NEW: Minimum KNOWLEDGE OBJECT questions for win (set to 1 for testing) ---
+const MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN = 8; 
 // -------------------------------------------
 
 // Dynamically import the Tunnel component to ensure it only renders on the client side
@@ -81,7 +81,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
   // NEW: State for Knowledge Objects, initialized as empty array
   const [knowledgeObjects, setKnowledgeObjects] = useState<KnowledgeInstance[]>([]);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(4);
 
   // --- NEW: Game Time Tracking State ---
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
@@ -190,7 +190,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   }, []);
   // ---------------------------------
 
-  const INITIAL_LIVES = 3;
+  const INITIAL_LIVES = 4;
 
   // --- Oxy Invincibility Logic (MOVED EARLIER) ---
   const activateOxyInvincibility = useCallback((duration: number) => {
@@ -332,12 +332,12 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   // --- NEW: Win Condition Check Logic ---
   const checkWinConditionsAndProceed = useCallback(() => {
     console.log('[Scene3D] Checking win conditions...');
-    const uniqueQuestionsAnswered = answeredCorrectlyIds.length;
-    console.log(`[Scene3D] Current stats: Lives: ${lives}, Unique Questions Answered: ${uniqueQuestionsAnswered}, Required: ${MIN_CORRECT_UNIQUE_QUESTIONS}, Elapsed Time: ${elapsedTimeInSeconds}s`);
+    const uniqueKoQuestionsAnswered = answeredCorrectlyIds.length;
+    console.log(`[Scene3D] Current stats: Lives: ${lives}, Unique KO Questions Answered: ${uniqueKoQuestionsAnswered}, Required: ${MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN}, Elapsed Time: ${elapsedTimeInSeconds}s`);
 
-    if (lives > 0 && uniqueQuestionsAnswered >= MIN_CORRECT_UNIQUE_QUESTIONS) {
-      console.log('%c[Scene3D] WIN CONDITIONS MET! Congratulations!', 'color: green; font-weight: bold;');
-      const score = { time: elapsedTimeInSeconds, questions: uniqueQuestionsAnswered, lives }; 
+    if (lives > 0 && uniqueKoQuestionsAnswered >= MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN) {
+      console.log('%c[Scene3D] WIN CONDITIONS MET (KO Logic)! Congratulations!', 'color: green; font-weight: bold;');
+      const score = { time: elapsedTimeInSeconds, questions: uniqueKoQuestionsAnswered, lives }; 
       console.log(`[Scene3D] Scoring Data: Time: ${score.time}s, Questions: ${score.questions}, Lives: ${score.lives}`);
       setFinalScore(score); 
       setGameState('won');
@@ -357,8 +357,8 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       if (lives <= 0) {
         console.log('[Scene3D] Reason: No lives left.');
       }
-      if (uniqueQuestionsAnswered < MIN_CORRECT_UNIQUE_QUESTIONS) {
-        console.log(`[Scene3D] Reason: Not enough unique questions answered (${uniqueQuestionsAnswered}/${MIN_CORRECT_UNIQUE_QUESTIONS}).`);
+      if (uniqueKoQuestionsAnswered < MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN) {
+        console.log(`[Scene3D] Reason: Not enough unique KO questions answered (${uniqueKoQuestionsAnswered}/${MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN}).`);
       }
       setGameState('game_over'); 
       if (gameOverSoundPlayer && gameOverSoundPlayer.loaded) {
@@ -432,7 +432,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         break;
       case 'open-question':
         isCorrect = !!(answerDetails.openAnswerText && answerDetails.openAnswerText.trim());
-        console.log(`[Scene3D] Open Question Answer: User input: \"${answerDetails.openAnswerText}\". Considered Correct (PoC): ${isCorrect}`);
+        console.log(`[Scene3D] Open Question Answer: User input: "${answerDetails.openAnswerText}". Considered Correct (PoC): ${isCorrect}`);
         break;
       default:
         console.warn('[Scene3D] Unknown question type in handleAnswer:', questionType);
@@ -441,13 +441,8 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     if (isCorrect) {
       setAnsweredCorrectlyIds(prev => [...new Set([...prev, currentDisplayQuestion.id])]);
       console.log('[Scene3D] Answer CORRECT. answeredCorrectlyIds updated.');
-      if (correctAnswerSynth) {
-        correctAnswerSynth.triggerAttackRelease("C5", "8n", Tone.now() + 0.01);
-        console.log('[Scene3D] Correct answer sound played.');
-      }
-      // No life change for correct KO answer. Invincibility might be nice for smooth continuation.
-      if (lives > 0) { // Only grant invincibility if player is alive
-        activateOxyInvincibility(1500); // Short invincibility after correct KO answer
+      if (lives > 0) { 
+        activateOxyInvincibility(1500); 
       }
       
       if (questionType !== 'open-question') {
@@ -458,28 +453,14 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
         }
       }
     } else {
-      // Incorrect answer from Knowledge Object Question
       console.log('[Scene3D] Answer INCORRECT (from Knowledge Object). No life lost from this answer.');
-      if (incorrectAnswerSynth) {
-        incorrectAnswerSynth.triggerAttackRelease("C3", "4n", Tone.now() + 0.01);
-        console.log('[Scene3D] Incorrect answer sound played.');
-      }
-      // NO life deduction here for KO questions.
-      // The "penalty" is not getting the question right for win conditions.
-      // Optional: activate short invincibility to prevent immediate new collision if player is in a tight spot.
-      // if (lives > 0) { // Only grant invincibility if player is alive
-      //   activateOxyInvincibility(1000); 
-      // }
-
-      // For incorrect answers from KO, close modal and return to play
       setIsModalVisible(false);
       setCurrentDisplayQuestion(null);
-      if (gameState !== 'game_over' && gameState !== 'won') { // Ensure we don't override win/loss states
+      if (gameState !== 'game_over' && gameState !== 'won') { 
         setGameState('playing');
       }
     }
-    // Removed general modal closing from here; handled conditionally above.
-  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility, correctAnswerSynth, incorrectAnswerSynth /* Removed gameOverSoundPlayer as it's not directly used here now */]);
+  }, [currentDisplayQuestion, gameState, lives, activateOxyInvincibility]);
 
   const handleCloseModal = useCallback((isContinuation?: boolean) => {
     if (isContinuation) {
@@ -487,10 +468,6 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       // No penalty, just close and resume
     } else {
       console.log('[Scene3D] Modal closed by user (penalty applied).');
-      if (incorrectAnswerSynth) {
-        incorrectAnswerSynth.triggerAttackRelease("G2", "4n", Tone.now() + 0.01);
-        console.log('[Scene3D] Modal close (penalty) sound played.');
-      }
       setLives(prevLives => {
         const newLives = Math.max(0, prevLives - 1);
         console.log(`[Scene3D] Lives decreased to: ${newLives} due to modal close.`);
@@ -520,7 +497,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     if (gameState !== 'game_over') {
       setGameState('playing');
     }
-  }, [gameState, lives, activateOxyInvincibility, incorrectAnswerSynth, gameOverSoundPlayer]);
+  }, [gameState, lives, activateOxyInvincibility, gameOverSoundPlayer]);
   // ------------------------------------
 
   // --- Game Restart Logic --- (MODIFIED)
@@ -764,13 +741,13 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
 
   // --- LivesIndicator Rendering (Modified for debug) ---
   const renderLivesIndicator = () => {
-    if (gameState === 'level_complete_debug') { // This state will be removed eventually
-      return <LivesIndicator currentLives={0} maxLives={0} />; 
-    } else if (gameState === 'won') {
-      return <LivesIndicator currentLives={lives} maxLives={INITIAL_LIVES} />; // Show lives at point of winning
-      // Or a custom message like <LivesIndicator message="YOU WON!" /> if we adapt LivesIndicator
+    if (gameState === 'level_complete_debug') { 
+      return <LivesIndicator currentLives={0} maxLives={0} />;
+    } else if (gameState === 'won' || gameState === 'game_over') { // Also show full hearts for game_over
+      return <LivesIndicator currentLives={lives} maxLives={INITIAL_LIVES} />;
     }
-    return <LivesIndicator currentLives={lives} />;
+    // For 'playing', 'question_paused', 'instructions', 'loading' states
+    return <LivesIndicator currentLives={lives} maxLives={INITIAL_LIVES} />;
   };
   // ---------------------------------------------------
 
@@ -786,7 +763,7 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       {isMounted && (gameState === 'playing' || gameState === 'question_paused') && (
         <WinProgressIndicator 
           currentCorrect={answeredCorrectlyIds.length} 
-          targetCorrect={MIN_CORRECT_UNIQUE_QUESTIONS}
+          targetCorrect={MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN}
           currentLang={currentLanguage} 
         />
       )}
@@ -926,6 +903,8 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
           onAnswer={handleAnswer}
           onClose={handleCloseModal}
           currentLang={currentLanguage}
+          correctAnswerSynth={correctAnswerSynth}
+          incorrectAnswerSynth={incorrectAnswerSynth}
         />
       )}
 
@@ -951,9 +930,11 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
       {/* NEW: Render the InstructionsModal */}
       {isMounted && (
         <InstructionsModal
-          isVisible={isInstructionsModalVisible}
+          isOpen={isInstructionsModalVisible}
           onClose={handleCloseInstructionsModal}
+          gameWinConditionKnowledge={MIN_KNOWLEDGE_OBJECT_QUESTIONS_FOR_WIN}
           currentLang={currentLanguage}
+          initialLives={INITIAL_LIVES}
         />
       )}
     </div>

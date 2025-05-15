@@ -18,11 +18,13 @@ const WinProgressIndicator: React.FC<WinProgressIndicatorProps> = ({
       progressLabel: "Win Progress:",
       goalReachedTitle: "Objective Met!",
       goalReachedSubtitle: "Head to the finish line!",
+      outOf: "/", // Using slash for English
     },
     he: {
       progressLabel: "התקדמות לניצחון:",
       goalReachedTitle: "המטרה הושלמה!",
       goalReachedSubtitle: "המשיכו אל קו הסיום!",
+      outOf: "מתוך", // Hebrew for "out of"
     },
   };
 
@@ -63,7 +65,10 @@ const WinProgressIndicator: React.FC<WinProgressIndicatorProps> = ({
           <div className="flex justify-between items-center mb-1">
             <span className={`text-sm sm:text-base ${currentLang === 'he' ? 'font-game-he' : 'font-game'}`}>{langMessages.progressLabel}</span>
             <span className={`text-sm sm:text-base font-mono ${currentLang === 'he' ? 'font-game-he' : 'font-game'}`}>
-              {currentCorrect} / {targetCorrect}
+              {currentLang === 'he' ? 
+                `${currentCorrect} ${langMessages.outOf} ${targetCorrect}` : 
+                `${currentCorrect} ${langMessages.outOf} ${targetCorrect}` // English will use '/' from langMessages.outOf
+              }
             </span>
           </div>
           <div className="w-full bg-gray-600 rounded-full h-3 sm:h-4 dark:bg-gray-700 overflow-hidden">
