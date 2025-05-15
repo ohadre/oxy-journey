@@ -26,6 +26,10 @@ import FinishLine from './FinishLine'; // NEW: Import FinishLine
 import InstructionsModal from './ui/InstructionsModal'; // NEW: Import InstructionsModal
 import WinProgressIndicator from './ui/WinProgressIndicator'; // NEW: Import WinProgressIndicator
 import * as Tone from 'tone'; // Import Tone.js
+// NEW: Import KnowledgeInstance (adjust path if you placed it elsewhere)
+import { KnowledgeInstance } from '../types/game.types';
+// NEW: Import KnowledgeObject
+import KnowledgeObject from './KnowledgeObject';
 
 // --- NEW: Define Tunnel End Z-coordinate ---
 const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
@@ -73,6 +77,10 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 146]);
   const [germs, setGerms] = useState<GermInstance[]>([]);
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
+  // NEW: State for Knowledge Objects, initialized with one static object for testing
+  const [knowledgeObjects, setKnowledgeObjects] = useState<KnowledgeInstance[]>([
+    { id: 'ko_test_1', position: [0, 0, 130], size: 1.5 } // Example position and size
+  ]);
   const [lives, setLives] = useState(3);
 
   // --- NEW: Game Time Tracking State ---
@@ -790,6 +798,12 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
           {(Array.isArray(dustParticles) ? dustParticles : []).map(dust => (
             <DustParticle key={dust.id} position={dust.position} size={dust.size} />
           ))}
+
+          {/* NEW: Render Knowledge Objects */}
+          {(Array.isArray(knowledgeObjects) ? knowledgeObjects : []).map(ko => (
+            <KnowledgeObject key={ko.id} position={ko.position} size={ko.size} />
+          ))}
+
           <Oxy 
             key={`oxy-${gameSessionId}`}
             ref={oxyMeshRef}
