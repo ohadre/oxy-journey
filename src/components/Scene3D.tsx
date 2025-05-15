@@ -602,6 +602,19 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     setKnowledgeObjects(updatedKnowledgeObjects);
   }, []);
 
+  // NEW: Callback for Knowledge Object collision
+  const handleKnowledgeObjectCollision = useCallback((collidedObjectId: string) => {
+    console.log(`[Scene3D] Knowledge Object collected: ${collidedObjectId}. Q&A to be triggered here in a future step.`);
+    // Remove the collected object
+    setKnowledgeObjects(prevKOs => prevKOs.filter(ko => ko.id !== collidedObjectId));
+    
+    // Play a sound? (Optional for now)
+    // if (someCollectionSound && Tone.context.state !== 'running') Tone.start();
+    // if (someCollectionSound) someCollectionSound.triggerAttackRelease("E5", "8n", Tone.now() + 0.01);
+
+    // For now, no direct impact on lives or game state other than removing the object.
+  }, []);
+
   const handleCollision = useCallback((type: 'germ' | 'dust', id: string) => {
     console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}, Invincible: ${isOxyInvincible}`);
 
@@ -783,12 +796,14 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
             onGermsChange={handleGermsChange}
             germs={germs}
             gameState={gameState}
+            gameSessionId={gameSessionId}
           />
           <DustManager
             key={`dust-manager-${gameSessionId}`}
             onDustChange={handleDustChange}
             dustParticles={dustParticles}
             gameState={gameState}
+            gameSessionId={gameSessionId}
           />
           {/* NEW: Add KnowledgeManager */}
           <KnowledgeManager
@@ -803,7 +818,9 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
             oxyPosition={oxyPosition}
             germs={germs}
             dustParticles={dustParticles}
+            knowledgeObjects={knowledgeObjects}
             onCollision={handleCollision}
+            onKnowledgeCollision={handleKnowledgeObjectCollision}
           />
           {(Array.isArray(germs) ? germs : []).map(germ => (
             <Germ key={germ.id} position={germ.position} size={germ.size} />

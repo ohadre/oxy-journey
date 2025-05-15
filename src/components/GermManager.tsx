@@ -48,16 +48,26 @@ interface GermManagerProps {
   germs: GermInstance[]; // Accept the current list of germs
   onGermsChange: (updatedGerms: GermInstance[]) => void; // Callback to update state in parent
   gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Add gameState prop
+  gameSessionId: number; // Added for unique ID generation and reset logic
 }
 
-const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameState }) => {
+const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameState, gameSessionId }) => {
   const [isReady, setIsReady] = useState(false); // Keep state for spawn readiness
   const { isLoading } = useLoading();
-  const nextId = useRef(Date.now());
+  const nextId = useRef(0); // Start from 0, gameSessionId will ensure uniqueness
   const spawnTimer = useRef(0);
   const isFirstSpawn = useRef(true);
 
-  // Effect to manage spawn readiness based on loading state
+  // Effect for component mount/re-mount (new game session)
+  useEffect(() => {
+    console.log(`[GermManager] Component mounted/re-mounted for game session ${gameSessionId}. Resetting internal state.`);
+    spawnTimer.current = 0;
+    isFirstSpawn.current = true;
+    nextId.current = 0; // Reset ID counter for the new session
+    setIsReady(false); // Ensure it waits for INITIAL_SPAWN_DELAY again
+  }, [gameSessionId]); // Re-run if gameSessionId changes, effectively on new game session
+
+  // Effect to manage spawn readiness based on loading state AND gameSessionId change
   useEffect(() => {
     if (!isLoading) {
       const timer = setTimeout(() => {
@@ -70,7 +80,7 @@ const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameSta
       spawnTimer.current = 0;
       isFirstSpawn.current = true;
     }
-  }, [isLoading]);
+  }, [isLoading, gameSessionId]);
 
   useFrame((_, delta) => {
     if (gameState !== 'playing') return; // Pause if not playing
@@ -160,7 +170,7 @@ const GermManager: React.FC<GermManagerProps> = ({ germs, onGermsChange, gameSta
       const [x, y] = randomXY(TUNNEL_RADIUS);
       // --- Create the new germ data --- 
       const newGerm: GermInstance = {
-        id: `germ-${nextId.current++}`,
+        id: `germ-session${gameSessionId}-${nextId.current++}`,
         position: [x, y, SPAWN_Z],
         speed: randomSpeed(),
         size: 1 + Math.random() * 0.5,

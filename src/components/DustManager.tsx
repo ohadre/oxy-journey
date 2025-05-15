@@ -47,15 +47,24 @@ interface DustManagerProps {
   dustParticles: DustInstance[];
   onDustChange: (updatedDust: DustInstance[]) => void;
   gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions'; // Add gameState prop
+  gameSessionId: number; // Added for unique ID generation and reset logic
 }
 
-const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, gameState }) => {
+const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, gameState, gameSessionId }) => {
   // Removed internal state: const [dusts, setDusts] = useState<DustInstance[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { isLoading } = useLoading();
-  const nextId = useRef(Date.now());
+  const nextId = useRef(0); // Start from 0, gameSessionId will ensure uniqueness
   const spawnTimer = useRef(0);
   // Removed isFirstSpawn ref as it wasn't used in the cleaned version
+
+  // Effect for component mount/re-mount (new game session)
+  useEffect(() => {
+    console.log(`[DustManager] Component mounted/re-mounted for game session ${gameSessionId}. Resetting internal state.`);
+    spawnTimer.current = 0;
+    nextId.current = 0; // Reset ID counter for the new session
+    setIsReady(false); // Ensure it waits for INITIAL_SPAWN_DELAY again
+  }, [gameSessionId]); // Re-run if gameSessionId changes
 
   useEffect(() => {
     if (!isLoading) {
@@ -68,7 +77,7 @@ const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, 
       setIsReady(false);
       spawnTimer.current = 0;
     }
-  }, [isLoading]);
+  }, [isLoading, gameSessionId]); // Also depend on gameSessionId
 
   useFrame((_, delta) => {
     if (gameState !== 'playing') return; // Pause if not playing
@@ -124,7 +133,7 @@ const DustManager: React.FC<DustManagerProps> = ({ dustParticles, onDustChange, 
     while (newDustParticles.length < MAX_DUST && spawnTimer.current >= SPAWN_INTERVAL) {
       const [x, y] = randomXY(TUNNEL_RADIUS);
       const newDust: DustInstance = {
-        id: `dust-${nextId.current++}`,
+        id: `dust-session${gameSessionId}-${nextId.current++}`,
         position: [x, y, SPAWN_Z],
         speed: randomDustSpeed(),
         size: 0.5 + Math.random() * 0.5, // Adjusted size range

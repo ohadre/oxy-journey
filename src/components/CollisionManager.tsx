@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GermInstance } from './GermManager'; // Import GermInstance type
 import { DustInstance } from './DustManager'; // Import DustInstance type
+import { KnowledgeInstance } from '../types/game.types'; // NEW: Import KnowledgeInstance
 
 // Removed import { TUNNEL_RADIUS } from './EntityManager';
 
@@ -10,14 +11,18 @@ interface CollisionManagerProps {
   oxyPosition: [number, number, number];
   germs: GermInstance[]; // Add germs array prop
   dustParticles: DustInstance[]; // Add dust array prop
+  knowledgeObjects: KnowledgeInstance[]; // NEW: Add knowledgeObjects array prop
   onCollision: (type: 'germ' | 'dust', id: string) => void; // Modify onCollision signature
+  onKnowledgeCollision: (id: string) => void; // NEW: Callback for knowledge object collision
 }
 
 export const CollisionManager: React.FC<CollisionManagerProps> = ({
   oxyPosition,
   germs, // Destructure germs prop
   dustParticles, // Destructure dust prop
-  onCollision
+  knowledgeObjects, // NEW: Destructure knowledgeObjects
+  onCollision,
+  onKnowledgeCollision // NEW: Destructure onKnowledgeCollision
 }) => {
   const lastCollisionTime = useRef(0);
   const collisionCooldown = 500; // Cooldown in milliseconds (e.g., 0.5 seconds)
@@ -72,6 +77,24 @@ export const CollisionManager: React.FC<CollisionManagerProps> = ({
         console.log(`[CollisionManager] Collision detected! Type: dust, ID: ${dust.id}`);
         onCollision('dust', dust.id); // Call with type 'dust'
         lastCollisionTime.current = currentTime;
+        return; // Exit after the first collision
+      }
+    }
+
+    // NEW: Iterate through each Knowledge Object to check for collision
+    for (const ko of knowledgeObjects) {
+      if (!ko || !ko.position || !Array.isArray(ko.position)) continue; // Basic validation
+      const koPos = new THREE.Vector3(...ko.position);
+      const distance = oxyPos.distanceTo(koPos);
+
+      // Assuming ko.size is diameter, similar to germs/dust
+      const koRadius = ko.size * 0.5; 
+      const combinedRadius = oxyRadius + koRadius;
+
+      if (distance < combinedRadius) {
+        console.log(`[CollisionManager] Knowledge Object collected! ID: ${ko.id}`);
+        onKnowledgeCollision(ko.id);
+        lastCollisionTime.current = currentTime; // Trigger global cooldown
         return; // Exit after the first collision
       }
     }
