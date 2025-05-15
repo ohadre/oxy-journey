@@ -30,6 +30,8 @@ import * as Tone from 'tone'; // Import Tone.js
 import { KnowledgeInstance } from '../types/game.types';
 // NEW: Import KnowledgeObject
 import KnowledgeObject from './KnowledgeObject';
+// NEW: Import KnowledgeManager
+import KnowledgeManager from './KnowledgeManager';
 
 // --- NEW: Define Tunnel End Z-coordinate ---
 const TUNNEL_END_Z = -148; // Assuming tunnel extends into negative Z
@@ -77,10 +79,8 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
   const [oxyPosition, setOxyPosition] = useState<[number, number, number]>([0, 0, 146]);
   const [germs, setGerms] = useState<GermInstance[]>([]);
   const [dustParticles, setDustParticles] = useState<DustInstance[]>([]);
-  // NEW: State for Knowledge Objects, initialized with one static object for testing
-  const [knowledgeObjects, setKnowledgeObjects] = useState<KnowledgeInstance[]>([
-    { id: 'ko_test_1', position: [0, 0, 130], size: 1.5 } // Example position and size
-  ]);
+  // NEW: State for Knowledge Objects, initialized as empty array
+  const [knowledgeObjects, setKnowledgeObjects] = useState<KnowledgeInstance[]>([]);
   const [lives, setLives] = useState(3);
 
   // --- NEW: Game Time Tracking State ---
@@ -597,6 +597,11 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
     setDustParticles(updatedDust);
   }, []);
 
+  // NEW: Callback for KnowledgeManager to update knowledge objects
+  const handleKnowledgeObjectsChange = useCallback((updatedKnowledgeObjects: KnowledgeInstance[]) => {
+    setKnowledgeObjects(updatedKnowledgeObjects);
+  }, []);
+
   const handleCollision = useCallback((type: 'germ' | 'dust', id: string) => {
     console.log(`[Scene3D] Collision detected with ${type}: ${id}. Current gameState: ${gameState}, Invincible: ${isOxyInvincible}`);
 
@@ -784,6 +789,14 @@ export default function Scene3D({ currentLanguage, showInstructions }: Scene3DPr
             onDustChange={handleDustChange}
             dustParticles={dustParticles}
             gameState={gameState}
+          />
+          {/* NEW: Add KnowledgeManager */}
+          <KnowledgeManager
+            key={`knowledge-manager-${gameSessionId}`}
+            knowledgeObjects={knowledgeObjects}
+            onKnowledgeObjectsChange={handleKnowledgeObjectsChange}
+            gameState={gameState}
+            gameSessionId={gameSessionId}
           />
           <CollisionManager
             key={`collision-manager-${gameSessionId}`}

@@ -1,128 +1,90 @@
-import React, { useRef, useEffect, useState } from 'react';
+// src/components/KnowledgeManager.tsx
+import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useLoading } from './LoadingManager';
-// import * as THREE from 'three'; // Not strictly needed if not using THREE.Vector3 etc.
+import * as THREE from 'three';
+import { KnowledgeInstance } from '../types/game.types'; // Fixed import path
 
-const TUNNEL_RADIUS = 6;
-const SPAWN_Z = -140;
-const OUT_OF_BOUNDS_Z = 160;
-const MAX_KNOWLEDGE = 5; // Updated as per user feedback
-const SPAWN_INTERVAL = 0.875; // Approx 20% longer interval than Dust's 0.7 (0.7 / 0.8 or 0.7 * 1.25)
-const INITIAL_SPAWN_DELAY = 2.5; // Slightly longer initial delay
+// Constants for Knowledge Object behavior (can be tuned)
+const MAX_KNOWLEDGE_OBJECTS = 7; // Maximum number of knowledge objects on screen
+const SPAWN_INTERVAL_KO = 5000; // Spawn a new knowledge object every 5 seconds (in milliseconds)
+const SPAWN_Z_KO = -140;        // Initial Z position for new knowledge objects (far end of tunnel)
+const MOVEMENT_SPEED_KO = 13;   // Units per second (Increased from 10)
+const OUT_OF_BOUNDS_Z_KO = 160; // Z position at which objects are despawned (near player start)
+const KNOWLEDGE_OBJECT_SIZE = 1.5; // Default size for knowledge objects
+const KNOWLEDGE_OBJECT_LIFETIME = (OUT_OF_BOUNDS_Z_KO - SPAWN_Z_KO) / MOVEMENT_SPEED_KO * 1000 * 1.2; // Max time to live (ms), bit more than travel time
 
-function randomXY(radius: number): [number, number] {
-  const angle = Math.random() * Math.PI * 2;
-  const r = Math.random() * (radius - 1.0); 
-  return [Math.cos(angle) * r, Math.sin(angle) * r];
+export interface KnowledgeManagerProps {
+  knowledgeObjects: KnowledgeInstance[];
+  onKnowledgeObjectsChange: (knowledgeObjects: KnowledgeInstance[]) => void;
+  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'won' | 'instructions'; // To control spawning
+  gameSessionId: number; // Added for unique ID generation
 }
 
-function randomKnowledgeSpeed() {
-  // Approx 60% of Dust's speed (Dust: 36-54)
-  // New range: 22-32 (avg 27, which is 60% of Dust's avg 45)
-  return 22 + Math.random() * 10;
-}
+const KnowledgeManager: React.FC<KnowledgeManagerProps> = ({
+  knowledgeObjects,
+  onKnowledgeObjectsChange,
+  gameState,
+  gameSessionId
+}) => {
+  const spawnTimerRef = useRef(0);
+  const nextIdRef = useRef(0);
 
-function randomKnowledgeLifetime() {
-  // Same lifetime as Dust for now, can be tuned later
-  return 200 + Math.random() * 100; // 200 to 300 seconds lifetime
-}
-
-export interface KnowledgeInstance {
-  id: string;
-  position: [number, number, number];
-  speed: number;
-  size: number;
-  timeAlive: number;
-  maxLifetime: number;
-}
-
-interface KnowledgeManagerProps {
-  knowledgeItems: KnowledgeInstance[];
-  onKnowledgeChange: (updatedKnowledge: KnowledgeInstance[]) => void;
-  gameState: 'loading' | 'playing' | 'question_paused' | 'game_over' | 'level_complete_debug' | 'won' | 'instructions';
-}
-
-const KnowledgeManager: React.FC<KnowledgeManagerProps> = ({ knowledgeItems, onKnowledgeChange, gameState }) => {
-  const [isReady, setIsReady] = useState(false);
-  const { isLoading } = useLoading();
-  const nextId = useRef(Date.now());
-  const spawnTimer = useRef(0);
-
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        setIsReady(true);
-        console.log('[KnowledgeManager] Now ready to spawn knowledge items');
-      }, INITIAL_SPAWN_DELAY * 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setIsReady(false);
-      spawnTimer.current = 0;
-    }
-  }, [isLoading]);
-
-  useFrame((_, delta) => {
-    if (gameState !== 'playing') return;
-    if (!isReady) return;
-
-    if (!Array.isArray(knowledgeItems)) {
-      console.error('[KnowledgeManager] Error: knowledgeItems prop is not an array!', knowledgeItems);
-      return; 
+  useFrame((state, delta) => {
+    if (gameState !== 'playing') {
+      spawnTimerRef.current = 0; // Reset spawn timer if game is not playing
+      return; // Don't spawn or move if not in 'playing' state
     }
 
-    let currentKnowledge = [...knowledgeItems];
+    const newKnowledgeObjects = knowledgeObjects
+      .map(ko => ({
+        ...ko,
+        position: [
+          ko.position[0],
+          ko.position[1],
+          ko.position[2] + MOVEMENT_SPEED_KO * delta, // Move along Z towards player
+        ] as [number, number, number],
+        timeAlive: (ko.timeAlive || 0) + delta * 1000,
+      }))
+      .filter(ko => ko.position[2] < OUT_OF_BOUNDS_Z_KO && (ko.timeAlive || 0) < KNOWLEDGE_OBJECT_LIFETIME);
 
-    let movedKnowledge = currentKnowledge.map((item) => {
-      if (!item || !item.position || !Array.isArray(item.position) || item.position.length !== 3) {
-        console.error('[KnowledgeManager] Invalid knowledge item position:', item);
-        return item; 
-      }
-      if (typeof item.speed !== 'number' || typeof item.timeAlive !== 'number') {
-        console.error('[KnowledgeManager] Invalid knowledge item speed or timeAlive:', item);
-        return item;
-      }
+    // Spawning logic
+    spawnTimerRef.current += delta * 1000; // Increment timer by milliseconds
 
-      const newZ = item.position[2] + item.speed * delta;
-      const finalPos: [number, number, number] = [item.position[0], item.position[1], newZ];
-      const finalTimeAlive = item.timeAlive + delta;
+    if (newKnowledgeObjects.length < MAX_KNOWLEDGE_OBJECTS && spawnTimerRef.current >= SPAWN_INTERVAL_KO) {
+      spawnTimerRef.current = 0; // Reset timer
 
-      return {
-        ...item,
-        position: finalPos,
-        timeAlive: finalTimeAlive
-      };
-    });
-    
-    let filteredKnowledge = movedKnowledge.filter(item => {
-      if (!item || typeof item.timeAlive !== 'number' || typeof item.maxLifetime !== 'number' || !Array.isArray(item.position)) {
-         console.error('[KnowledgeManager] Invalid knowledge item data before filtering:', item);
-         return false;
-      }
-      const isOutOfBounds = item.position[2] >= OUT_OF_BOUNDS_Z;
-      const isExpired = item.timeAlive >= item.maxLifetime;
-      return !isOutOfBounds && !isExpired;
-    });
-    
-    spawnTimer.current += delta;
-    let newKnowledgeItems = [...filteredKnowledge];
-    while (newKnowledgeItems.length < MAX_KNOWLEDGE && spawnTimer.current >= SPAWN_INTERVAL) {
-      const [x, y] = randomXY(TUNNEL_RADIUS);
-      const newItem: KnowledgeInstance = {
-        id: `knowledge-${nextId.current++}`,
-        position: [x, y, SPAWN_Z],
-        speed: randomKnowledgeSpeed(),
-        size: 0.75 + Math.random() * 0.25, // Size range 0.75 to 1.0
+      // Simple spawn: random X within a range, fixed Y for now
+      const randomX = (Math.random() - 0.5) * 8; // Example range for X: -4 to 4
+      const randomY = Math.random() * 2 - 1;      // Example range for Y: -1 to 1 (adjust based on tunnel height)
+      
+      const newId = `ko_session${gameSessionId}_${nextIdRef.current++}`;
+      console.log(`[KnowledgeManager] Spawning new KnowledgeObject: ${newId} at [${randomX.toFixed(2)}, ${randomY.toFixed(2)}, ${SPAWN_Z_KO}]`);
+
+
+      newKnowledgeObjects.push({
+        id: newId,
+        position: [randomX, randomY, SPAWN_Z_KO],
+        size: KNOWLEDGE_OBJECT_SIZE,
         timeAlive: 0,
-        maxLifetime: randomKnowledgeLifetime()
-      };
-      newKnowledgeItems.push(newItem);
-      spawnTimer.current -= SPAWN_INTERVAL;
+      });
     }
 
-    onKnowledgeChange(newKnowledgeItems);
+    if (
+      newKnowledgeObjects.length !== knowledgeObjects.length ||
+      newKnowledgeObjects.some((ko, i) => ko.id !== knowledgeObjects[i]?.id || ko.position[2] !== knowledgeObjects[i]?.position[2])
+    ) {
+      onKnowledgeObjectsChange(newKnowledgeObjects);
+    }
   });
 
-  return null;
+  useEffect(() => {
+    // Reset ID counter if the component is somehow re-instantiated or for future restart logic
+    nextIdRef.current = 0;
+    console.log('[KnowledgeManager] Initialized or re-initialized.');
+  }, []);
+
+
+  return null; // This component manages logic, doesn't render anything itself
 };
 
-export default KnowledgeManager; 
+export default KnowledgeManager;
